@@ -27,8 +27,8 @@
 
 **Purpose**: Project initialization and database schema preparation
 
-- [ ] T001 Create database migration for tasks table using Alembic in apps/api/alembic/versions/002_create_tasks_table.py
-- [ ] T002 [P] Install frontend dependencies (date-fns) in apps/web/package.json
+- [X] T001 Create database migration for tasks table using Alembic in apps/api/alembic/versions/002_create_tasks_table.py
+- [X] T002 [P] Install frontend dependencies (date-fns) in apps/web/package.json
 - [ ] T003 Run database migration to create tasks table with all indexes and triggers
 
 ---
@@ -41,21 +41,21 @@
 
 ### Core Models and Services
 
-- [ ] T004 Create Task SQLModel model in apps/api/src/models/task.py with all attributes (id, user_id, title, description, status, priority, tags, due_date, completed, timestamps)
-- [ ] T005 [P] Create TaskService class skeleton in apps/api/src/services/task_service.py with EventEmitter dependency injection
-- [ ] T006 [P] Create task API routes skeleton in apps/api/src/routes/tasks.py with FastAPI router
-- [ ] T007 Register task routes in apps/api/src/main.py by importing and including tasks router
-- [ ] T008 [P] Create Task TypeScript types in apps/web/src/types/task.ts (Task, TaskStatus, TaskPriority, TaskFilters)
-- [ ] T009 [P] Create task API client functions in apps/web/src/lib/tasks-api.ts (getTasks, createTask, updateTask, completeTask, deleteTask)
+- [X] T004 Create Task SQLModel model in apps/api/src/models/task.py with all attributes (id, user_id, title, description, status, priority, tags, due_date, completed, timestamps)
+- [X] T005 [P] Create TaskService class skeleton in apps/api/src/services/task_service.py with EventEmitter dependency injection
+- [X] T006 [P] Create task API routes skeleton in apps/api/src/routes/tasks.py with FastAPI router
+- [X] T007 Register task routes in apps/api/src/main.py by importing and including tasks router
+- [X] T008 [P] Create Task TypeScript types in apps/web/src/types/task.ts (Task, TaskStatus, TaskPriority, TaskFilters)
+- [X] T009 [P] Create task API client functions in apps/web/src/lib/tasks-api.ts (getTasks, createTask, updateTask, completeTask, deleteTask)
 
 ### Test Infrastructure Setup
 
-- [ ] T010 Create pytest configuration in apps/api/pytest.ini with coverage settings and test markers
-- [ ] T011 Create test fixtures in apps/api/tests/conftest.py (database session, event emitter mock, authenticated user)
-- [ ] T012 [P] Create Vitest configuration in apps/web/vitest.config.ts for frontend unit tests
-- [ ] T013 [P] Create React Testing Library setup in apps/web/tests/setup.ts with custom render utilities
-- [ ] T014 [P] Install testing dependencies (pytest, pytest-cov, pytest-asyncio, httpx) in apps/api/pyproject.toml
-- [ ] T015 [P] Install frontend testing dependencies (vitest, @testing-library/react, @testing-library/user-event) in apps/web/package.json
+- [X] T010 Create pytest configuration in apps/api/pytest.ini with coverage settings and test markers
+- [X] T011 Create test fixtures in apps/api/tests/conftest.py (database session, event emitter mock, authenticated user)
+- [X] T012 [P] Create Vitest configuration in apps/web/vitest.config.ts for frontend unit tests
+- [X] T013 [P] Create React Testing Library setup in apps/web/tests/setup.ts with custom render utilities
+- [X] T014 [P] Install testing dependencies (pytest, pytest-cov, pytest-asyncio, httpx) in apps/api/pyproject.toml
+- [X] T015 [P] Install frontend testing dependencies (vitest, @testing-library/react, @testing-library/user-event) in apps/web/package.json
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -70,19 +70,19 @@
 ### Tests for User Story 1 (TDD - Write First, Ensure FAIL) ⚠️
 
 **Contract Tests** (API schema validation):
-- [ ] T016 [P] [US1] Write contract test for POST /api/{user_id}/tasks in apps/api/tests/contract/test_tasks_contract.py verifying request/response match OpenAPI schema (should FAIL)
-- [ ] T017 [P] [US1] Write contract test for GET /api/{user_id}/tasks in apps/api/tests/contract/test_tasks_contract.py verifying pagination response schema (should FAIL)
+- [X] T016 [P] [US1] Write contract test for POST /api/{user_id}/tasks in apps/api/tests/contract/test_tasks_contract.py verifying request/response match OpenAPI schema (should FAIL)
+- [X] T017 [P] [US1] Write contract test for GET /api/{user_id}/tasks in apps/api/tests/contract/test_tasks_contract.py verifying pagination response schema (should FAIL)
 
 **Unit Tests** (business logic):
-- [ ] T018 [P] [US1] Write unit test for TaskService.create_task() in apps/api/tests/unit/test_task_service.py testing title validation, event emission (should FAIL)
-- [ ] T019 [P] [US1] Write unit test for TaskService.get_tasks() in apps/api/tests/unit/test_task_service.py testing pagination logic (should FAIL)
-- [ ] T020 [P] [US1] Write unit test for Task model validation in apps/api/tests/unit/test_task_model.py testing title not empty, max length constraints (should FAIL)
-- [ ] T021 [P] [US1] Write unit test for TaskCard component in apps/web/tests/unit/TaskCard.test.tsx testing rendering of title, description (should FAIL)
-- [ ] T022 [P] [US1] Write unit test for TaskForm component in apps/web/tests/unit/TaskForm.test.tsx testing title validation, submission (should FAIL)
+- [X] T018 [P] [US1] Write unit test for TaskService.create_task() in apps/api/tests/unit/test_task_service.py testing title validation, event emission (should FAIL)
+- [X] T019 [P] [US1] Write unit test for TaskService.get_tasks() in apps/api/tests/unit/test_task_service.py testing pagination logic (should FAIL)
+- [X] T020 [P] [US1] Write unit test for Task model validation in apps/api/tests/unit/test_task_model.py testing title not empty, max length constraints (should FAIL)
+- [X] T021 [P] [US1] Write unit test for TaskCard component in apps/web/tests/unit/TaskCard.test.tsx testing rendering of title, description (should FAIL)
+- [X] T022 [P] [US1] Write unit test for TaskForm component in apps/web/tests/unit/TaskForm.test.tsx testing title validation, submission (should FAIL)
 
 **Integration Tests** (end-to-end workflows):
-- [ ] T023 [US1] Write integration test for task creation workflow in apps/api/tests/integration/test_tasks_api.py testing POST creates task in DB and emits event (should FAIL)
-- [ ] T024 [US1] Write integration test for user isolation in apps/api/tests/integration/test_tasks_api.py verifying User A cannot access User B's tasks (should FAIL)
+- [X] T023 [US1] Write integration test for task creation workflow in apps/api/tests/integration/test_tasks_api.py testing POST creates task in DB and emits event (should FAIL)
+- [X] T024 [US1] Write integration test for user isolation in apps/api/tests/integration/test_tasks_api.py verifying User A cannot access User B's tasks (should FAIL)
 
 ### Implementation for User Story 1 (Make Tests PASS - GREEN)
 
