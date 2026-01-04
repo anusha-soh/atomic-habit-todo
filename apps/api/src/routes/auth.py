@@ -6,12 +6,16 @@ from fastapi import APIRouter, Depends, HTTPException, Response, Request, status
 from sqlmodel import Session
 from pydantic import BaseModel, EmailStr
 from uuid import UUID
+import os
 
 from src.database import get_session
 from src.services.auth_service import AuthService, AuthenticationError, ValidationError
 from src.middleware.auth import get_current_user_id
 
 router = APIRouter()
+
+# Cookie security: Use secure cookies only in production (HTTPS)
+COOKIE_SECURE = os.getenv("ENVIRONMENT", "development") == "production"
 
 
 # Request/Response Models
@@ -92,7 +96,7 @@ async def register(
             key="auth_token",
             value=token,
             httponly=True,
-            secure=True,  # HTTPS only in production
+            secure=COOKIE_SECURE,  # HTTPS only in production
             samesite="strict",
             max_age=7 * 24 * 60 * 60,  # 7 days
         )
@@ -152,7 +156,7 @@ async def login(
             key="auth_token",
             value=token,
             httponly=True,
-            secure=True,
+            secure=COOKIE_SECURE,
             samesite="strict",
             max_age=7 * 24 * 60 * 60,  # 7 days
         )
@@ -213,7 +217,7 @@ async def logout(
         response.delete_cookie(
             key="auth_token",
             httponly=True,
-            secure=True,
+            secure=COOKIE_SECURE,
             samesite="strict",
         )
 

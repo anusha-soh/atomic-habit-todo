@@ -3,7 +3,7 @@ Authentication Service
 Phase 2 Core Infrastructure - User registration, login, logout
 """
 from sqlmodel import Session, select
-from passlib.context import CryptContext
+import bcrypt
 from datetime import datetime, timezone, timedelta
 from uuid import UUID
 import re
@@ -13,9 +13,6 @@ from src.models.user import User
 from src.models.session import Session as SessionModel
 from src.middleware.auth import create_access_token
 from src.services.event_emitter import event_emitter
-
-# Password hashing context (bcrypt)
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # Email validation regex (RFC 5322 simplified)
 EMAIL_REGEX = re.compile(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
@@ -72,9 +69,13 @@ def hash_password(password: str) -> str:
         password: Plaintext password
 
     Returns:
-        Hashed password
+        Hashed password (as string)
     """
-    return pwd_context.hash(password)
+    # Convert password to bytes, hash it, and return as string
+    password_bytes = password.encode('utf-8')
+    salt = bcrypt.gensalt()
+    hashed = bcrypt.hashpw(password_bytes, salt)
+    return hashed.decode('utf-8')
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
@@ -83,12 +84,14 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
     Args:
         plain_password: Plaintext password
-        hashed_password: Bcrypt hashed password
+        hashed_password: Bcrypt hashed password (as string)
 
     Returns:
         True if password matches, False otherwise
     """
-    return pwd_context.verify(plain_password, hashed_password)
+    password_bytes = plain_password.encode('utf-8')
+    hashed_bytes = hashed_password.encode('utf-8')
+    return bcrypt.checkpw(password_bytes, hashed_bytes)
 
 
 class AuthService:

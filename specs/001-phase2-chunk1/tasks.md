@@ -203,7 +203,7 @@
 - [x] T076 [P] Security audit: verify passwords never stored plaintext, JWT secrets not committed, CORS properly configured
 - [x] T077 Test concurrent registrations with same email: verify database unique constraint prevents duplicates
 - [x] T078 Test JWT token expiration: verify expired tokens (7 days old) are rejected with 401
-- [ ] T079 Run quickstart.md validation: follow all steps in specs/001-phase2-chunk1/quickstart.md and verify success
+- [x] T079 Run quickstart.md validation: follow all steps in specs/001-phase2-chunk1/quickstart.md and verify success
 - [x] T080 [P] Update root README.md with project overview, architecture diagram, and links to quickstart guide
 
 ---
