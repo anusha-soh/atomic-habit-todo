@@ -1,0 +1,500 @@
+openapi: 3.1.0
+info:
+  title: Tasks API - Phase 2 Chunk 2
+  description: |
+    Complete task management API with CRUD operations, filtering, searching, sorting, and due date management.
+    Part of the Evolution of Todo: Atomic Habits Edition project.
+  version: 2.0.0
+  contact:
+    name: API Support
+    email: support@atomichabits.app
+
+servers:
+  - url: http://localhost:8000/api
+    description: Local development
+  - url: https://api-staging.atomichabits.app/api
+    description: Staging environment
+  - url: https://api.atomichabits.app/api
+    description: Production environment
+
+tags:
+  - name: tasks
+    description: Task management operations (CRUD, filters, search, sort)
+
+paths:
+  /{user_id}/tasks:
+    parameters:
+      - $ref: '#/components/parameters/UserIdPath'
+
+    get:
+      summary: List tasks with filtering and sorting
+      description: |
+        Retrieve a paginated list of tasks for the authenticated user.
+        Supports filtering by status, priority, and tags, searching in title/description,
+        and sorting by various criteria.
+      tags:
+        - tasks
+      operationId: listTasks
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: page
+          in: query
+          description: Page number (1-indexed)
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          description: Tasks per page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+        - name: status
+          in: query
+          description: Filter by task status
+          schema:
+            type: string
+            enum: [pending, in_progress, completed]
+        - name: priority
+          in: query
+          description: Filter by priority level
+          schema:
+            type: string
+            enum: [high, medium, low]
+        - name: tags
+          in: query
+          description: Filter by tags (comma-separated, matches ANY)
+          schema:
+            type: string
+            example: "work,urgent,client"
+        - name: search
+          in: query
+          description: Search in title and description (case-insensitive)
+          schema:
+            type: string
+            maxLength: 100
+        - name: sort
+          in: query
+          description: Sort order
+          schema:
+            type: string
+            enum:
+              - created_desc
+              - created_asc
+              - due_date_asc
+              - due_date_desc
+              - priority_asc
+              - priority_desc
+            default: created_desc
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - tasks
+                  - total
+                  - page
+                  - limit
+                properties:
+                  tasks:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Task'
+                  total:
+                    type: integer
+                    description: Total number of tasks matching filters
+                    example: 127
+                  page:
+                    type: integer
+                    description: Current page number
+                    example: 1
+                  limit:
+                    type: integer
+                    description: Tasks per page
+                    example: 50
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+    post:
+      summary: Create a new task
+      description: Create a new task for the authenticated user
+      tags:
+        - tasks
+      operationId: createTask
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskCreate'
+      responses:
+        '201':
+          description: Task created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /{user_id}/tasks/{task_id}:
+    parameters:
+      - $ref: '#/components/parameters/UserIdPath'
+      - $ref: '#/components/parameters/TaskIdPath'
+
+    get:
+      summary: Get task details
+      description: Retrieve a single task by ID
+      tags:
+        - tasks
+      operationId: getTask
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      summary: Update task
+      description: Update task fields (partial update)
+      tags:
+        - tasks
+      operationId: updateTask
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskUpdate'
+      responses:
+        '200':
+          description: Task updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      summary: Delete task
+      description: Permanently delete a task
+      tags:
+        - tasks
+      operationId: deleteTask
+      security:
+        - cookieAuth: []
+      responses:
+        '204':
+          description: Task deleted successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /{user_id}/tasks/{task_id}/complete:
+    parameters:
+      - $ref: '#/components/parameters/UserIdPath'
+      - $ref: '#/components/parameters/TaskIdPath'
+
+    patch:
+      summary: Mark task as complete
+      description: |
+        Mark a task as completed. Sets status to 'completed' and completed flag to true.
+        Emits TASK_COMPLETED event.
+      tags:
+        - tasks
+      operationId: completeTask
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Task marked as complete
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: session_token
+      description: Session token stored in httpOnly cookie
+
+  parameters:
+    UserIdPath:
+      name: user_id
+      in: path
+      required: true
+      description: User UUID
+      schema:
+        type: string
+        format: uuid
+        example: "550e8400-e29b-41d4-a716-446655440000"
+
+    TaskIdPath:
+      name: task_id
+      in: path
+      required: true
+      description: Task UUID
+      schema:
+        type: string
+        format: uuid
+        example: "123e4567-e89b-12d3-a456-426614174000"
+
+  schemas:
+    Task:
+      type: object
+      required:
+        - id
+        - user_id
+        - title
+        - status
+        - completed
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique task identifier
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        user_id:
+          type: string
+          format: uuid
+          description: Owner user ID
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        title:
+          type: string
+          minLength: 1
+          maxLength: 500
+          description: Task title (required, non-empty)
+          example: "Write project proposal for client"
+        description:
+          type: string
+          nullable: true
+          maxLength: 5000
+          description: Optional detailed description
+          example: "Create a comprehensive proposal including timeline, budget, and deliverables"
+        status:
+          type: string
+          enum: [pending, in_progress, completed]
+          description: Task lifecycle status
+          example: "pending"
+        priority:
+          type: string
+          nullable: true
+          enum: [high, medium, low]
+          description: Priority level (optional)
+          example: "high"
+        tags:
+          type: array
+          items:
+            type: string
+          description: User-defined tags/categories
+          example: ["work", "urgent", "client"]
+          default: []
+        due_date:
+          type: string
+          format: date-time
+          nullable: true
+          description: Optional deadline (ISO 8601 timestamp in UTC)
+          example: "2026-01-10T00:00:00Z"
+        completed:
+          type: boolean
+          description: Completion flag (synced with status)
+          example: false
+        created_at:
+          type: string
+          format: date-time
+          description: Task creation timestamp (ISO 8601 UTC)
+          example: "2026-01-04T18:30:00.000Z"
+        updated_at:
+          type: string
+          format: date-time
+          description: Last modification timestamp (ISO 8601 UTC)
+          example: "2026-01-04T18:45:00.000Z"
+
+    TaskCreate:
+      type: object
+      required:
+        - title
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 500
+          description: Task title (required, cannot be empty or only whitespace)
+          example: "Write project proposal"
+        description:
+          type: string
+          maxLength: 5000
+          description: Optional detailed description
+          example: "Include timeline, budget, and deliverables"
+        status:
+          type: string
+          enum: [pending, in_progress, completed]
+          default: "pending"
+          description: Initial status
+          example: "pending"
+        priority:
+          type: string
+          enum: [high, medium, low]
+          description: Priority level (optional)
+          example: "high"
+        tags:
+          type: array
+          items:
+            type: string
+          description: Tags/categories (max 20 tags)
+          example: ["work", "urgent"]
+          maxItems: 20
+        due_date:
+          type: string
+          format: date-time
+          description: Optional deadline (ISO 8601 timestamp)
+          example: "2026-01-10T00:00:00Z"
+
+    TaskUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 500
+          description: Updated task title
+          example: "Write comprehensive project proposal"
+        description:
+          type: string
+          maxLength: 5000
+          description: Updated description
+          example: "Updated requirements from client meeting"
+        status:
+          type: string
+          enum: [pending, in_progress, completed]
+          description: Updated status
+          example: "in_progress"
+        priority:
+          type: string
+          enum: [high, medium, low]
+          description: Updated priority
+          example: "high"
+        tags:
+          type: array
+          items:
+            type: string
+          description: Updated tags (replaces entire array)
+          example: ["work", "urgent", "client"]
+          maxItems: 20
+        due_date:
+          type: string
+          format: date-time
+          nullable: true
+          description: Updated due date (null to remove)
+          example: "2026-01-15T00:00:00Z"
+
+    Error:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          description: Error type
+          example: "BadRequest"
+        message:
+          type: string
+          description: Human-readable error message
+          example: "Title cannot be empty"
+        details:
+          type: object
+          description: Additional error details (optional)
+          additionalProperties: true
+
+  responses:
+    BadRequest:
+      description: Invalid request (validation error)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "BadRequest"
+            message: "Title cannot be empty or only whitespace"
+
+    Unauthorized:
+      description: Not authenticated
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "Unauthorized"
+            message: "Authentication required"
+
+    Forbidden:
+      description: Authenticated but not authorized to access this resource
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "Forbidden"
+            message: "You don't have permission to access this task"
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "NotFound"
+            message: "Task not found"
+
+security:
+  - cookieAuth: []
