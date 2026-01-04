@@ -1,0 +1,19 @@
+{
+  "name": "@atomic-habits/core",
+  "version": "0.1.0",
+  "description": "Shared types and constants for Atomic Habits monorepo",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.0"
+  },
+  "files": [
+    "dist",
+    "src"
+  ]
+}

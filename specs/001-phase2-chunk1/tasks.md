@@ -160,7 +160,7 @@
 ### Implementation for User Story 5
 
 - [x] T057 [US5] Document migration workflow in apps/api/README.md (alembic revision --autogenerate, alembic upgrade head, alembic downgrade -1)
-- [ ] T058 [US5] Create apps/api/scripts/verify_database.py to check database connection and list tables
+- [x] T058 [US5] Create apps/api/scripts/verify_database.py to check database connection and list tables
 - [ ] T059 [US5] Test migration rollback: run `alembic downgrade -1` and verify tables are dropped, then re-apply with `alembic upgrade head`
 - [x] T060 [US5] Add database health check endpoint GET /api/health in apps/api/src/routes/health.py (return database connection status)
 - [ ] T061 [US5] Verify user persistence: register user, restart backend server, confirm user data survives restart
@@ -180,7 +180,7 @@
 - [x] T062 [US6] Verify event schema validation in apps/api/src/services/event_emitter.py (ensure all events have user_id, timestamp ISO8601, event_type, payload)
 - [x] T063 [US6] Add log_level field to event schema for debugging (e.g., "info", "debug", "error")
 - [ ] T064 [US6] Test daily log rotation: verify new log file created when date changes (logs/events-2026-01-03.jsonl, logs/events-2026-01-04.jsonl)
-- [ ] T065 [US6] Create apps/api/scripts/view_events.py to parse and display event logs with filtering by event_type
+- [x] T065 [US6] Create apps/api/scripts/view_events.py to parse and display event logs with filtering by event_type
 - [ ] T066 [US6] Verify fire-and-forget behavior: confirm application continues normally when event emitter writes to logs (no blocking)
 - [ ] T067 [US6] Test event logging for all authentication flows: register → USER_REGISTERED, login → USER_LOGGED_IN, logout → USER_LOGGED_OUT
 - [ ] T068 [US6] Add event emission to all auth endpoints: register, login, logout (already implemented in previous phases, verify completeness)
@@ -196,7 +196,7 @@
 - [x] T069 [P] Add mobile-responsive styling to all frontend pages (register, login, dashboard) with TailwindCSS breakpoints
 - [x] T070 [P] Ensure all touch targets on authentication forms are minimum 44×44px (buttons, inputs)
 - [x] T071 [P] Add loading states to forms (disable buttons during API calls, show spinner)
-- [ ] T072 [P] Add form accessibility: ARIA labels, keyboard navigation support, focus management
+- [x] T072 [P] Add form accessibility: ARIA labels, keyboard navigation support, focus management
 - [ ] T073 Verify protected route middleware: test unauthenticated access to /dashboard redirects to /login within 500ms
 - [ ] T074 Verify authenticated user redirect: test /login and /register access when logged in redirects to /dashboard
 - [ ] T075 [P] Code review: check for hardcoded configuration (all config must be in environment variables)
