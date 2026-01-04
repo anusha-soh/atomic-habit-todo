@@ -12,7 +12,12 @@ export function middleware(request: NextRequest) {
   // Check if user has auth token (httpOnly cookie)
   const hasAuthToken = request.cookies.has('auth_token')
 
-  // Redirect authenticated users from login/register to dashboard
+  // Protected Routes: Redirect unauthenticated users to login
+  if (!hasAuthToken && pathname.startsWith('/dashboard')) {
+    return NextResponse.redirect(new URL('/login', request.url))
+  }
+
+  // Auth Routes: Redirect authenticated users from login/register to dashboard
   if (hasAuthToken && (pathname === '/login' || pathname === '/register')) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
