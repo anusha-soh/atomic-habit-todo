@@ -12,6 +12,44 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ## Outline
 
+### Step 0: PREFLIGHT VALIDATION (Auto-runs before implementation)
+
+**Purpose**: Catch common issues BEFORE writing code to avoid runtime errors.
+
+Run the preflight validator:
+```bash
+python .specify/scripts/python/preflight_validator.py --project-root .
+```
+
+**If script doesn't exist**, perform manual preflight checks:
+
+#### 0.1 SQLModel Field Check
+Search `apps/api/src/models/*.py` for:
+- Pattern: `Field(nullable=*, sa_column=Column(` → **CRITICAL ERROR**
+- Fix: Move nullable inside Column(): `Field(sa_column=Column(Text, nullable=False))`
+
+#### 0.2 Import Path Check
+Search `apps/api/src/**/*.py` for:
+- Pattern: `from services.` without `src.` prefix → **CRITICAL ERROR**
+- Pattern: `from models.` without `src.` prefix → **CRITICAL ERROR**
+- Fix: Add `src.` prefix: `from src.services.x import Y`
+
+#### 0.3 Database Compatibility Check
+If models use `ARRAY(`, `JSONB`, or `postgresql.`:
+- Check: Is `DATABASE_URL` or `TEST_DATABASE_URL` set?
+- Warning: SQLite tests will fail without PostgreSQL
+
+#### 0.4 TDD Placeholder Check
+Search `apps/api/tests/**/*.py` for:
+- Pattern: `assert False,` → **WARNING** (needs update after impl)
+
+**Decision Point**:
+- **CRITICAL issues found**: STOP and fix before proceeding
+- **Only warnings**: Display and continue
+- **All pass**: Continue to Step 1
+
+---
+
 1. Run `.specify/scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks` from repo root and parse FEATURE_DIR and AVAILABLE_DOCS list. All paths must be absolute. For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
 
 2. **Check checklists status** (if FEATURE_DIR/checklists/ exists):

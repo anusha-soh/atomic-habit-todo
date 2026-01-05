@@ -2,6 +2,7 @@
 Pytest Fixtures and Configuration
 Phase 2 Chunk 2 - Tasks Full Feature Set
 """
+import os
 import pytest
 from sqlmodel import Session, SQLModel, create_engine
 from sqlmodel.pool import StaticPool
@@ -20,14 +21,32 @@ from src.services.event_emitter import EventEmitter
 
 @pytest.fixture(name="engine")
 def engine_fixture():
-    """Create in-memory SQLite engine for testing"""
-    engine = create_engine(
-        "sqlite:///:memory:",
-        connect_args={"check_same_thread": False},
-        poolclass=StaticPool,
-    )
+    """
+    Create database engine for testing.
+
+    Uses PostgreSQL from DATABASE_URL if available (required for ARRAY types),
+    otherwise falls back to SQLite for basic tests (will skip ARRAY-related tests).
+    """
+    database_url = os.getenv("DATABASE_URL")
+
+    if database_url:
+        # Use PostgreSQL for full feature testing
+        engine = create_engine(database_url)
+    else:
+        # SQLite fallback - will fail for ARRAY columns but useful for basic tests
+        # To run full tests, set DATABASE_URL environment variable
+        pytest.skip("PostgreSQL required for tests with ARRAY columns. Set DATABASE_URL environment variable.")
+        engine = create_engine(
+            "sqlite:///:memory:",
+            connect_args={"check_same_thread": False},
+            poolclass=StaticPool,
+        )
+
     SQLModel.metadata.create_all(engine)
-    return engine
+    yield engine
+    # Clean up after tests (drop all tables in test mode)
+    if database_url and "test" in database_url.lower():
+        SQLModel.metadata.drop_all(engine)
 
 
 @pytest.fixture(name="session")

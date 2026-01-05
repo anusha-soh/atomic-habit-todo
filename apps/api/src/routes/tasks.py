@@ -93,8 +93,27 @@ async def list_tasks(
     if current_user_id != user_id:
         raise HTTPException(status_code=403, detail="Forbidden")
 
-    # Implementation will be added in US1 (T028)
-    raise HTTPException(status_code=501, detail="Not implemented")
+    # Parse tags (comma-separated string to list)
+    tag_list = tags.split(",") if tags else None
+
+    # Get tasks from service
+    tasks, total = task_service.get_tasks(
+        user_id=user_id,
+        page=page,
+        limit=limit,
+        status=status,
+        priority=priority,
+        tags=tag_list,
+        search=search,
+        sort=sort
+    )
+
+    return {
+        "tasks": tasks,
+        "total": total,
+        "page": page,
+        "limit": limit
+    }
 
 
 @router.post("/{user_id}/tasks", status_code=201)
@@ -113,8 +132,19 @@ async def create_task(
     if current_user_id != user_id:
         raise HTTPException(status_code=403, detail="Forbidden")
 
-    # Implementation will be added in US1 (T027)
-    raise HTTPException(status_code=501, detail="Not implemented")
+    try:
+        task = task_service.create_task(
+            user_id=user_id,
+            title=task_data.title,
+            description=task_data.description,
+            status=task_data.status or "pending",
+            priority=task_data.priority,
+            tags=task_data.tags or [],
+            due_date=task_data.due_date
+        )
+        return task
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.get("/{user_id}/tasks/{task_id}", response_model=TaskResponse)

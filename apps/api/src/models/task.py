@@ -31,11 +31,11 @@ class Task(SQLModel, table=True):
 
     id: UUID = Field(default_factory=uuid4, primary_key=True)
     user_id: UUID = Field(foreign_key="users.id", nullable=False, index=True)
-    title: str = Field(nullable=False, max_length=500, sa_column=Column(Text))
-    description: Optional[str] = Field(default=None, max_length=5000, sa_column=Column(Text))
+    title: str = Field(sa_column=Column(Text, nullable=False))
+    description: Optional[str] = Field(default=None, sa_column=Column(Text, nullable=True))
     status: str = Field(default="pending", nullable=False, max_length=20)
     priority: Optional[str] = Field(default=None, max_length=10)
-    tags: list[str] = Field(default_factory=list, sa_column=Column(ARRAY(String)))
+    tags: list[str] = Field(default_factory=list, sa_column=Column(ARRAY(String), nullable=True))
     due_date: Optional[datetime] = Field(default=None)
     completed: bool = Field(default=False, nullable=False)
     created_at: datetime = Field(

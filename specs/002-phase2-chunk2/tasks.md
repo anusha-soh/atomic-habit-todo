@@ -29,7 +29,7 @@
 
 - [X] T001 Create database migration for tasks table using Alembic in apps/api/alembic/versions/002_create_tasks_table.py
 - [X] T002 [P] Install frontend dependencies (date-fns) in apps/web/package.json
-- [ ] T003 Run database migration to create tasks table with all indexes and triggers
+- [X] T003 Run database migration to create tasks table with all indexes and triggers
 
 ---
 
@@ -86,20 +86,20 @@
 
 ### Implementation for User Story 1 (Make Tests PASS - GREEN)
 
-- [ ] T025 [P] [US1] Implement TaskService.create_task() method in apps/api/src/services/task_service.py with title validation, user_id assignment, and TASK_CREATED event emission
-- [ ] T026 [P] [US1] Implement TaskService.get_tasks() method in apps/api/src/services/task_service.py with pagination (page, limit), user_id filtering, and basic sorting by created_at DESC
-- [ ] T027 [US1] Implement POST /{user_id}/tasks endpoint in apps/api/src/routes/tasks.py with TaskCreate Pydantic model validation
-- [ ] T028 [US1] Implement GET /{user_id}/tasks endpoint in apps/api/src/routes/tasks.py returning paginated task list with total count
-- [ ] T029 [US1] Create TaskList Server Component in apps/web/src/app/tasks/page.tsx fetching tasks server-side with searchParams
-- [ ] T030 [P] [US1] Create TaskCard component in apps/web/src/components/tasks/TaskCard.tsx displaying title, description, created_at
-- [ ] T031 [US1] Create TaskForm component in apps/web/src/components/tasks/TaskForm.tsx with title (required) and description (optional) inputs
-- [ ] T032 [US1] Create task creation page in apps/web/src/app/tasks/new/page.tsx with TaskForm and createTask API call
+- [X] T025 [P] [US1] Implement TaskService.create_task() method in apps/api/src/services/task_service.py with title validation, user_id assignment, and TASK_CREATED event emission
+- [X] T026 [P] [US1] Implement TaskService.get_tasks() method in apps/api/src/services/task_service.py with pagination (page, limit), user_id filtering, and basic sorting by created_at DESC
+- [X] T027 [US1] Implement POST /{user_id}/tasks endpoint in apps/api/src/routes/tasks.py with TaskCreate Pydantic model validation
+- [X] T028 [US1] Implement GET /{user_id}/tasks endpoint in apps/api/src/routes/tasks.py returning paginated task list with total count
+- [X] T029 [US1] Create TaskList Server Component in apps/web/src/app/tasks/page.tsx fetching tasks server-side with searchParams
+- [X] T030 [P] [US1] Create TaskCard component in apps/web/src/components/tasks/TaskCard.tsx displaying title, description, created_at
+- [X] T031 [US1] Create TaskForm component in apps/web/src/components/tasks/TaskForm.tsx with title (required) and description (optional) inputs
+- [X] T032 [US1] Create task creation page in apps/web/src/app/tasks/new/page.tsx with TaskForm and createTask API call
 
 ### Verification for User Story 1 (Manual/Integration Checks)
 
-- [ ] T033 [US1] Run all US1 tests and verify they PASS (pytest apps/api/tests/ -k US1)
-- [ ] T034 [US1] Verify user can create task via POST /api/{user_id}/tasks and receive 201 with task object
-- [ ] T035 [US1] Verify user can view tasks via GET /api/{user_id}/tasks and see paginated results
+- [X] T033 [US1] Run all US1 tests and verify they PASS (pytest apps/api/tests/ -k US1)
+- [X] T034 [US1] Verify user can create task via POST /api/{user_id}/tasks and receive 201 with task object
+- [X] T035 [US1] Verify user can view tasks via GET /api/{user_id}/tasks and see paginated results
 - [ ] T036 [US1] Verify task persistence: Create task, refresh browser, verify task still appears
 
 **Checkpoint**: At this point, User Story 1 should be fully functional with all tests passing

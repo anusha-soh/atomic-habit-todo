@@ -208,3 +208,89 @@ Wait for consent; never auto-create ADRs. Group related decisions (stacks, authe
 
 ## Code Standards
 See `.specify/memory/constitution.md` for code quality, testing, performance, security, and architecture principles.
+
+## Common Pitfalls - MUST READ BEFORE IMPLEMENTATION
+
+These are known issues encountered during development. **ALWAYS check for these before writing code**.
+
+### 1. SQLModel Field Definitions
+
+**NEVER combine Field() parameters with sa_column parameters:**
+
+```python
+# BAD - Will cause RuntimeError at import time
+title: str = Field(nullable=False, sa_column=Column(Text))
+title: str = Field(max_length=500, sa_column=Column(Text))
+
+# GOOD - Put ALL column attributes inside Column()
+title: str = Field(sa_column=Column(Text, nullable=False))
+description: Optional[str] = Field(default=None, sa_column=Column(Text, nullable=True))
+```
+
+**Rule**: When using `sa_column=Column(...)`, ALL column attributes (nullable, default, etc.) go INSIDE the Column() call.
+
+### 2. Import Paths
+
+**ALWAYS use `src.` prefix for internal imports:**
+
+```python
+# BAD - Will cause ModuleNotFoundError
+from services.event_emitter import EventEmitter
+from models.task import Task
+from database import get_session
+
+# GOOD - Full path with src. prefix
+from src.services.event_emitter import EventEmitter
+from src.models.task import Task
+from src.database import get_session
+```
+
+**Rule**: Every internal import in `apps/api/src/` must start with `from src.` or `import src.`
+
+### 3. Database Compatibility (SQLite vs PostgreSQL)
+
+**PostgreSQL-specific types don't work with SQLite:**
+
+```python
+# These require PostgreSQL - tests will fail with SQLite
+tags: list[str] = Field(sa_column=Column(ARRAY(String)))  # ARRAY
+metadata: dict = Field(sa_column=Column(JSONB))           # JSONB
+```
+
+**Rule**: Set `DATABASE_URL` or `TEST_DATABASE_URL` environment variable before running tests. SQLite cannot handle ARRAY, JSONB, or other PostgreSQL-specific types.
+
+### 4. Test Fixtures
+
+**Test fixtures must use PostgreSQL for full feature testing:**
+
+```python
+# In conftest.py - check for PostgreSQL
+database_url = os.getenv("DATABASE_URL")
+if not database_url:
+    pytest.skip("PostgreSQL required for ARRAY columns")
+```
+
+### 5. TDD Placeholder Tests
+
+**Always update placeholder tests after implementation:**
+
+```python
+# BAD - Placeholder test that will always fail
+def test_create_task():
+    assert False, "Not implemented yet - implement in T027"
+
+# GOOD - Actual test implementation
+def test_create_task():
+    task = service.create_task(user_id, "Test")
+    assert task.title == "Test"
+```
+
+**Rule**: After implementing a feature, search for `assert False` and update the corresponding tests.
+
+## Preflight Validation
+
+Before running `/sp.implement`, the preflight validator automatically checks for these issues.
+
+Run manually: `/sp.preflight` or `python .specify/scripts/python/preflight_validator.py`
+
+**If preflight fails with CRITICAL issues, FIX THEM FIRST before proceeding.**
