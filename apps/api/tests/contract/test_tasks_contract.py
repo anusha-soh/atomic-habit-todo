@@ -61,6 +61,110 @@ class TestTasksAPIContract:
         # Clean up overrides
         app.dependency_overrides.clear()
 
+
+@pytest.mark.contract
+@pytest.mark.US2
+class TestTasksAPIContractUS2:
+    """Contract tests for User Story 2 (update & complete tasks)"""
+
+    @pytest.fixture(autouse=True)
+    def setup(self):
+        from src.main import app
+        from src.routes.tasks import get_task_service
+        from src.middleware.auth import get_current_user_id
+
+        self.user_id = uuid4()
+        self.task_id = uuid4()
+        self.test_task = {
+            "id": str(self.task_id),
+            "user_id": str(self.user_id),
+            "title": "Updated Task",
+            "description": "Updated description",
+            "status": "in_progress",
+            "priority": "medium",
+            "tags": ["updated"],
+            "due_date": None,
+            "completed": False,
+            "created_at": datetime.utcnow().isoformat(),
+            "updated_at": datetime.utcnow().isoformat(),
+        }
+
+        async def mock_get_current_user_id():
+            return self.user_id
+
+        self.mock_service = Mock()
+
+        def mock_get_task_service():
+            return self.mock_service
+
+        app.dependency_overrides[get_current_user_id] = mock_get_current_user_id
+        app.dependency_overrides[get_task_service] = mock_get_task_service
+
+        self.client = TestClient(app)
+
+        yield
+
+        app.dependency_overrides.clear()
+
+    def test_patch_task_update_schema(self):
+        """T037: Verify PATCH /api/{user_id}/tasks/{task_id} accepts partial updates"""
+        payload = {
+            "title": "Write comprehensive proposal",
+            "description": "Updated scope",
+            "status": "in_progress",
+        }
+
+        self.mock_service.update_task.return_value = self.test_task
+
+        response = self.client.patch(
+            f"/api/{self.user_id}/tasks/{self.task_id}",
+            json=payload
+        )
+
+        assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text}"
+
+    def test_patch_task_complete_schema(self):
+        """T038: Verify PATCH /api/{user_id}/tasks/{task_id}/complete response schema"""
+        completed_task = {**self.test_task, "status": "completed", "completed": True}
+        self.mock_service.mark_complete.return_value = completed_task
+
+        response = self.client.patch(
+            f"/api/{self.user_id}/tasks/{self.task_id}/complete"
+        )
+
+        assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text}"
+
+    def test_get_task_detail_schema(self):
+        """T039: Verify GET /api/{user_id}/tasks/{task_id} returns task details"""
+        self.mock_service.get_task.return_value = self.test_task
+
+        response = self.client.get(
+            f"/api/{self.user_id}/tasks/{self.task_id}"
+        )
+
+        assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text}"
+        data = response.json()
+        expected_keys = {
+            "id", "user_id", "title", "description", "status",
+            "priority", "tags", "due_date", "completed",
+            "created_at", "updated_at"
+        }
+        assert expected_keys.issubset(data.keys()), f"Missing keys: {expected_keys - set(data.keys())}"
+
+    def test_delete_task_schema(self):
+        """T056: Verify DELETE /api/{user_id}/tasks/{task_id} returns 204 No Content"""
+        # For DELETE operations, we typically return 204 No Content
+        # Mock the service to not raise an exception
+        self.mock_service.delete_task.return_value = None
+
+        response = self.client.delete(
+            f"/api/{self.user_id}/tasks/{self.task_id}"
+        )
+
+        # Should return 204 No Content for successful deletion
+        assert response.status_code == 204, f"Expected 204, got {response.status_code}: {response.text}"
+        # Verify response body is empty
+        assert response.content == b""
     def test_post_tasks_request_schema(self):
         """
         T016: Verify POST /api/{user_id}/tasks request schema

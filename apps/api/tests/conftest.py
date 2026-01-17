@@ -4,15 +4,19 @@ Phase 2 Chunk 2 - Tasks Full Feature Set
 """
 import os
 import pytest
-from sqlmodel import Session, SQLModel, create_engine
+from sqlmodel import Session, SQLModel, create_engine, text
 from sqlmodel.pool import StaticPool
 from uuid import uuid4, UUID
 from datetime import datetime, timezone
 from unittest.mock import Mock
+from dotenv import load_dotenv
 
 from src.models.user import User
 from src.models.task import Task
 from src.services.event_emitter import EventEmitter
+
+# Load environment variables from .env file
+load_dotenv()
 
 
 # ============================================================================
@@ -24,18 +28,18 @@ def engine_fixture():
     """
     Create database engine for testing.
 
-    Uses PostgreSQL from DATABASE_URL if available (required for ARRAY types),
+    Uses PostgreSQL from TEST_DATABASE_URL or DATABASE_URL if available (required for ARRAY types),
     otherwise falls back to SQLite for basic tests (will skip ARRAY-related tests).
     """
-    database_url = os.getenv("DATABASE_URL")
+    database_url = os.getenv("TEST_DATABASE_URL") or os.getenv("DATABASE_URL")
 
     if database_url:
         # Use PostgreSQL for full feature testing
         engine = create_engine(database_url)
     else:
         # SQLite fallback - will fail for ARRAY columns but useful for basic tests
-        # To run full tests, set DATABASE_URL environment variable
-        pytest.skip("PostgreSQL required for tests with ARRAY columns. Set DATABASE_URL environment variable.")
+        # To run full tests, set TEST_DATABASE_URL or DATABASE_URL environment variable
+        pytest.skip("PostgreSQL required for tests with ARRAY columns. Set TEST_DATABASE_URL or DATABASE_URL environment variable.")
         engine = create_engine(
             "sqlite:///:memory:",
             connect_args={"check_same_thread": False},
@@ -51,11 +55,16 @@ def engine_fixture():
 
 @pytest.fixture(name="session")
 def session_fixture(engine):
-    """Create database session for tests"""
+    """Create database session for tests with cleanup between tests"""
     with Session(engine) as session:
         yield session
-        # Rollback after each test to ensure isolation
+        # Clean up all test data after each test
         session.rollback()
+        # Truncate tables to ensure clean state (only for PostgreSQL)
+        if "postgresql" in str(engine.url):
+            session.execute(text("TRUNCATE TABLE tasks CASCADE"))
+            session.execute(text("TRUNCATE TABLE users CASCADE"))
+            session.commit()
 
 
 # ============================================================================

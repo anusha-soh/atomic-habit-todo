@@ -1,0 +1,79 @@
+/**
+ * Edit Task Page (Server Component)
+ * Phase 2 Chunk 2 - User Story 2
+ *
+ * Fetches task data server-side and renders edit form
+ */
+import Link from 'next/link';
+import { cookies } from 'next/headers';
+import { notFound } from 'next/navigation';
+import { TaskForm } from '@/components/tasks/TaskForm';
+import { getTask } from '@/lib/tasks-api';
+
+interface EditTaskPageProps {
+  params: Promise<{ id: string }>;
+}
+
+export default async function EditTaskPage({ params }: EditTaskPageProps) {
+  const { id: taskId } = await params;
+
+  // Get user ID from session cookie
+  const cookieStore = await cookies();
+  const sessionCookie = cookieStore.get('session_token');
+  const userId = sessionCookie?.value || 'test-user-id';
+
+  let task;
+  let error: string | null = null;
+
+  try {
+    task = await getTask(userId, taskId);
+  } catch (e) {
+    if (e instanceof Error && e.message.includes('404')) {
+      notFound();
+    }
+    error = e instanceof Error ? e.message : 'Failed to load task';
+  }
+
+  if (!task && !error) {
+    notFound();
+  }
+
+  return (
+    <div className="container mx-auto px-4 py-8 max-w-2xl">
+      {/* Header */}
+      <div className="mb-8">
+        <Link
+          href="/tasks"
+          className="text-blue-600 hover:text-blue-800 text-sm mb-4 inline-block"
+        >
+          &larr; Back to Tasks
+        </Link>
+        <h1 className="text-3xl font-bold text-gray-900">Edit Task</h1>
+      </div>
+
+      {/* Error state */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6">
+          {error}
+        </div>
+      )}
+
+      {/* Edit form */}
+      {task && (
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <TaskForm
+            userId={userId}
+            taskId={taskId}
+            initialData={{
+              title: task.title,
+              description: task.description,
+              status: task.status,
+              priority: task.priority,
+              tags: task.tags,
+            }}
+          />
+        </div>
+      )}
+    </div>
+  );
+}

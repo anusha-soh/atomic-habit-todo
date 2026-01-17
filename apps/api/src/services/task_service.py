@@ -8,6 +8,10 @@ from src.models.task import Task
 from uuid import UUID
 from typing import Optional
 from datetime import datetime
+import logging
+
+# Configure logging for the service
+logger = logging.getLogger(__name__)
 
 
 class TaskService:
@@ -63,12 +67,18 @@ class TaskService:
         Raises:
             ValueError: If title is empty or exceeds max length
         """
+        logger.info(f"Creating task for user {user_id} with title '{title[:50]}...'")
+
         # Validate title
         title = title.strip()
         if not title:
-            raise ValueError("Title cannot be empty or only whitespace")
+            error_msg = "Title cannot be empty or only whitespace"
+            logger.warning(f"Task creation failed: {error_msg}")
+            raise ValueError(error_msg)
         if len(title) > 500:
-            raise ValueError("Title must be 500 characters or less")
+            error_msg = "Title must be 500 characters or less"
+            logger.warning(f"Task creation failed: {error_msg}")
+            raise ValueError(error_msg)
 
         # Create task
         task = Task(
@@ -84,6 +94,8 @@ class TaskService:
         self.session.add(task)
         self.session.commit()
         self.session.refresh(task)
+
+        logger.info(f"Task created successfully with ID {task.id}")
 
         # Emit TASK_CREATED event
         self.event_emitter.emit("TASK_CREATED", {
@@ -131,17 +143,23 @@ class TaskService:
         Returns:
             Tuple of (list of tasks, total count)
         """
+        logger.info(f"Retrieving tasks for user {user_id} with page={page}, limit={limit}, filters={bool(status or priority or tags or search)}, sort={sort}")
+
         offset = (page - 1) * limit
         query = select(Task).where(Task.user_id == user_id)
 
         # Apply filters
         if status:
+            logger.debug(f"Applying status filter: {status}")
             query = query.where(Task.status == status)
         if priority:
+            logger.debug(f"Applying priority filter: {priority}")
             query = query.where(Task.priority == priority)
         if tags:
+            logger.debug(f"Applying tags filter: {tags}")
             query = query.where(Task.tags.op("&&")(tags))
         if search:
+            logger.debug(f"Applying search filter: {search}")
             query = query.where(or_(
                 Task.title.ilike(f"%{search}%"),
                 Task.description.ilike(f"%{search}%")
@@ -160,14 +178,42 @@ class TaskService:
                 else_=4
             )
         }
-        query = query.order_by(sort_map.get(sort, Task.created_at.desc()))
+        sort_order = sort_map.get(sort, Task.created_at.desc())
+        query = query.order_by(sort_order)
 
         # Count total
-        total = self.session.exec(select(func.count()).select_from(query.subquery())).one()
+        total_query = select(func.count()).select_from(query.subquery())
+        total = self.session.exec(total_query).one()
+        logger.debug(f"Total tasks matching query: {total}")
 
         # Fetch page
         tasks = self.session.exec(query.offset(offset).limit(limit)).all()
+        logger.info(f"Retrieved {len(tasks)} tasks for user {user_id}")
+
         return list(tasks), total
+
+    def get_task(self, user_id: UUID, task_id: UUID) -> Optional[Task]:
+        """
+        Get a single task by ID.
+
+        Args:
+            user_id: User ID for authorization
+            task_id: Task ID to retrieve
+
+        Returns:
+            Task object if found and owned by user, None otherwise
+        """
+        logger.info(f"Retrieving task {task_id} for user {user_id}")
+
+        query = select(Task).where(Task.id == task_id, Task.user_id == user_id)
+        task = self.session.exec(query).first()
+
+        if task:
+            logger.info(f"Task {task_id} found for user {user_id}")
+        else:
+            logger.info(f"Task {task_id} not found for user {user_id} (may not exist or unauthorized)")
+
+        return task
 
     def update_task(
         self, user_id: UUID, task_id: UUID, **updates
@@ -186,8 +232,70 @@ class TaskService:
         Raises:
             ValueError: If task not found or user doesn't own the task
         """
-        # Implementation will be added in US2 (T045)
-        pass
+        logger.info(f"Updating task {task_id} for user {user_id} with updates: {list(updates.keys())}")
+
+        # Find task owned by user
+        task = self.get_task(user_id, task_id)
+        if not task:
+            error_msg = "Task not found"
+            logger.warning(f"Task update failed: {error_msg}")
+            raise ValueError(error_msg)
+
+        # Allowed update fields
+        allowed_fields = {"title", "description", "status", "priority", "tags", "due_date"}
+
+        # Log which fields are being updated
+        update_fields = {k: v for k, v in updates.items() if k in allowed_fields}
+        logger.debug(f"Valid updates for task {task_id}: {list(update_fields.keys())}")
+
+        # Apply updates
+        for field, value in updates.items():
+            if field not in allowed_fields:
+                continue
+
+            # Validate title if being updated
+            if field == "title":
+                if value is not None:
+                    value = value.strip()
+                    if not value:
+                        error_msg = "Title cannot be empty or only whitespace"
+                        logger.warning(f"Task update failed: {error_msg}")
+                        raise ValueError(error_msg)
+                    if len(value) > 500:
+                        error_msg = "Title must be 500 characters or less"
+                        logger.warning(f"Task update failed: {error_msg}")
+                        raise ValueError(error_msg)
+
+            setattr(task, field, value)
+
+        # Update timestamp
+        task.updated_at = datetime.utcnow()
+
+        self.session.add(task)
+        self.session.commit()
+        self.session.refresh(task)
+
+        logger.info(f"Task {task_id} updated successfully for user {user_id}")
+
+        # Emit TASK_UPDATED event
+        self.event_emitter.emit("TASK_UPDATED", {
+            "user_id": str(user_id),
+            "timestamp": datetime.utcnow().isoformat(),
+            "event_type": "TASK_UPDATED",
+            "payload": {
+                "task_id": str(task.id),
+                "title": task.title,
+                "description": task.description,
+                "status": task.status,
+                "priority": task.priority,
+                "tags": task.tags,
+                "due_date": task.due_date.isoformat() if task.due_date else None,
+                "completed": task.completed,
+                "updated_fields": list(updates.keys())
+            }
+        })
+
+        return task
 
     def mark_complete(self, user_id: UUID, task_id: UUID) -> Task:
         """
@@ -203,8 +311,41 @@ class TaskService:
         Raises:
             ValueError: If task not found or user doesn't own the task
         """
-        # Implementation will be added in US2 (T046)
-        pass
+        logger.info(f"Marking task {task_id} as complete for user {user_id}")
+
+        # Find task owned by user
+        task = self.get_task(user_id, task_id)
+        if not task:
+            error_msg = "Task not found"
+            logger.warning(f"Mark complete failed: {error_msg}")
+            raise ValueError(error_msg)
+
+        # Update status and completed flag
+        old_status = task.status
+        task.status = "completed"
+        task.completed = True
+        task.updated_at = datetime.utcnow()
+
+        self.session.add(task)
+        self.session.commit()
+        self.session.refresh(task)
+
+        logger.info(f"Task {task_id} marked as complete for user {user_id} (was {old_status})")
+
+        # Emit TASK_UPDATED event with completed flag
+        self.event_emitter.emit("TASK_UPDATED", {
+            "user_id": str(user_id),
+            "timestamp": datetime.utcnow().isoformat(),
+            "event_type": "TASK_UPDATED",
+            "payload": {
+                "task_id": str(task.id),
+                "title": task.title,
+                "status": "completed",
+                "completed": True
+            }
+        })
+
+        return task
 
     def delete_task(self, user_id: UUID, task_id: UUID) -> None:
         """
@@ -217,5 +358,28 @@ class TaskService:
         Raises:
             ValueError: If task not found or user doesn't own the task
         """
-        # Implementation will be added in US3 (T060)
-        pass
+        logger.info(f"Deleting task {task_id} for user {user_id}")
+
+        # Find task owned by user
+        task = self.get_task(user_id, task_id)
+        if not task:
+            error_msg = "Task not found"
+            logger.warning(f"Task deletion failed: {error_msg}")
+            raise ValueError(error_msg)
+
+        # Remove task from database
+        self.session.delete(task)
+        self.session.commit()
+
+        logger.info(f"Task {task_id} deleted successfully for user {user_id}")
+
+        # Emit TASK_DELETED event
+        self.event_emitter.emit("TASK_DELETED", {
+            "user_id": str(user_id),
+            "timestamp": datetime.utcnow().isoformat(),
+            "event_type": "TASK_DELETED",
+            "payload": {
+                "task_id": str(task.id),
+                "title": task.title
+            }
+        })

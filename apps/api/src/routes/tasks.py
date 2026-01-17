@@ -91,22 +91,42 @@ async def list_tasks(
     """
     # Authorization: Ensure current user can only access their own tasks
     if current_user_id != user_id:
-        raise HTTPException(status_code=403, detail="Forbidden")
+        raise HTTPException(status_code=403, detail="Access denied: Cannot access another user's tasks")
+
+    # Validate sort parameter
+    valid_sort_options = {"created_desc", "created_asc", "due_date_asc", "due_date_desc", "priority_asc"}
+    if sort not in valid_sort_options:
+        raise HTTPException(status_code=400, detail=f"Invalid sort option. Valid options: {', '.join(valid_sort_options)}")
 
     # Parse tags (comma-separated string to list)
-    tag_list = tags.split(",") if tags else None
+    tag_list = None
+    if tags:
+        tag_list = [tag.strip() for tag in tags.split(",") if tag.strip()]
+        if len(tag_list) > 20:
+            raise HTTPException(status_code=400, detail="Too many tags. Maximum 20 tags allowed.")
+
+    # Validate status parameter
+    if status and status not in ["pending", "in_progress", "completed"]:
+        raise HTTPException(status_code=400, detail="Invalid status. Valid values: pending, in_progress, completed")
+
+    # Validate priority parameter
+    if priority and priority not in ["high", "medium", "low"]:
+        raise HTTPException(status_code=400, detail="Invalid priority. Valid values: high, medium, low")
 
     # Get tasks from service
-    tasks, total = task_service.get_tasks(
-        user_id=user_id,
-        page=page,
-        limit=limit,
-        status=status,
-        priority=priority,
-        tags=tag_list,
-        search=search,
-        sort=sort
-    )
+    try:
+        tasks, total = task_service.get_tasks(
+            user_id=user_id,
+            page=page,
+            limit=limit,
+            status=status,
+            priority=priority,
+            tags=tag_list,
+            search=search,
+            sort=sort
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error retrieving tasks: {str(e)}")
 
     return {
         "tasks": tasks,
@@ -130,7 +150,19 @@ async def create_task(
     """
     # Authorization
     if current_user_id != user_id:
-        raise HTTPException(status_code=403, detail="Forbidden")
+        raise HTTPException(status_code=403, detail="Access denied: Cannot create tasks for another user")
+
+    # Validate tags
+    if task_data.tags and len(task_data.tags) > 20:
+        raise HTTPException(status_code=400, detail="Too many tags. Maximum 20 tags allowed.")
+
+    # Validate status
+    if task_data.status and task_data.status not in ["pending", "in_progress", "completed"]:
+        raise HTTPException(status_code=400, detail="Invalid status. Valid values: pending, in_progress, completed")
+
+    # Validate priority
+    if task_data.priority and task_data.priority not in ["high", "medium", "low"]:
+        raise HTTPException(status_code=400, detail="Invalid priority. Valid values: high, medium, low")
 
     try:
         task = task_service.create_task(
@@ -144,7 +176,9 @@ async def create_task(
         )
         return task
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=f"Validation error: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error creating task: {str(e)}")
 
 
 @router.get("/{user_id}/tasks/{task_id}", response_model=TaskResponse)
@@ -163,8 +197,11 @@ async def get_task(
     if current_user_id != user_id:
         raise HTTPException(status_code=403, detail="Forbidden")
 
-    # Implementation will be added in US2 (T049)
-    raise HTTPException(status_code=501, detail="Not implemented")
+    task = task_service.get_task(user_id=user_id, task_id=task_id)
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    return task
 
 
 @router.patch("/{user_id}/tasks/{task_id}", response_model=TaskResponse)
@@ -182,10 +219,48 @@ async def update_task(
     """
     # Authorization
     if current_user_id != user_id:
-        raise HTTPException(status_code=403, detail="Forbidden")
+        raise HTTPException(status_code=403, detail="Access denied: Cannot update another user's task")
 
-    # Implementation will be added in US2 (T047)
-    raise HTTPException(status_code=501, detail="Not implemented")
+    # Validate tags
+    if task_data.tags is not None and len(task_data.tags) > 20:
+        raise HTTPException(status_code=400, detail="Too many tags. Maximum 20 tags allowed.")
+
+    # Validate status
+    if task_data.status is not None and task_data.status not in ["pending", "in_progress", "completed"]:
+        raise HTTPException(status_code=400, detail="Invalid status. Valid values: pending, in_progress, completed")
+
+    # Validate priority
+    if task_data.priority is not None and task_data.priority not in ["high", "medium", "low"]:
+        raise HTTPException(status_code=400, detail="Invalid priority. Valid values: high, medium, low")
+
+    # Build updates dict from non-None values
+    updates = {}
+    if task_data.title is not None:
+        updates["title"] = task_data.title
+    if task_data.description is not None:
+        updates["description"] = task_data.description
+    if task_data.status is not None:
+        updates["status"] = task_data.status
+    if task_data.priority is not None:
+        updates["priority"] = task_data.priority
+    if task_data.tags is not None:
+        updates["tags"] = task_data.tags
+    if task_data.due_date is not None:
+        updates["due_date"] = task_data.due_date
+
+    try:
+        task = task_service.update_task(
+            user_id=user_id,
+            task_id=task_id,
+            **updates
+        )
+        return task
+    except ValueError as e:
+        if "not found" in str(e).lower():
+            raise HTTPException(status_code=404, detail=f"Task not found: {str(e)}")
+        raise HTTPException(status_code=400, detail=f"Validation error: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error updating task: {str(e)}")
 
 
 @router.patch("/{user_id}/tasks/{task_id}/complete", response_model=TaskResponse)
@@ -202,10 +277,17 @@ async def complete_task(
     """
     # Authorization
     if current_user_id != user_id:
-        raise HTTPException(status_code=403, detail="Forbidden")
+        raise HTTPException(status_code=403, detail="Access denied: Cannot complete another user's task")
 
-    # Implementation will be added in US2 (T048)
-    raise HTTPException(status_code=501, detail="Not implemented")
+    try:
+        task = task_service.mark_complete(user_id=user_id, task_id=task_id)
+        return task
+    except ValueError as e:
+        if "not found" in str(e).lower():
+            raise HTTPException(status_code=404, detail=f"Task not found: {str(e)}")
+        raise HTTPException(status_code=400, detail=f"Validation error: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error completing task: {str(e)}")
 
 
 @router.delete("/{user_id}/tasks/{task_id}", status_code=204)
@@ -222,7 +304,45 @@ async def delete_task(
     """
     # Authorization
     if current_user_id != user_id:
-        raise HTTPException(status_code=403, detail="Forbidden")
+        raise HTTPException(status_code=403, detail="Access denied: Cannot delete another user's task")
 
-    # Implementation will be added in US3 (T061)
-    raise HTTPException(status_code=501, detail="Not implemented")
+    try:
+        task_service.delete_task(user_id=user_id, task_id=task_id)
+    except ValueError as e:
+        if "not found" in str(e).lower():
+            raise HTTPException(status_code=404, detail=f"Task not found: {str(e)}")
+        raise HTTPException(status_code=400, detail=f"Validation error: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error deleting task: {str(e)}")
+
+
+@router.get("/{user_id}/tasks/tags", response_model=list[str])
+async def get_task_tags(
+    user_id: UUID,
+    current_user_id: UUID = Depends(get_current_user_id),
+    task_service: TaskService = Depends(get_task_service)
+):
+    """
+    Get unique tags for autocomplete suggestions.
+
+    Implementation: US6 (T104)
+    """
+    # Authorization
+    if current_user_id != user_id:
+        raise HTTPException(status_code=403, detail="Access denied: Cannot access another user's tags")
+
+    try:
+        # Get all tasks and extract unique tags
+        # Note: This is a simplified approach - in a real implementation,
+        # we'd have a dedicated method in the service to get unique tags
+        tasks, _ = task_service.get_tasks(user_id=user_id, page=1, limit=1000)  # Get all user's tags
+
+        # Extract all unique tags
+        all_tags = set()
+        for task in tasks:
+            if task.tags:
+                all_tags.update(task.tags)
+
+        return list(all_tags)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error retrieving tags: {str(e)}")

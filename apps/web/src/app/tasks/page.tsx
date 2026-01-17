@@ -7,6 +7,7 @@
 import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { TaskCard } from '@/components/tasks/TaskCard';
+import { TaskFilters } from '@/components/tasks/TaskFilters';
 import { getTasks } from '@/lib/tasks-api';
 import { Task } from '@/types/task';
 
@@ -63,6 +64,9 @@ export default async function TasksPage({ searchParams }: TasksPageProps) {
         </Link>
       </div>
 
+      {/* Filters */}
+      <TaskFilters currentFilters={filters} />
+
       {/* Error state */}
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6">
@@ -84,7 +88,7 @@ export default async function TasksPage({ searchParams }: TasksPageProps) {
       ) : (
         <div className="space-y-4">
           {tasks.map((task) => (
-            <TaskCard key={task.id} task={task} />
+            <TaskCard key={task.id} task={task} userId={userId} />
           ))}
         </div>
       )}
