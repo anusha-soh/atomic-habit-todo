@@ -6,6 +6,7 @@ from fastapi import Request, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import JWTError, jwt
 from typing import Optional
+from uuid import UUID
 import os
 
 # JWT configuration
@@ -40,7 +41,7 @@ def decode_token(token: str) -> dict:
         )
 
 
-def get_current_user_id(request: Request) -> str:
+def get_current_user_id(request: Request) -> UUID:
     """
     Extract user ID from JWT token in Authorization header or cookie.
 
@@ -48,7 +49,7 @@ def get_current_user_id(request: Request) -> str:
         request: FastAPI request object
 
     Returns:
-        User ID from token payload
+        User ID as UUID from token payload
 
     Raises:
         HTTPException: If token is missing or invalid
@@ -79,7 +80,13 @@ def get_current_user_id(request: Request) -> str:
             detail="Invalid token payload",
         )
 
-    return user_id
+    try:
+        return UUID(user_id)
+    except (ValueError, AttributeError):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid user ID in token",
+        )
 
 
 def create_access_token(user_id: str, expires_delta: int = 7) -> str:

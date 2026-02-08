@@ -10,7 +10,7 @@ from typing import Optional
 from datetime import datetime
 
 from src.database import get_session
-from src.services.task_service import TaskService
+from src.services.task_service import TaskService, UNSET
 from src.services.event_emitter import EventEmitter
 from src.middleware.auth import get_current_user_id
 
@@ -94,7 +94,7 @@ async def list_tasks(
         raise HTTPException(status_code=403, detail="Access denied: Cannot access another user's tasks")
 
     # Validate sort parameter
-    valid_sort_options = {"created_desc", "created_asc", "due_date_asc", "due_date_desc", "priority_asc"}
+    valid_sort_options = {"created_desc", "created_asc", "due_date_asc", "due_date_desc", "priority_asc", "priority_desc"}
     if sort not in valid_sort_options:
         raise HTTPException(status_code=400, detail=f"Invalid sort option. Valid options: {', '.join(valid_sort_options)}")
 
@@ -110,8 +110,13 @@ async def list_tasks(
         raise HTTPException(status_code=400, detail="Invalid status. Valid values: pending, in_progress, completed")
 
     # Validate priority parameter
-    if priority and priority not in ["high", "medium", "low"]:
-        raise HTTPException(status_code=400, detail="Invalid priority. Valid values: high, medium, low")
+    if priority and priority not in ["high", "medium", "low", "none"]:
+        raise HTTPException(status_code=400, detail="Invalid priority. Valid values: high, medium, low, none")
+
+    # Map 'none' to None for NULL filtering, and use UNSET if missing
+    priority_value = UNSET
+    if priority is not None:
+        priority_value = None if priority == "none" else priority
 
     # Get tasks from service
     try:
@@ -120,7 +125,7 @@ async def list_tasks(
             page=page,
             limit=limit,
             status=status,
-            priority=priority,
+            priority=priority_value,
             tags=tag_list,
             search=search,
             sort=sort
@@ -179,6 +184,28 @@ async def create_task(
         raise HTTPException(status_code=400, detail=f"Validation error: {str(e)}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error creating task: {str(e)}")
+
+
+@router.get("/{user_id}/tasks/tags", response_model=list[str])
+async def get_task_tags(
+    user_id: UUID,
+    current_user_id: UUID = Depends(get_current_user_id),
+    task_service: TaskService = Depends(get_task_service)
+):
+    """
+    Get unique tags for autocomplete suggestions.
+    MUST be defined before /{user_id}/tasks/{task_id} to avoid route collision.
+
+    Implementation: US6 (T104)
+    """
+    # Authorization
+    if current_user_id != user_id:
+        raise HTTPException(status_code=403, detail="Access denied: Cannot access another user's tags")
+
+    try:
+        return task_service.get_unique_tags(user_id=user_id)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error retrieving tags: {str(e)}")
 
 
 @router.get("/{user_id}/tasks/{task_id}", response_model=TaskResponse)
@@ -316,33 +343,3 @@ async def delete_task(
         raise HTTPException(status_code=500, detail=f"Error deleting task: {str(e)}")
 
 
-@router.get("/{user_id}/tasks/tags", response_model=list[str])
-async def get_task_tags(
-    user_id: UUID,
-    current_user_id: UUID = Depends(get_current_user_id),
-    task_service: TaskService = Depends(get_task_service)
-):
-    """
-    Get unique tags for autocomplete suggestions.
-
-    Implementation: US6 (T104)
-    """
-    # Authorization
-    if current_user_id != user_id:
-        raise HTTPException(status_code=403, detail="Access denied: Cannot access another user's tags")
-
-    try:
-        # Get all tasks and extract unique tags
-        # Note: This is a simplified approach - in a real implementation,
-        # we'd have a dedicated method in the service to get unique tags
-        tasks, _ = task_service.get_tasks(user_id=user_id, page=1, limit=1000)  # Get all user's tags
-
-        # Extract all unique tags
-        all_tags = set()
-        for task in tasks:
-            if task.tags:
-                all_tags.update(task.tags)
-
-        return list(all_tags)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error retrieving tags: {str(e)}")

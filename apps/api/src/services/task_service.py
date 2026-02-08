@@ -7,11 +7,14 @@ from src.services.event_emitter import EventEmitter
 from src.models.task import Task
 from uuid import UUID
 from typing import Optional
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 
 # Configure logging for the service
 logger = logging.getLogger(__name__)
+
+# Sentinel for missing arguments
+UNSET = object()
 
 
 class TaskService:
@@ -48,6 +51,8 @@ class TaskService:
         priority: Optional[str] = None,
         tags: Optional[list[str]] = None,
         due_date: Optional[datetime] = None,
+        created_at: Optional[datetime] = None,
+        updated_at: Optional[datetime] = None,
     ) -> Task:
         """
         Create a new task for the user.
@@ -60,6 +65,8 @@ class TaskService:
             priority: Priority level (high, medium, low, or null)
             tags: List of tags/categories
             due_date: Optional deadline
+            created_at: Optional creation timestamp (for testing/migration)
+            updated_at: Optional update timestamp (for testing/migration)
 
         Returns:
             Created Task object
@@ -69,16 +76,10 @@ class TaskService:
         """
         logger.info(f"Creating task for user {user_id} with title '{title[:50]}...'")
 
-        # Validate title
+        # Validate and trim title
+        if not title or not title.strip():
+            raise ValueError("Title cannot be empty or only whitespace")
         title = title.strip()
-        if not title:
-            error_msg = "Title cannot be empty or only whitespace"
-            logger.warning(f"Task creation failed: {error_msg}")
-            raise ValueError(error_msg)
-        if len(title) > 500:
-            error_msg = "Title must be 500 characters or less"
-            logger.warning(f"Task creation failed: {error_msg}")
-            raise ValueError(error_msg)
 
         # Create task
         task = Task(
@@ -90,6 +91,11 @@ class TaskService:
             tags=tags or [],
             due_date=due_date,
         )
+        
+        if created_at:
+            task.created_at = created_at
+        if updated_at:
+            task.updated_at = updated_at
 
         self.session.add(task)
         self.session.commit()
@@ -98,20 +104,15 @@ class TaskService:
         logger.info(f"Task created successfully with ID {task.id}")
 
         # Emit TASK_CREATED event
-        self.event_emitter.emit("TASK_CREATED", {
-            "user_id": str(user_id),
-            "timestamp": datetime.utcnow().isoformat(),
-            "event_type": "TASK_CREATED",
-            "payload": {
-                "task_id": str(task.id),
-                "title": task.title,
-                "description": task.description,
-                "status": task.status,
-                "priority": task.priority,
-                "tags": task.tags,
-                "due_date": task.due_date.isoformat() if task.due_date else None,
-                "completed": task.completed
-            }
+        self.event_emitter.emit("TASK_CREATED", user_id, {
+            "task_id": str(task.id),
+            "title": task.title,
+            "description": task.description,
+            "status": task.status,
+            "priority": task.priority,
+            "tags": task.tags,
+            "due_date": task.due_date.isoformat() if task.due_date else None,
+            "completed": task.completed
         })
 
         return task
@@ -122,7 +123,7 @@ class TaskService:
         page: int = 1,
         limit: int = 50,
         status: Optional[str] = None,
-        priority: Optional[str] = None,
+        priority: Optional[str] = UNSET,
         tags: Optional[list[str]] = None,
         search: Optional[str] = None,
         sort: str = "created_desc",
@@ -135,7 +136,7 @@ class TaskService:
             page: Page number (1-indexed)
             limit: Tasks per page (max 100)
             status: Filter by status (pending, in_progress, completed)
-            priority: Filter by priority (high, medium, low)
+            priority: Filter by priority (high, medium, low, or None for no priority)
             tags: Filter by tags (ANY match)
             search: Search in title and description (case-insensitive)
             sort: Sort order (created_desc, due_date_asc, priority_asc, etc.)
@@ -143,7 +144,7 @@ class TaskService:
         Returns:
             Tuple of (list of tasks, total count)
         """
-        logger.info(f"Retrieving tasks for user {user_id} with page={page}, limit={limit}, filters={bool(status or priority or tags or search)}, sort={sort}")
+        logger.info(f"Retrieving tasks for user {user_id} with page={page}, limit={limit}, filters={bool(status or priority is not UNSET or tags or search)}, sort={sort}")
 
         offset = (page - 1) * limit
         query = select(Task).where(Task.user_id == user_id)
@@ -152,17 +153,25 @@ class TaskService:
         if status:
             logger.debug(f"Applying status filter: {status}")
             query = query.where(Task.status == status)
-        if priority:
+        
+        if priority is not UNSET:
             logger.debug(f"Applying priority filter: {priority}")
             query = query.where(Task.priority == priority)
+            
         if tags:
             logger.debug(f"Applying tags filter: {tags}")
-            query = query.where(Task.tags.op("&&")(tags))
+            # Use PostgreSQL array overlap operator with proper binding
+            from sqlalchemy import text
+            # Create the overlap condition manually to ensure proper casting
+            query = query.where(text("tasks.tags && cast(:tags AS TEXT[])").bindparams(tags=tags))
+            
         if search:
             logger.debug(f"Applying search filter: {search}")
+            # Escape SQL LIKE wildcards to prevent unintended pattern matching
+            escaped = search.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
             query = query.where(or_(
-                Task.title.ilike(f"%{search}%"),
-                Task.description.ilike(f"%{search}%")
+                Task.title.ilike(f"%{escaped}%"),
+                func.coalesce(Task.description, '').ilike(f"%{escaped}%")
             ))
 
         # Apply sort
@@ -176,14 +185,34 @@ class TaskService:
                 (Task.priority == "medium", 2),
                 (Task.priority == "low", 3),
                 else_=4
+            ),
+            "priority_desc": case(
+                (Task.priority == "low", 1),
+                (Task.priority == "medium", 2),
+                (Task.priority == "high", 3),
+                else_=4
             )
         }
         sort_order = sort_map.get(sort, Task.created_at.desc())
         query = query.order_by(sort_order)
 
-        # Count total
-        total_query = select(func.count()).select_from(query.subquery())
-        total = self.session.exec(total_query).one()
+        # Count total using a separate count query for better compatibility
+        count_query = select(func.count()).select_from(Task).where(Task.user_id == user_id)
+        if status:
+            count_query = count_query.where(Task.status == status)
+        if priority is not UNSET:
+            count_query = count_query.where(Task.priority == priority)
+        if tags:
+            from sqlalchemy import text
+            count_query = count_query.where(text("tasks.tags && cast(:tags AS TEXT[])").bindparams(tags=tags))
+        if search:
+            escaped = search.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+            count_query = count_query.where(or_(
+                Task.title.ilike(f"%{escaped}%"),
+                func.coalesce(Task.description, '').ilike(f"%{escaped}%")
+            ))
+            
+        total = self.session.exec(count_query).one()
         logger.debug(f"Total tasks matching query: {total}")
 
         # Fetch page
@@ -256,11 +285,11 @@ class TaskService:
             # Validate title if being updated
             if field == "title":
                 if value is not None:
-                    value = value.strip()
-                    if not value:
+                    if not value.strip():
                         error_msg = "Title cannot be empty or only whitespace"
                         logger.warning(f"Task update failed: {error_msg}")
                         raise ValueError(error_msg)
+                    value = value.strip()
                     if len(value) > 500:
                         error_msg = "Title must be 500 characters or less"
                         logger.warning(f"Task update failed: {error_msg}")
@@ -269,7 +298,7 @@ class TaskService:
             setattr(task, field, value)
 
         # Update timestamp
-        task.updated_at = datetime.utcnow()
+        task.updated_at = datetime.now(timezone.utc)
 
         self.session.add(task)
         self.session.commit()
@@ -278,21 +307,16 @@ class TaskService:
         logger.info(f"Task {task_id} updated successfully for user {user_id}")
 
         # Emit TASK_UPDATED event
-        self.event_emitter.emit("TASK_UPDATED", {
-            "user_id": str(user_id),
-            "timestamp": datetime.utcnow().isoformat(),
-            "event_type": "TASK_UPDATED",
-            "payload": {
-                "task_id": str(task.id),
-                "title": task.title,
-                "description": task.description,
-                "status": task.status,
-                "priority": task.priority,
-                "tags": task.tags,
-                "due_date": task.due_date.isoformat() if task.due_date else None,
-                "completed": task.completed,
-                "updated_fields": list(updates.keys())
-            }
+        self.event_emitter.emit("TASK_UPDATED", user_id, {
+            "task_id": str(task.id),
+            "title": task.title,
+            "description": task.description,
+            "status": task.status,
+            "priority": task.priority,
+            "tags": task.tags,
+            "due_date": task.due_date.isoformat() if task.due_date else None,
+            "completed": task.completed,
+            "updated_fields": list(updates.keys())
         })
 
         return task
@@ -324,7 +348,7 @@ class TaskService:
         old_status = task.status
         task.status = "completed"
         task.completed = True
-        task.updated_at = datetime.utcnow()
+        task.updated_at = datetime.now(timezone.utc)
 
         self.session.add(task)
         self.session.commit()
@@ -332,20 +356,39 @@ class TaskService:
 
         logger.info(f"Task {task_id} marked as complete for user {user_id} (was {old_status})")
 
-        # Emit TASK_UPDATED event with completed flag
-        self.event_emitter.emit("TASK_UPDATED", {
-            "user_id": str(user_id),
-            "timestamp": datetime.utcnow().isoformat(),
-            "event_type": "TASK_UPDATED",
-            "payload": {
-                "task_id": str(task.id),
-                "title": task.title,
-                "status": "completed",
-                "completed": True
-            }
+        # Emit TASK_COMPLETED event (FR-020)
+        self.event_emitter.emit("TASK_COMPLETED", user_id, {
+            "task_id": str(task.id),
+            "title": task.title,
+            "description": task.description,
+            "status": "completed",
+            "priority": task.priority,
+            "tags": task.tags,
+            "due_date": task.due_date.isoformat() if task.due_date else None,
+            "completed": True
         })
 
         return task
+
+    def get_unique_tags(self, user_id: UUID) -> list[str]:
+        """
+        Get all unique tags for a user's tasks using SQL DISTINCT unnest.
+
+        Args:
+            user_id: User ID to filter tasks
+
+        Returns:
+            Sorted list of unique tag strings
+        """
+        logger.info(f"Retrieving unique tags for user {user_id}")
+        from sqlalchemy import text
+        result = self.session.execute(
+            text("SELECT DISTINCT unnest(tags) AS tag FROM tasks WHERE user_id = :uid ORDER BY tag"),
+            {"uid": user_id}
+        )
+        tags = [row[0] for row in result]
+        logger.info(f"Found {len(tags)} unique tags for user {user_id}")
+        return tags
 
     def delete_task(self, user_id: UUID, task_id: UUID) -> None:
         """
@@ -374,12 +417,7 @@ class TaskService:
         logger.info(f"Task {task_id} deleted successfully for user {user_id}")
 
         # Emit TASK_DELETED event
-        self.event_emitter.emit("TASK_DELETED", {
-            "user_id": str(user_id),
-            "timestamp": datetime.utcnow().isoformat(),
-            "event_type": "TASK_DELETED",
-            "payload": {
-                "task_id": str(task.id),
-                "title": task.title
-            }
+        self.event_emitter.emit("TASK_DELETED", user_id, {
+            "task_id": str(task.id),
+            "title": task.title
         })

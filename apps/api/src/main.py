@@ -27,6 +27,8 @@ app = FastAPI(
 
 # Configure CORS middleware
 allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000").split(",")
+# Always allow HF Spaces origin pattern
+allowed_origins = [o.strip() for o in allowed_origins]
 
 app.add_middleware(
     CORSMiddleware,

@@ -115,35 +115,35 @@
 ### Tests for User Story 2 (TDD - Write First, Ensure FAIL) ⚠️
 
 **Contract Tests**:
-- [ ] T037 [P] [US2] Write contract test for PATCH /api/{user_id}/tasks/{task_id} in apps/api/tests/contract/test_tasks_contract.py verifying partial update schema (should FAIL)
-- [ ] T038 [P] [US2] Write contract test for PATCH /api/{user_id}/tasks/{task_id}/complete in apps/api/tests/contract/test_tasks_contract.py (should FAIL)
-- [ ] T039 [P] [US2] Write contract test for GET /api/{user_id}/tasks/{task_id} in apps/api/tests/contract/test_tasks_contract.py verifying task detail schema (should FAIL)
+- [X] T037 [P] [US2] Write contract test for PATCH /api/{user_id}/tasks/{task_id} in apps/api/tests/contract/test_tasks_contract.py verifying partial update schema (should FAIL)
+- [X] T038 [P] [US2] Write contract test for PATCH /api/{user_id}/tasks/{task_id}/complete in apps/api/tests/contract/test_tasks_contract.py (should FAIL)
+- [X] T039 [P] [US2] Write contract test for GET /api/{user_id}/tasks/{task_id} in apps/api/tests/contract/test_tasks_contract.py verifying task detail schema (should FAIL)
 
 **Unit Tests**:
-- [ ] T040 [P] [US2] Write unit test for TaskService.update_task() in apps/api/tests/unit/test_task_service.py testing partial updates, updated_at timestamp (should FAIL)
-- [ ] T041 [P] [US2] Write unit test for TaskService.mark_complete() in apps/api/tests/unit/test_task_service.py testing status change, TASK_COMPLETED event (should FAIL)
-- [ ] T042 [P] [US2] Write unit test for task status transitions in apps/api/tests/unit/test_task_model.py testing pending→completed, completed→pending (should FAIL)
+- [X] T040 [P] [US2] Write unit test for TaskService.update_task() in apps/api/tests/unit/test_task_service.py testing partial updates, updated_at timestamp (should FAIL)
+- [X] T041 [P] [US2] Write unit test for TaskService.mark_complete() in apps/api/tests/unit/test_task_service.py testing status change, TASK_COMPLETED event (should FAIL)
+- [X] T042 [P] [US2] Write unit test for task status transitions in apps/api/tests/unit/test_task_model.py testing pending→completed, completed→pending (should FAIL)
 
 **Integration Tests**:
-- [ ] T043 [US2] Write integration test for task update workflow in apps/api/tests/integration/test_tasks_api.py testing PATCH updates DB and emits event (should FAIL)
-- [ ] T044 [US2] Write integration test for task completion in apps/api/tests/integration/test_tasks_api.py testing mark complete and reopen (should FAIL)
+- [X] T043 [US2] Write integration test for task update workflow in apps/api/tests/integration/test_tasks_api.py testing PATCH updates DB and emits event (should FAIL)
+- [X] T044 [US2] Write integration test for task completion in apps/api/tests/integration/test_tasks_api.py testing mark complete and reopen (should FAIL)
 
 ### Implementation for User Story 2 (Make Tests PASS - GREEN)
 
-- [ ] T045 [P] [US2] Implement TaskService.update_task() method in apps/api/src/services/task_service.py with partial updates, updated_at timestamp, and TASK_UPDATED event emission
-- [ ] T046 [P] [US2] Implement TaskService.mark_complete() method in apps/api/src/services/task_service.py setting status='completed', completed=true, and TASK_COMPLETED event emission
-- [ ] T047 [US2] Implement PATCH /{user_id}/tasks/{task_id} endpoint in apps/api/src/routes/tasks.py with TaskUpdate Pydantic model
-- [ ] T048 [US2] Implement PATCH /{user_id}/tasks/{task_id}/complete endpoint in apps/api/src/routes/tasks.py
-- [ ] T049 [US2] Implement GET /{user_id}/tasks/{task_id} endpoint in apps/api/src/routes/tasks.py for task detail view
-- [ ] T050 [US2] Create task detail/edit page in apps/web/src/app/tasks/[id]/page.tsx with TaskForm pre-filled for editing
-- [ ] T051 [US2] Add "Mark Complete" button to TaskCard component in apps/web/src/components/tasks/TaskCard.tsx calling completeTask API
-- [ ] T052 [US2] Add visual completed state to TaskCard in apps/web/src/components/tasks/TaskCard.tsx (strikethrough, badge, moved section)
+- [X] T045 [P] [US2] Implement TaskService.update_task() method in apps/api/src/services/task_service.py with partial updates, updated_at timestamp, and TASK_UPDATED event emission
+- [X] T046 [P] [US2] Implement TaskService.mark_complete() method in apps/api/src/services/task_service.py setting status='completed', completed=true, and TASK_COMPLETED event emission
+- [X] T047 [US2] Implement PATCH /{user_id}/tasks/{task_id} endpoint in apps/api/src/routes/tasks.py with TaskUpdate Pydantic model
+- [X] T048 [US2] Implement PATCH /{user_id}/tasks/{task_id}/complete endpoint in apps/api/src/routes/tasks.py
+- [X] T049 [US2] Implement GET /{user_id}/tasks/{task_id} endpoint in apps/api/src/routes/tasks.py for task detail view
+- [X] T050 [US2] Create task detail/edit page in apps/web/src/app/tasks/[id]/page.tsx with TaskForm pre-filled for editing
+- [X] T051 [US2] Add "Mark Complete" button to TaskCard component in apps/web/src/components/tasks/TaskCard.tsx calling completeTask API
+- [X] T052 [US2] Add visual completed state to TaskCard in apps/web/src/components/tasks/TaskCard.tsx (strikethrough, badge, moved section)
 
 ### Verification for User Story 2
 
-- [ ] T053 [US2] Run all US2 tests and verify they PASS (pytest apps/api/tests/ -k US2)
-- [ ] T054 [US2] Verify user can update task and changes persist across page refreshes
-- [ ] T055 [US2] Verify user can reopen task by updating status back to 'pending' or 'in_progress'
+- [X] T053 [US2] Run all US2 tests and verify they PASS (pytest apps/api/tests/ -k US2)
+- [X] T054 [US2] Verify user can update task and changes persist across page refreshes
+- [X] T055 [US2] Verify user can reopen task by updating status back to 'pending' or 'in_progress'
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work - users can create, view, edit, and complete tasks
 
@@ -158,26 +158,26 @@
 ### Tests for User Story 3 (TDD - Write First, Ensure FAIL) ⚠️
 
 **Contract Tests**:
-- [ ] T056 [P] [US3] Write contract test for DELETE /api/{user_id}/tasks/{task_id} in apps/api/tests/contract/test_tasks_contract.py verifying 204 response (should FAIL)
+- [X] T056 [P] [US3] Write contract test for DELETE /api/{user_id}/tasks/{task_id} in apps/api/tests/contract/test_tasks_contract.py verifying 204 response (should FAIL)
 
 **Unit Tests**:
-- [ ] T057 [P] [US3] Write unit test for TaskService.delete_task() in apps/api/tests/unit/test_task_service.py testing hard delete and TASK_DELETED event (should FAIL)
+- [X] T057 [P] [US3] Write unit test for TaskService.delete_task() in apps/api/tests/unit/test_task_service.py testing hard delete and TASK_DELETED event (should FAIL)
 
 **Integration Tests**:
-- [ ] T058 [US3] Write integration test for task deletion in apps/api/tests/integration/test_tasks_api.py testing DELETE removes from DB and emits event (should FAIL)
-- [ ] T059 [US3] Write integration test for deleted task 404 in apps/api/tests/integration/test_tasks_api.py testing GET after DELETE returns 404 (should FAIL)
+- [X] T058 [US3] Write integration test for task deletion in apps/api/tests/integration/test_tasks_api.py testing DELETE removes from DB and emits event (should FAIL)
+- [X] T059 [US3] Write integration test for deleted task 404 in apps/api/tests/integration/test_tasks_api.py testing GET after DELETE returns 404 (should FAIL)
 
 ### Implementation for User Story 3 (Make Tests PASS - GREEN)
 
-- [ ] T060 [US3] Implement TaskService.delete_task() method in apps/api/src/services/task_service.py with hard delete and TASK_DELETED event emission
-- [ ] T061 [US3] Implement DELETE /{user_id}/tasks/{task_id} endpoint in apps/api/src/routes/tasks.py returning 204 No Content
-- [ ] T062 [US3] Add delete button with confirmation dialog to TaskCard component in apps/web/src/components/tasks/TaskCard.tsx
-- [ ] T063 [US3] Implement deleteTask API call and optimistic UI update in TaskCard component
+- [X] T060 [US3] Implement TaskService.delete_task() method in apps/api/src/services/task_service.py with hard delete and TASK_DELETED event emission
+- [X] T061 [US3] Implement DELETE /{user_id}/tasks/{task_id} endpoint in apps/api/src/routes/tasks.py returning 204 No Content
+- [X] T062 [US3] Add delete button with confirmation dialog to TaskCard component in apps/web/src/components/tasks/TaskCard.tsx
+- [X] T063 [US3] Implement deleteTask API call and optimistic UI update in TaskCard component
 
 ### Verification for User Story 3
 
-- [ ] T064 [US3] Run all US3 tests and verify they PASS (pytest apps/api/tests/ -k US3)
-- [ ] T065 [US3] Verify deleted task does not appear in task list and returns 404 when accessed
+- [X] T064 [US3] Run all US3 tests and verify they PASS (pytest apps/api/tests/ -k US3)
+- [X] T065 [US3] Verify deleted task does not appear in task list and returns 404 when accessed
 
 **Checkpoint**: At this point, full CRUD operations (Create, Read, Update, Delete) are complete with all tests passing
 
@@ -192,27 +192,27 @@
 ### Tests for User Story 4 (TDD - Write First, Ensure FAIL) ⚠️
 
 **Unit Tests**:
-- [ ] T066 [P] [US4] Write unit test for Task model priority validation in apps/api/tests/unit/test_task_model.py testing enum values (high/medium/low/null) (should FAIL)
-- [ ] T067 [P] [US4] Write unit test for TaskService priority filtering in apps/api/tests/unit/test_task_service.py testing WHERE priority = X (should FAIL)
-- [ ] T068 [P] [US4] Write unit test for PriorityBadge component in apps/web/tests/unit/PriorityBadge.test.tsx testing color-coded rendering (should FAIL)
+- [X] T066 [P] [US4] Write unit test for Task model priority validation in apps/api/tests/unit/test_task_model.py testing enum values (high/medium/low/null) (should FAIL)
+- [X] T067 [P] [US4] Write unit test for TaskService priority filtering in apps/api/tests/unit/test_task_service.py testing WHERE priority = X (should FAIL)
+- [X] T068 [P] [US4] Write unit test for PriorityBadge component in apps/web/tests/unit/PriorityBadge.test.tsx testing color-coded rendering (should FAIL)
 
 **Integration Tests**:
-- [ ] T069 [US4] Write integration test for priority filtering in apps/api/tests/integration/test_tasks_api.py testing GET ?priority=high returns only high-priority tasks (should FAIL)
+- [X] T069 [US4] Write integration test for priority filtering in apps/api/tests/integration/test_tasks_api.py testing GET ?priority=high returns only high-priority tasks (should FAIL)
 
 ### Implementation for User Story 4 (Make Tests PASS - GREEN)
 
-- [ ] T070 [US4] Add priority parameter to TaskService.create_task() and update_task() methods in apps/api/src/services/task_service.py with validation
-- [ ] T071 [US4] Add priority filtering to TaskService.get_tasks() query in apps/api/src/services/task_service.py (WHERE priority = $priority)
-- [ ] T072 [US4] Add priority query parameter to GET /{user_id}/tasks endpoint in apps/api/src/routes/tasks.py
-- [ ] T073 [US4] Add priority select dropdown to TaskForm component in apps/web/src/components/tasks/TaskForm.tsx (options: High, Medium, Low, None)
-- [ ] T074 [P] [US4] Create PriorityBadge component in apps/web/src/components/tasks/PriorityBadge.tsx with color-coded badges (red=high, yellow=medium, blue=low)
-- [ ] T075 [US4] Add PriorityBadge to TaskCard component in apps/web/src/components/tasks/TaskCard.tsx
-- [ ] T076 [US4] Create TaskFilters component in apps/web/src/components/tasks/TaskFilters.tsx with priority filter dropdown updating URL searchParams
+- [X] T070 [US4] Add priority parameter to TaskService.create_task() and update_task() methods in apps/api/src/services/task_service.py with validation
+- [X] T071 [US4] Add priority filtering to TaskService.get_tasks() query in apps/api/src/services/task_service.py (WHERE priority = $priority)
+- [X] T072 [US4] Add priority query parameter to GET /{user_id}/tasks endpoint in apps/api/src/routes/tasks.py
+- [X] T073 [US4] Add priority select dropdown to TaskForm component in apps/web/src/components/tasks/TaskForm.tsx (options: High, Medium, Low, None)
+- [X] T074 [P] [US4] Create PriorityBadge component in apps/web/src/components/tasks/PriorityBadge.tsx with color-coded badges (red=high, yellow=medium, blue=low)
+- [X] T075 [US4] Add PriorityBadge to TaskCard component in apps/web/src/components/tasks/TaskCard.tsx
+- [X] T076 [US4] Create TaskFilters component in apps/web/src/components/tasks/TaskFilters.tsx with priority filter dropdown updating URL searchParams
 
 ### Verification for User Story 4
 
-- [ ] T077 [US4] Run all US4 tests and verify they PASS (pytest apps/api/tests/ -k US4)
-- [ ] T078 [US4] Verify priority badge displays correct color and label for each priority level
+- [X] T077 [US4] Run all US4 tests and verify they PASS (pytest apps/api/tests/ -k US4)
+- [X] T078 [US4] Verify priority badge displays correct color and label for each priority level
 
 **Checkpoint**: At this point, users can prioritize tasks and filter by priority
 
@@ -227,31 +227,31 @@
 ### Tests for User Story 5 (TDD - Write First, Ensure FAIL) ⚠️
 
 **Unit Tests**:
-- [ ] T079 [P] [US5] Write unit test for due_date sorting in apps/api/tests/unit/test_task_service.py testing ORDER BY due_date ASC NULLS LAST (should FAIL)
-- [ ] T080 [P] [US5] Write unit test for formatDueDate utility in apps/web/tests/unit/date-utils.test.ts testing "Today", "Tomorrow", "Overdue" logic (should FAIL)
-- [ ] T081 [P] [US5] Write unit test for overdue detection in apps/web/tests/unit/date-utils.test.ts testing isPast && status != completed (should FAIL)
-- [ ] T082 [P] [US5] Write unit test for DueDateBadge component in apps/web/tests/unit/DueDateBadge.test.tsx testing overdue styling (should FAIL)
+- [X] T079 [P] [US5] Write unit test for due_date sorting in apps/api/tests/unit/test_task_service.py testing ORDER BY due_date ASC NULLS LAST (should FAIL)
+- [X] T080 [P] [US5] Write unit test for formatDueDate utility in apps/web/tests/unit/date-utils.test.ts testing "Today", "Tomorrow", "Overdue" logic (should FAIL)
+- [X] T081 [P] [US5] Write unit test for overdue detection in apps/web/tests/unit/date-utils.test.ts testing isPast && status != completed (should FAIL)
+- [X] T082 [P] [US5] Write unit test for DueDateBadge component in apps/web/tests/unit/DueDateBadge.test.tsx testing overdue styling (should FAIL)
 
 **Integration Tests**:
-- [ ] T083 [US5] Write integration test for due_date sorting in apps/api/tests/integration/test_tasks_api.py testing GET ?sort=due_date_asc (should FAIL)
+- [X] T083 [US5] Write integration test for due_date sorting in apps/api/tests/integration/test_tasks_api.py testing GET ?sort=due_date_asc (should FAIL)
 
 ### Implementation for User Story 5 (Make Tests PASS - GREEN)
 
-- [ ] T084 [US5] Add due_date parameter to TaskService.create_task() and update_task() methods in apps/api/src/services/task_service.py
-- [ ] T085 [US5] Add due_date sorting to TaskService.get_tasks() query in apps/api/src/services/task_service.py (ORDER BY due_date ASC NULLS LAST)
-- [ ] T086 [US5] Add sort query parameter to GET /{user_id}/tasks endpoint in apps/api/src/routes/tasks.py (created_desc, due_date_asc, due_date_desc, priority_asc)
-- [ ] T087 [P] [US5] Install and configure date-fns library in apps/web for date formatting
-- [ ] T088 [P] [US5] Create date utility functions in apps/web/src/lib/date-utils.ts (formatDueDate with "Today", "Tomorrow", "Overdue", "Due in X days" logic)
-- [ ] T089 [US5] Add due_date date picker input to TaskForm component in apps/web/src/components/tasks/TaskForm.tsx (type="datetime-local")
-- [ ] T090 [P] [US5] Create DueDateBadge component in apps/web/src/components/tasks/DueDateBadge.tsx with formatDueDate and overdue styling
-- [ ] T091 [US5] Add DueDateBadge to TaskCard component in apps/web/src/components/tasks/TaskCard.tsx
-- [ ] T092 [US5] Add sort dropdown to TaskFilters component in apps/web/src/components/tasks/TaskFilters.tsx (Created, Due Date, Priority options)
+- [X] T084 [US5] Add due_date parameter to TaskService.create_task() and update_task() methods in apps/api/src/services/task_service.py
+- [X] T085 [US5] Add due_date sorting to TaskService.get_tasks() query in apps/api/src/services/task_service.py (ORDER BY due_date ASC NULLS LAST)
+- [X] T086 [US5] Add sort query parameter to GET /{user_id}/tasks endpoint in apps/api/src/routes/tasks.py (created_desc, due_date_asc, due_date_desc, priority_asc)
+- [X] T087 [P] [US5] Install and configure date-fns library in apps/web for date formatting
+- [X] T088 [P] [US5] Create date utility functions in apps/web/src/lib/date-utils.ts (formatDueDate with "Today", "Tomorrow", "Overdue", "Due in X days" logic)
+- [X] T089 [US5] Add due_date date picker input to TaskForm component in apps/web/src/components/tasks/TaskForm.tsx (type="datetime-local")
+- [X] T090 [P] [US5] Create DueDateBadge component in apps/web/src/components/tasks/DueDateBadge.tsx with formatDueDate and overdue styling
+- [X] T091 [US5] Add DueDateBadge to TaskCard component in apps/web/src/components/tasks/TaskCard.tsx
+- [X] T092 [US5] Add sort dropdown to TaskFilters component in apps/web/src/components/tasks/TaskFilters.tsx (Created, Due Date, Priority options)
 
 ### Verification for User Story 5
 
-- [ ] T093 [US5] Run all US5 tests and verify they PASS (pytest apps/api/tests/ -k US5)
-- [ ] T094 [US5] Verify overdue tasks are visually highlighted with red text and warning icon
-- [ ] T095 [US5] Verify due dates display in human-readable format ("Today", "Tomorrow", "Due in 3 days", "Overdue")
+- [X] T093 [US5] Run all US5 tests and verify they PASS (pytest apps/api/tests/ -k US5)
+- [X] T094 [US5] Verify overdue tasks are visually highlighted with red text and warning icon
+- [X] T095 [US5] Verify due dates display in human-readable format ("Today", "Tomorrow", "Due in 3 days", "Overdue")
 
 **Checkpoint**: At this point, users can set due dates and see deadline awareness features
 
@@ -266,29 +266,29 @@
 ### Tests for User Story 6 (TDD - Write First, Ensure FAIL) ⚠️
 
 **Unit Tests**:
-- [ ] T096 [P] [US6] Write unit test for Task model tags validation in apps/api/tests/unit/test_task_model.py testing max 20 tags, trim whitespace (should FAIL)
-- [ ] T097 [P] [US6] Write unit test for TaskService tags filtering in apps/api/tests/unit/test_task_service.py testing PostgreSQL && operator (should FAIL)
-- [ ] T098 [P] [US6] Write unit test for tags autocomplete query in apps/api/tests/unit/test_task_service.py testing DISTINCT unnest(tags) (should FAIL)
+- [X] T096 [P] [US6] Write unit test for Task model tags validation in apps/api/tests/unit/test_task_model.py testing max 20 tags, trim whitespace (should FAIL)
+- [X] T097 [P] [US6] Write unit test for TaskService tags filtering in apps/api/tests/unit/test_task_service.py testing PostgreSQL && operator (should FAIL)
+- [X] T098 [P] [US6] Write unit test for tags autocomplete query in apps/api/tests/unit/test_task_service.py testing DISTINCT unnest(tags) (should FAIL)
 
 **Integration Tests**:
-- [ ] T099 [US6] Write integration test for tag filtering in apps/api/tests/integration/test_tasks_api.py testing GET ?tags=work,urgent matches ANY (should FAIL)
-- [ ] T100 [US6] Write integration test for tags autocomplete endpoint in apps/api/tests/integration/test_tasks_api.py testing GET /tasks/tags returns unique tags (should FAIL)
+- [X] T099 [US6] Write integration test for tag filtering in apps/api/tests/integration/test_tasks_api.py testing GET ?tags=work,urgent matches ANY (should FAIL)
+- [X] T100 [US6] Write integration test for tags autocomplete endpoint in apps/api/tests/integration/test_tasks_api.py testing GET /tasks/tags returns unique tags (should FAIL)
 
 ### Implementation for User Story 6 (Make Tests PASS - GREEN)
 
-- [ ] T101 [US6] Add tags parameter to TaskService.create_task() and update_task() methods in apps/api/src/services/task_service.py with validation (max 20 tags, trim whitespace)
-- [ ] T102 [US6] Add tags filtering to TaskService.get_tasks() query in apps/api/src/services/task_service.py using PostgreSQL array overlap operator (tags && $tags::TEXT[])
-- [ ] T103 [US6] Add tags query parameter to GET /{user_id}/tasks endpoint in apps/api/src/routes/tasks.py (comma-separated string converted to array)
-- [ ] T104 [US6] Create GET /{user_id}/tasks/tags endpoint in apps/api/src/routes/tasks.py returning unique tags for autocomplete (SELECT DISTINCT unnest(tags))
-- [ ] T105 [US6] Add tags input with autocomplete to TaskForm component in apps/web/src/components/tasks/TaskForm.tsx (comma-separated or multi-select)
-- [ ] T106 [US6] Add tags display to TaskCard component in apps/web/src/components/tasks/TaskCard.tsx as colored badges
-- [ ] T107 [US6] Add tag filter multi-select to TaskFilters component in apps/web/src/components/tasks/TaskFilters.tsx
+- [X] T101 [US6] Add tags parameter to TaskService.create_task() and update_task() methods in apps/api/src/services/task_service.py with validation (max 20 tags, trim whitespace)
+- [X] T102 [US6] Add tags filtering to TaskService.get_tasks() query in apps/api/src/services/task_service.py using PostgreSQL array overlap operator (tags && $tags::TEXT[])
+- [X] T103 [US6] Add tags query parameter to GET /{user_id}/tasks endpoint in apps/api/src/routes/tasks.py (comma-separated string converted to array)
+- [X] T104 [US6] Create GET /{user_id}/tasks/tags endpoint in apps/api/src/routes/tasks.py returning unique tags for autocomplete (SELECT DISTINCT unnest(tags))
+- [X] T105 [US6] Add tags input with autocomplete to TaskForm component in apps/web/src/components/tasks/TaskForm.tsx (comma-separated or multi-select)
+- [X] T106 [US6] Add tags display to TaskCard component in apps/web/src/components/tasks/TaskCard.tsx as colored badges
+- [X] T107 [US6] Add tag filter multi-select to TaskFilters component in apps/web/src/components/tasks/TaskFilters.tsx
 
 ### Verification for User Story 6
 
-- [ ] T108 [US6] Run all US6 tests and verify they PASS (pytest apps/api/tests/ -k US6)
-- [ ] T109 [US6] Verify autocomplete endpoint returns unique tags for user via GET /api/{user_id}/tasks/tags
-- [ ] T110 [US6] Verify user can add/remove tags from task via PATCH
+- [X] T108 [US6] Run all US6 tests and verify they PASS (pytest apps/api/tests/ -k US6)
+- [X] T109 [US6] Verify autocomplete endpoint returns unique tags for user via GET /api/{user_id}/tasks/tags
+- [X] T110 [US6] Verify user can add/remove tags from task via PATCH
 
 **Checkpoint**: At this point, users can organize tasks with tags and filter by context
 
@@ -303,26 +303,26 @@
 ### Tests for User Story 7 (TDD - Write First, Ensure FAIL) ⚠️
 
 **Unit Tests**:
-- [ ] T111 [P] [US7] Write unit test for search query in apps/api/tests/unit/test_task_service.py testing ILIKE with title OR description (should FAIL)
-- [ ] T112 [P] [US7] Write unit test for search special characters in apps/api/tests/unit/test_task_service.py testing proper escaping of quotes, backslashes (should FAIL)
+- [X] T111 [P] [US7] Write unit test for search query in apps/api/tests/unit/test_task_service.py testing ILIKE with title OR description (should FAIL)
+- [X] T112 [P] [US7] Write unit test for search special characters in apps/api/tests/unit/test_task_service.py testing proper escaping of quotes, backslashes (should FAIL)
 
 **Integration Tests**:
-- [ ] T113 [US7] Write integration test for search in apps/api/tests/integration/test_tasks_api.py testing GET ?search=proposal matches both title and description (should FAIL)
-- [ ] T114 [US7] Write integration test for case-insensitive search in apps/api/tests/integration/test_tasks_api.py testing uppercase/lowercase/mixed case (should FAIL)
+- [X] T113 [US7] Write integration test for search in apps/api/tests/integration/test_tasks_api.py testing GET ?search=proposal matches both title and description (should FAIL)
+- [X] T114 [US7] Write integration test for case-insensitive search in apps/api/tests/integration/test_tasks_api.py testing uppercase/lowercase/mixed case (should FAIL)
 
 ### Implementation for User Story 7 (Make Tests PASS - GREEN)
 
-- [ ] T115 [US7] Add search filtering to TaskService.get_tasks() query in apps/api/src/services/task_service.py using PostgreSQL ILIKE operator (title ILIKE '%search%' OR description ILIKE '%search%')
-- [ ] T116 [US7] Add search query parameter to GET /{user_id}/tasks endpoint in apps/api/src/routes/tasks.py
-- [ ] T117 [P] [US7] Create TaskSearch component in apps/web/src/components/tasks/TaskSearch.tsx with debounced search input updating URL searchParams
-- [ ] T118 [US7] Add TaskSearch component to tasks list page in apps/web/src/app/tasks/page.tsx
-- [ ] T119 [US7] Add "No tasks found" empty state to TaskList component when search returns zero results
+- [X] T115 [US7] Add search filtering to TaskService.get_tasks() query in apps/api/src/services/task_service.py using PostgreSQL ILIKE operator (title ILIKE '%search%' OR description ILIKE '%search%')
+- [X] T116 [US7] Add search query parameter to GET /{user_id}/tasks endpoint in apps/api/src/routes/tasks.py
+- [X] T117 [P] [US7] Create TaskSearch component in apps/web/src/components/tasks/TaskSearch.tsx with debounced search input updating URL searchParams
+- [X] T118 [US7] Add TaskSearch component to tasks list page in apps/web/src/app/tasks/page.tsx
+- [X] T119 [US7] Add "No tasks found" empty state to TaskList component when search returns zero results
 
 ### Verification for User Story 7
 
-- [ ] T120 [US7] Run all US7 tests and verify they PASS (pytest apps/api/tests/ -k US7)
-- [ ] T121 [US7] Verify clearing search shows all tasks again
-- [ ] T122 [US7] Verify search with special characters escapes properly
+- [X] T120 [US7] Run all US7 tests and verify they PASS (pytest apps/api/tests/ -k US7)
+- [X] T121 [US7] Verify clearing search shows all tasks again
+- [X] T122 [US7] Verify search with special characters escapes properly
 
 **Checkpoint**: At this point, users can search their task list
 
@@ -337,27 +337,27 @@
 ### Tests for User Story 8 (TDD - Write First, Ensure FAIL) ⚠️
 
 **Unit Tests**:
-- [ ] T123 [P] [US8] Write unit test for status filtering in apps/api/tests/unit/test_task_service.py testing WHERE status = X (should FAIL)
-- [ ] T124 [P] [US8] Write unit test for combined filters in apps/api/tests/unit/test_task_service.py testing status AND priority simultaneously (should FAIL)
+- [X] T123 [P] [US8] Write unit test for status filtering in apps/api/tests/unit/test_task_service.py testing WHERE status = X (should FAIL)
+- [X] T124 [P] [US8] Write unit test for combined filters in apps/api/tests/unit/test_task_service.py testing status AND priority simultaneously (should FAIL)
 
 **Integration Tests**:
-- [ ] T125 [US8] Write integration test for status filtering in apps/api/tests/integration/test_tasks_api.py testing GET ?status=pending (should FAIL)
-- [ ] T126 [US8] Write integration test for combined filters in apps/api/tests/integration/test_tasks_api.py testing GET ?status=pending&priority=high (should FAIL)
+- [X] T125 [US8] Write integration test for status filtering in apps/api/tests/integration/test_tasks_api.py testing GET ?status=pending (should FAIL)
+- [X] T126 [US8] Write integration test for combined filters in apps/api/tests/integration/test_tasks_api.py testing GET ?status=pending&priority=high (should FAIL)
 
 ### Implementation for User Story 8 (Make Tests PASS - GREEN)
 
-- [ ] T127 [US8] Add status filtering to TaskService.get_tasks() query in apps/api/src/services/task_service.py (WHERE status = $status)
-- [ ] T128 [US8] Add status query parameter to GET /{user_id}/tasks endpoint in apps/api/src/routes/tasks.py
-- [ ] T129 [US8] Add status filter dropdown to TaskFilters component in apps/web/src/components/tasks/TaskFilters.tsx (Pending, In Progress, Completed, All)
-- [ ] T130 [US8] Add "Clear All Filters" button to TaskFilters component in apps/web/src/components/tasks/TaskFilters.tsx
-- [ ] T131 [US8] Display active filters as removable chips in TaskFilters component
-- [ ] T132 [US8] Add completion timestamp display to TaskCard for completed tasks in apps/web/src/components/tasks/TaskCard.tsx
+- [X] T127 [US8] Add status filtering to TaskService.get_tasks() query in apps/api/src/services/task_service.py (WHERE status = $status)
+- [X] T128 [US8] Add status query parameter to GET /{user_id}/tasks endpoint in apps/api/src/routes/tasks.py
+- [X] T129 [US8] Add status filter dropdown to TaskFilters component in apps/web/src/components/tasks/TaskFilters.tsx (Pending, In Progress, Completed, All)
+- [X] T130 [US8] Add "Clear All Filters" button to TaskFilters component in apps/web/src/components/tasks/TaskFilters.tsx
+- [X] T131 [US8] Display active filters as removable chips in TaskFilters component
+- [X] T132 [US8] Add completion timestamp display to TaskCard for completed tasks in apps/web/src/components/tasks/TaskCard.tsx
 
 ### Verification for User Story 8
 
-- [ ] T133 [US8] Run all US8 tests and verify they PASS (pytest apps/api/tests/ -k US8)
-- [ ] T134 [US8] Verify user can clear all filters and see all tasks
-- [ ] T135 [US8] Verify completed tasks display completion timestamp
+- [X] T133 [US8] Run all US8 tests and verify they PASS (pytest apps/api/tests/ -k US8)
+- [X] T134 [US8] Verify user can clear all filters and see all tasks
+- [X] T135 [US8] Verify completed tasks display completion timestamp
 
 **Checkpoint**: At this point, users can filter tasks by multiple criteria simultaneously
 
@@ -372,24 +372,24 @@
 ### Tests for User Story 9 (TDD - Write First, Ensure FAIL) ⚠️
 
 **Unit Tests**:
-- [ ] T136 [P] [US9] Write unit test for priority sorting in apps/api/tests/unit/test_task_service.py testing CASE expression (high=1, medium=2, low=3, null=4) (should FAIL)
-- [ ] T137 [P] [US9] Write unit test for combined sort with filters in apps/api/tests/unit/test_task_service.py testing ?status=pending&sort=due_date_asc (should FAIL)
+- [X] T136 [P] [US9] Write unit test for priority sorting in apps/api/tests/unit/test_task_service.py testing CASE expression (high=1, medium=2, low=3, null=4) (should FAIL)
+- [X] T137 [P] [US9] Write unit test for combined sort with filters in apps/api/tests/unit/test_task_service.py testing ?status=pending&sort=due_date_asc (should FAIL)
 
 **Integration Tests**:
-- [ ] T138 [US9] Write integration test for priority sorting in apps/api/tests/integration/test_tasks_api.py testing GET ?sort=priority_asc returns high, medium, low, null order (should FAIL)
-- [ ] T139 [US9] Write integration test for created_at sorting in apps/api/tests/integration/test_tasks_api.py testing GET ?sort=created_desc returns newest first (should FAIL)
+- [X] T138 [US9] Write integration test for priority sorting in apps/api/tests/integration/test_tasks_api.py testing GET ?sort=priority_asc returns high, medium, low, null order (should FAIL)
+- [X] T139 [US9] Write integration test for created_at sorting in apps/api/tests/integration/test_tasks_api.py testing GET ?sort=created_desc returns newest first (should FAIL)
 
 ### Implementation for User Story 9 (Make Tests PASS - GREEN)
 
-- [ ] T140 [US9] Add priority sorting to TaskService.get_tasks() using PostgreSQL CASE expression in apps/api/src/services/task_service.py (high=1, medium=2, low=3, null=4)
-- [ ] T141 [US9] Update sort query parameter to support all sort options in GET /{user_id}/tasks endpoint (created_desc, created_asc, due_date_asc, due_date_desc, priority_asc, priority_desc)
-- [ ] T142 [US9] Verify sort dropdown in TaskFilters component includes all sort options
-- [ ] T143 [US9] Add sort indicator to task list showing current sort order in apps/web/src/app/tasks/page.tsx
+- [X] T140 [US9] Add priority sorting to TaskService.get_tasks() using PostgreSQL CASE expression in apps/api/src/services/task_service.py (high=1, medium=2, low=3, null=4)
+- [X] T141 [US9] Update sort query parameter to support all sort options in GET /{user_id}/tasks endpoint (created_desc, created_asc, due_date_asc, due_date_desc, priority_asc, priority_desc)
+- [X] T142 [US9] Verify sort dropdown in TaskFilters component includes all sort options
+- [X] T143 [US9] Add sort indicator to task list showing current sort order in apps/web/src/app/tasks/page.tsx
 
 ### Verification for User Story 9
 
-- [ ] T144 [US9] Run all US9 tests and verify they PASS (pytest apps/api/tests/ -k US9)
-- [ ] T145 [US9] Verify combining sort with filters works correctly (e.g., ?status=pending&sort=due_date_asc)
+- [X] T144 [US9] Run all US9 tests and verify they PASS (pytest apps/api/tests/ -k US9)
+- [X] T145 [US9] Verify combining sort with filters works correctly (e.g., ?status=pending&sort=due_date_asc)
 
 **Checkpoint**: At this point, all 9 user stories are complete with comprehensive test coverage - full task management system delivered
 

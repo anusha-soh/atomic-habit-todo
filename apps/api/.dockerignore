@@ -1,0 +1,17 @@
+__pycache__
+*.pyc
+*.pyo
+.env
+.env.test
+.pytest_cache
+.coverage
+coverage_html
+coverage.json
+tests/
+pytest.ini
+*.egg-info
+.git
+.gitignore
+logs/
+*.md
+!HF_README.md

@@ -64,10 +64,12 @@ class TestTaskServiceCreate:
         assert task.completed is False  # Default completed flag
         assert task.created_at is not None
         assert task.updated_at is not None
-        task_service.event_emitter.emit.assert_called_once_with(
-            "TASK_CREATED",
-            pytest.helpers.match_event_payload("TASK_CREATED"),
-        )
+        # Verify event was emitted with correct event type
+        task_service.event_emitter.emit.assert_called_once()
+        call_args = task_service.event_emitter.emit.call_args
+        assert call_args[0][0] == "TASK_CREATED", "Should emit TASK_CREATED event"
+        assert call_args[0][1] == user_id, "Should pass user_id as second argument"
+        assert "task_id" in call_args[0][2], "Third argument (payload) should contain task_id"
 
     def test_create_task_emits_event(self, session: Session, mock_event_emitter, user_id: UUID):
         """
@@ -84,7 +86,8 @@ class TestTaskServiceCreate:
         mock_event_emitter.emit.assert_called_once()
         call_args = mock_event_emitter.emit.call_args
         assert call_args[0][0] == "TASK_CREATED", "Should emit TASK_CREATED event"
-        assert "task_id" in call_args[0][1]["payload"]
+        assert call_args[0][1] == user_id
+        assert "task_id" in call_args[0][2]
 
     def test_create_task_trims_whitespace_from_title(self, session: Session, mock_event_emitter, user_id: UUID):
         """
@@ -348,7 +351,8 @@ class TestTaskServiceUpdate:
         mock_event_emitter.emit.assert_called_once()
         call_args = mock_event_emitter.emit.call_args
         assert call_args[0][0] == "TASK_UPDATED"
-        assert "task_id" in call_args[0][1]["payload"]
+        assert call_args[0][1] == user_id
+        assert "task_id" in call_args[0][2]
 
     def test_update_task_not_found_raises_error(self, task_service: TaskService, user_id: UUID):
         """
@@ -420,7 +424,7 @@ class TestTaskServiceMarkComplete:
 
     def test_mark_complete_emits_event(self, session: Session, mock_event_emitter, user_id: UUID, create_task):
         """
-        T041: Test that mark_complete emits TASK_UPDATED event with completed flag
+        T041: Test that mark_complete emits TASK_COMPLETED event (FR-020)
         """
         task = create_task(status="pending")
         service = TaskService(session, mock_event_emitter)
@@ -429,9 +433,11 @@ class TestTaskServiceMarkComplete:
 
         mock_event_emitter.emit.assert_called_once()
         call_args = mock_event_emitter.emit.call_args
-        assert call_args[0][0] == "TASK_UPDATED"
-        payload = call_args[0][1]["payload"]
-        assert payload.get("completed") is True or payload.get("status") == "completed"
+        assert call_args[0][0] == "TASK_COMPLETED"
+        assert call_args[0][1] == user_id
+        payload = call_args[0][2]
+        assert payload.get("completed") is True
+        assert payload.get("status") == "completed"
 
     def test_mark_complete_not_found_raises_error(self, task_service: TaskService, user_id: UUID):
         """
@@ -552,7 +558,8 @@ class TestTaskServiceDelete:
         mock_event_emitter.emit.assert_called_once()
         call_args = mock_event_emitter.emit.call_args
         assert call_args[0][0] == "TASK_DELETED"
-        assert "task_id" in call_args[0][1]["payload"]
+        assert call_args[0][1] == user_id
+        assert "task_id" in call_args[0][2]
 
     def test_delete_task_not_found_raises_error(self, task_service: TaskService, user_id: UUID):
         """

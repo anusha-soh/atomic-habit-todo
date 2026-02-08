@@ -60,11 +60,18 @@ def session_fixture(engine):
         yield session
         # Clean up all test data after each test
         session.rollback()
-        # Truncate tables to ensure clean state (only for PostgreSQL)
+        # Delete data from tables to ensure clean state
         if "postgresql" in str(engine.url):
-            session.execute(text("TRUNCATE TABLE tasks CASCADE"))
-            session.execute(text("TRUNCATE TABLE users CASCADE"))
+            session.execute(text("DELETE FROM tasks"))
+            session.execute(text("DELETE FROM users"))
             session.commit()
+
+
+@pytest.fixture(autouse=True, scope="function")
+def ensure_test_user_exists(session: Session, test_user):
+    """Ensure test user exists before every test"""
+    # session.refresh(test_user)
+    pass
 
 
 # ============================================================================
@@ -79,10 +86,10 @@ def user_id_fixture():
 
 @pytest.fixture(name="test_user")
 def test_user_fixture(session: Session, user_id: UUID):
-    """Create a test user in the database"""
+    """Create a test user in the database with a unique email per test"""
     user = User(
         id=user_id,
-        email="test@example.com",
+        email=f"test_{uuid4().hex[:8]}@example.com",
         password_hash="$2b$12$hashed_password",
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc),
@@ -95,10 +102,10 @@ def test_user_fixture(session: Session, user_id: UUID):
 
 @pytest.fixture(name="another_user")
 def another_user_fixture(session: Session):
-    """Create another test user for authorization tests"""
+    """Create another test user for authorization tests with a unique email"""
     user = User(
         id=uuid4(),
-        email="another@example.com",
+        email=f"another_{uuid4().hex[:8]}@example.com",
         password_hash="$2b$12$hashed_password",
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc),

@@ -7,6 +7,7 @@ from sqlalchemy import ARRAY, String, Text
 from uuid import UUID, uuid4
 from datetime import datetime, timezone
 from typing import Optional
+from pydantic import field_validator
 
 
 class Task(SQLModel, table=True):
@@ -44,6 +45,30 @@ class Task(SQLModel, table=True):
     updated_at: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc), nullable=False
     )
+
+    @field_validator("title")
+    @classmethod
+    def title_not_empty(cls, v: str) -> str:
+        if not v or not v.strip():
+            raise ValueError("Title cannot be empty or only whitespace")
+        v = v.strip()
+        if len(v) > 500:
+            raise ValueError("Title must be 500 characters or less")
+        return v
+
+    @field_validator("description", mode="before")
+    @classmethod
+    def description_max_length(cls, v):
+        if v is not None and len(v) > 5000:
+            raise ValueError("Description must be 5000 characters or less")
+        return v
+
+    @field_validator("tags", mode="before")
+    @classmethod
+    def trim_tags(cls, v):
+        if isinstance(v, list):
+            return [tag.strip() for tag in v if tag.strip()]
+        return v
 
     class Config:
         """Pydantic configuration"""
