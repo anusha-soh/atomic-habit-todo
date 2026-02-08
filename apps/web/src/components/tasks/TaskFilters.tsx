@@ -8,26 +8,21 @@
 
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
+import { TaskFilters as TaskFiltersType, TaskStatus, TaskPriority, TaskSortOption } from '@/types/task';
 
 interface TaskFiltersProps {
-  currentFilters?: {
-    status?: string;
-    priority?: string;
-    tags?: string;
-    search?: string;
-    sort?: string;
-  };
+  currentFilters?: TaskFiltersType;
 }
 
 export function TaskFilters({ currentFilters }: TaskFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [status, setStatus] = useState(currentFilters?.status || '');
-  const [priority, setPriority] = useState(currentFilters?.priority || '');
+  const [status, setStatus] = useState<TaskStatus | ''>(currentFilters?.status || '');
+  const [priority, setPriority] = useState<TaskPriority | ''>(currentFilters?.priority || '');
   const [tags, setTags] = useState(currentFilters?.tags || '');
   const [search, setSearch] = useState(currentFilters?.search || '');
-  const [sort, setSort] = useState(currentFilters?.sort || 'created_desc');
+  const [sort, setSort] = useState<TaskSortOption>(currentFilters?.sort || 'created_desc');
 
   // Update URL when filters change
   useEffect(() => {
@@ -62,7 +57,7 @@ export function TaskFilters({ currentFilters }: TaskFiltersProps) {
           <select
             id="status-filter"
             value={status}
-            onChange={(e) => setStatus(e.target.value)}
+            onChange={(e) => setStatus(e.target.value as TaskStatus | '')}
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
             <option value="">All Statuses</option>
@@ -79,8 +74,8 @@ export function TaskFilters({ currentFilters }: TaskFiltersProps) {
           </label>
           <select
             id="priority-filter"
-            value={priority}
-            onChange={(e) => setPriority(e.target.value)}
+            value={priority || ''}
+            onChange={(e) => setPriority(e.target.value as TaskPriority | '')}
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
             <option value="">All Priorities</option>
@@ -128,7 +123,7 @@ export function TaskFilters({ currentFilters }: TaskFiltersProps) {
           <select
             id="sort-filter"
             value={sort}
-            onChange={(e) => setSort(e.target.value)}
+            onChange={(e) => setSort(e.target.value as TaskSortOption)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
             <option value="created_desc">Created (Newest First)</option>

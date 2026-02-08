@@ -94,23 +94,19 @@ class TestTaskModelTags:
         session.commit()
 
     def test_task_tags_trim_whitespace(self, session: Session, user_id):
-        """T096: Test Task model trims whitespace from tag values"""
+        """T096: Test TaskService trims whitespace from tag values"""
+        from src.services.task_service import TaskService
+        from unittest.mock import Mock
+        
         # Create tags with leading/trailing whitespace
         tags_with_spaces = ["  work  ", "  urgent  ", "  client  "]
-
-        task = Task(
-            id=uuid4(),
+        
+        service = TaskService(session, Mock())
+        task = service.create_task(
             user_id=user_id,
             title="Test task",
-            status="pending",
-            tags=tags_with_spaces,
-            completed=False,
-            created_at=datetime.now(timezone.utc),
-            updated_at=datetime.now(timezone.utc),
+            tags=tags_with_spaces
         )
-        session.add(task)
-        session.commit()
-        session.refresh(task)
 
         # Check that tags are trimmed
         expected_tags = ["work", "urgent", "client"]

@@ -81,6 +81,11 @@ class TaskService:
             raise ValueError("Title cannot be empty or only whitespace")
         title = title.strip()
 
+        # Trim tags
+        trimmed_tags = []
+        if tags:
+            trimmed_tags = [tag.strip() for tag in tags if tag.strip()]
+
         # Create task
         task = Task(
             user_id=user_id,
@@ -88,7 +93,7 @@ class TaskService:
             description=description,
             status=status,
             priority=priority,
-            tags=tags or [],
+            tags=trimmed_tags,
             due_date=due_date,
         )
         
@@ -296,6 +301,10 @@ class TaskService:
                         raise ValueError(error_msg)
 
             setattr(task, field, value)
+
+        # Handle tag trimming if tags are being updated
+        if "tags" in updates and updates["tags"] is not None:
+            task.tags = [tag.strip() for tag in updates["tags"] if tag.strip()]
 
         # Update timestamp
         task.updated_at = datetime.now(timezone.utc)

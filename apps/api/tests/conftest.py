@@ -23,7 +23,7 @@ load_dotenv()
 # Database Fixtures
 # ============================================================================
 
-@pytest.fixture(name="engine")
+@pytest.fixture(name="engine", scope="session")
 def engine_fixture():
     """
     Create database engine for testing.

@@ -21,7 +21,7 @@ export default function DashboardPage() {
     // Fetch current user on mount
     const fetchUser = async () => {
       try {
-        const response = await authAPI.me()
+        const response = await authAPI.me() as { user: User }
         setUser(response.user)
       } catch (err) {
         if (err instanceof APIError && err.status === 401) {

@@ -563,9 +563,10 @@ class TestTaskDeleteWorkflow:
         deleted_events = [e for e in emitted_events if e[0] == "TASK_DELETED"]
         assert len(deleted_events) == 1, f"Expected 1 TASK_DELETED event, got {len(deleted_events)}"
 
-        event_type, payload = deleted_events[0]
+        event_type, event_user_id, payload = deleted_events[0]
         assert event_type == "TASK_DELETED"
-        assert payload["payload"]["task_id"] == str(task.id)
+        assert event_user_id == user_id
+        assert payload["task_id"] == str(task.id)
 
     def test_get_deleted_task_returns_404(
         self, session: Session, event_emitter: EventEmitter, user_id: UUID
@@ -871,11 +872,11 @@ class TestTaskSearch:
         service.create_task(user_id=user_id, title="Budget review", description="Analyze quarterly budget")
         service.create_task(user_id=user_id, title="Status update", description="Prepare weekly status")
 
-        # Search for "analysis"
-        results, total = service.get_tasks(user_id=user_id, search="analysis", page=1, limit=50)
+        # Search for "analyze"
+        results, total = service.get_tasks(user_id=user_id, search="analyze", page=1, limit=50)
         assert total == 1
         assert len(results) == 1
-        assert "analysis" in results[0].description.lower()
+        assert "analyze" in results[0].description.lower()
 
     def test_get_tasks_search_title_and_description(
         self, session: Session, event_emitter: EventEmitter, user_id: UUID

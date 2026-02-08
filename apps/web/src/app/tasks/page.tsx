@@ -9,7 +9,7 @@ import { cookies } from 'next/headers';
 import { TaskCard } from '@/components/tasks/TaskCard';
 import { TaskFilters } from '@/components/tasks/TaskFilters';
 import { getTasks } from '@/lib/tasks-api';
-import { Task } from '@/types/task';
+import { Task, TaskStatus, TaskPriority, TaskFilters as TaskFiltersType, TaskSortOption } from '@/types/task';
 
 interface TasksPageProps {
   searchParams: Promise<{ [key: string]: string | undefined }>;
@@ -27,12 +27,12 @@ export default async function TasksPage({ searchParams }: TasksPageProps) {
   const userId = sessionCookie?.value || 'test-user-id';
 
   // Extract filter params
-  const filters = {
-    status: params.status,
-    priority: params.priority,
+  const filters: TaskFiltersType = {
+    status: params.status as TaskStatus | undefined,
+    priority: params.priority as TaskPriority | undefined,
     tags: params.tags,
     search: params.search,
-    sort: params.sort || 'created_desc',
+    sort: (params.sort || 'created_desc') as TaskSortOption,
     page: parseInt(params.page || '1'),
     limit: parseInt(params.limit || '50'),
   };
@@ -49,7 +49,9 @@ export default async function TasksPage({ searchParams }: TasksPageProps) {
     error = e instanceof Error ? e.message : 'Failed to load tasks';
   }
 
-  const totalPages = Math.ceil(total / filters.limit);
+  const limit = filters.limit || 50;
+  const page = filters.page || 1;
+  const totalPages = Math.ceil(total / limit);
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
@@ -97,21 +99,21 @@ export default async function TasksPage({ searchParams }: TasksPageProps) {
       {totalPages > 1 && (
         <div className="flex items-center justify-between mt-8 pt-4 border-t border-gray-200">
           <p className="text-sm text-gray-500">
-            Showing {(filters.page - 1) * filters.limit + 1} to{' '}
-            {Math.min(filters.page * filters.limit, total)} of {total} tasks
+            Showing {(page - 1) * limit + 1} to{' '}
+            {Math.min(page * limit, total)} of {total} tasks
           </p>
           <div className="flex space-x-2">
-            {filters.page > 1 && (
+            {page > 1 && (
               <Link
-                href={`/tasks?page=${filters.page - 1}`}
+                href={`/tasks?page=${page - 1}`}
                 className="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50"
               >
                 Previous
               </Link>
             )}
-            {filters.page < totalPages && (
+            {page < totalPages && (
               <Link
-                href={`/tasks?page=${filters.page + 1}`}
+                href={`/tasks?page=${page + 1}`}
                 className="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50"
               >
                 Next
