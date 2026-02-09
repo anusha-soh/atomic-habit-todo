@@ -484,7 +484,7 @@ components:
             $ref: '#/components/schemas/Error'
           example:
             error: "Forbidden"
-            message: "You don't have permission to access this task"
+            message: "Access denied: You are logged in as {current_user_id} but trying to access tasks for {user_id}"
 
     NotFound:
       description: Resource not found
@@ -494,7 +494,7 @@ components:
             $ref: '#/components/schemas/Error'
           example:
             error: "NotFound"
-            message: "Task not found"
+            message: "Task with ID {task_id} not found for user {user_id}"
 
 security:
   - cookieAuth: []

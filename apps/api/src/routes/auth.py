@@ -255,7 +255,7 @@ async def get_current_user(
 
         # Get user from database
         auth_service = AuthService(db)
-        user = auth_service.get_user_by_id(UUID(user_id))
+        user = auth_service.get_user_by_id(user_id)
 
         if not user:
             raise HTTPException(

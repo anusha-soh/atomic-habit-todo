@@ -8,6 +8,8 @@ import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { TaskCard } from '@/components/tasks/TaskCard';
 import { TaskFilters } from '@/components/tasks/TaskFilters';
+import { EmptyState } from '@/components/tasks/EmptyState';
+import { Pagination } from '@/components/tasks/Pagination';
 import { getTasks } from '@/lib/tasks-api';
 import { Task, TaskStatus, TaskPriority, TaskFilters as TaskFiltersType, TaskSortOption } from '@/types/task';
 
@@ -37,6 +39,8 @@ export default async function TasksPage({ searchParams }: TasksPageProps) {
     limit: parseInt(params.limit || '50'),
   };
 
+  const hasFilters = !!(filters.status || filters.priority || filters.tags || filters.search);
+
   let tasks: Task[] = [];
   let total = 0;
   let error: string | null = null;
@@ -51,7 +55,6 @@ export default async function TasksPage({ searchParams }: TasksPageProps) {
 
   const limit = filters.limit || 50;
   const page = filters.page || 1;
-  const totalPages = Math.ceil(total / limit);
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
@@ -78,15 +81,7 @@ export default async function TasksPage({ searchParams }: TasksPageProps) {
 
       {/* Task list */}
       {tasks.length === 0 && !error ? (
-        <div className="text-center py-12 bg-gray-50 rounded-lg">
-          <p className="text-gray-500 mb-4">No tasks found</p>
-          <Link
-            href="/tasks/new"
-            className="text-blue-600 hover:text-blue-800 underline"
-          >
-            Create your first task
-          </Link>
-        </div>
+        <EmptyState hasFilters={hasFilters} />
       ) : (
         <div className="space-y-4">
           {tasks.map((task) => (
@@ -96,32 +91,7 @@ export default async function TasksPage({ searchParams }: TasksPageProps) {
       )}
 
       {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between mt-8 pt-4 border-t border-gray-200">
-          <p className="text-sm text-gray-500">
-            Showing {(page - 1) * limit + 1} to{' '}
-            {Math.min(page * limit, total)} of {total} tasks
-          </p>
-          <div className="flex space-x-2">
-            {page > 1 && (
-              <Link
-                href={`/tasks?page=${page - 1}`}
-                className="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50"
-              >
-                Previous
-              </Link>
-            )}
-            {page < totalPages && (
-              <Link
-                href={`/tasks?page=${page + 1}`}
-                className="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50"
-              >
-                Next
-              </Link>
-            )}
-          </div>
-        </div>
-      )}
+      <Pagination total={total} limit={limit} currentPage={page} />
     </div>
   );
 }

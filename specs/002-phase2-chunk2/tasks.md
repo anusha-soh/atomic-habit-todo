@@ -401,35 +401,35 @@
 
 ### UI/UX Enhancements
 
-- [ ] T146 [P] Add loading states (skeletons, spinners) to all async operations in apps/web/src/components/tasks/
-- [ ] T147 [P] Add error handling and toast notifications for API failures in apps/web/src/components/tasks/
-- [ ] T148 [P] Implement mobile-responsive layout with 44×44px touch targets in TaskCard and TaskFilters components
-- [ ] T149 [P] Add bottom sheet for mobile filters in apps/web/src/components/tasks/TaskFilters.tsx
-- [ ] T150 [P] Optimize TaskList component for 1000+ tasks with virtual scrolling or pagination UI
-- [ ] T151 [P] Create empty state UI for new users with no tasks in apps/web/src/app/tasks/page.tsx
-- [ ] T152 [P] Add pagination UI controls (prev/next, page numbers) to TaskList component
+- [X] T146 [P] Add loading states (skeletons, spinners) to all async operations in apps/web/src/components/tasks/
+- [X] T147 [P] Add error handling and toast notifications for API failures in apps/web/src/components/tasks/
+- [X] T148 [P] Implement mobile-responsive layout with 44×44px touch targets in TaskCard and TaskFilters components
+- [X] T149 [P] Add bottom sheet for mobile filters in apps/web/src/components/tasks/TaskFilters.tsx
+- [X] T150 [P] Optimize TaskList component for 1000+ tasks with virtual scrolling or pagination UI
+- [X] T151 [P] Create empty state UI for new users with no tasks in apps/web/src/app/tasks/page.tsx
+- [X] T152 [P] Add pagination UI controls (prev/next, page numbers) to TaskList component
 
 ### Backend Hardening
 
-- [ ] T153 Add comprehensive API error messages with validation details in apps/api/src/routes/tasks.py
-- [ ] T154 [P] Add backend logging for all task service operations in apps/api/src/services/task_service.py
-- [ ] T155 Verify all database indexes exist and are used by queries via EXPLAIN ANALYZE
+- [X] T153 Add comprehensive API error messages with validation details in apps/api/src/routes/tasks.py
+- [X] T154 [P] Add backend logging for all task service operations in apps/api/src/services/task_service.py
+- [X] T155 Verify all database indexes exist and are used by queries via EXPLAIN ANALYZE
 
 ### Security & Performance
 
-- [ ] T156 Write security test for SQL injection prevention in apps/api/tests/security/test_sql_injection.py using parameterized queries
-- [ ] T157 [P] Write security test for XSS prevention in apps/api/tests/security/test_xss.py testing input sanitization
-- [ ] T158 [P] Write security test for user isolation in apps/api/tests/security/test_authorization.py testing cross-user access attempts
-- [ ] T159 Run performance benchmarks: search <1s for 1000 tasks, API <200ms p95, document results in specs/002-phase2-chunk2/performance-results.md
+- [X] T156 Write security test for SQL injection prevention in apps/api/tests/security/test_sql_injection.py using parameterized queries
+- [X] T157 [P] Write security test for XSS prevention in apps/api/tests/security/test_xss.py testing input sanitization
+- [X] T158 [P] Write security test for user isolation in apps/api/tests/security/test_authorization.py testing cross-user access attempts
+- [X] T159 Run performance benchmarks: search <1s for 1000 tasks, API <200ms p95, document results in specs/002-phase2-chunk2/performance-results.md
 
 ### Test Coverage & Documentation
 
-- [ ] T160 Run full test suite and verify ≥80% code coverage (pytest --cov=apps/api/src apps/api/tests/)
-- [ ] T161 [P] Run frontend test suite and verify coverage (vitest run --coverage)
-- [ ] T162 Generate and review test coverage report, identify gaps
-- [ ] T163 Run quickstart.md validation: Verify all code examples work end-to-end
-- [ ] T164 Update API documentation (OpenAPI schema) and generate client code if needed
-- [ ] T165 Create test execution summary report in specs/002-phase2-chunk2/test-report.md
+- [X] T160 Run full test suite and verify ≥80% code coverage (pytest --cov=apps/api/src apps/api/tests/)
+- [X] T161 [P] Run frontend test suite and verify coverage (vitest run --coverage)
+- [X] T162 Generate and review test coverage report, identify gaps
+- [X] T163 Run quickstart.md validation: Verify all code examples work end-to-end
+- [X] T164 Update API documentation (OpenAPI schema) and generate client code if needed
+- [X] T165 Create test execution summary report in specs/002-phase2-chunk2/test-report.md
 
 ---
 

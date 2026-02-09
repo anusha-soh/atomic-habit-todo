@@ -10,6 +10,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createTask, updateTask } from '@/lib/tasks-api';
 import { validateTitle, validateDescription, Task, TaskStatus, TaskPriority } from '@/types/task';
+import { useToast } from '@/lib/toast-context';
 
 interface TaskFormProps {
   userId: string;
@@ -27,6 +28,7 @@ interface TaskFormProps {
 
 export function TaskForm({ userId, taskId, initialData, onSuccess }: TaskFormProps) {
   const router = useRouter();
+  const { showToast } = useToast();
   const isEditMode = !!taskId;
 
   const [title, setTitle] = useState(initialData?.title || '');
@@ -36,7 +38,7 @@ export function TaskForm({ userId, taskId, initialData, onSuccess }: TaskFormPro
   const [dueDate, setDueDate] = useState<string>(initialData?.dueDate || '');
   const [tags, setTags] = useState<string>(initialData?.tags?.join(', ') || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errors, setErrors] = useState<{ title?: string; description?: string; form?: string }>({});
+  const [errors, setErrors] = useState<{ title?: string; description?: string }>({});
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,6 +75,7 @@ export function TaskForm({ userId, taskId, initialData, onSuccess }: TaskFormPro
           due_date: dueDate || undefined,
           tags: processedTags,
         });
+        showToast('Task updated successfully', 'success');
       } else {
         // Create new task
         await createTask(userId, {
@@ -83,6 +86,7 @@ export function TaskForm({ userId, taskId, initialData, onSuccess }: TaskFormPro
           due_date: dueDate || undefined,
           tags: processedTags,
         });
+        showToast('Task created successfully', 'success');
       }
 
       if (onSuccess) {
@@ -92,9 +96,7 @@ export function TaskForm({ userId, taskId, initialData, onSuccess }: TaskFormPro
         router.refresh();
       }
     } catch (error) {
-      setErrors({
-        form: error instanceof Error ? error.message : `Failed to ${isEditMode ? 'update' : 'create'} task`,
-      });
+      showToast(error instanceof Error ? error.message : `Failed to ${isEditMode ? 'update' : 'create'} task`, 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -111,13 +113,6 @@ export function TaskForm({ userId, taskId, initialData, onSuccess }: TaskFormPro
               <span>{isEditMode ? 'Updating task...' : 'Creating task...'}</span>
             </div>
           </div>
-        </div>
-      )}
-
-      {/* Form error */}
-      {errors.form && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-          {errors.form}
         </div>
       )}
 

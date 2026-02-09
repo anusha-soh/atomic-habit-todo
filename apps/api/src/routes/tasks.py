@@ -40,17 +40,17 @@ class TaskUpdate(BaseModel):
 
 class TaskResponse(BaseModel):
     """Task response"""
-    id: str
-    user_id: str
+    id: UUID
+    user_id: UUID
     title: str
     description: Optional[str]
     status: str
     priority: Optional[str]
     tags: list[str]
-    due_date: Optional[str]
+    due_date: Optional[datetime]
     completed: bool
-    created_at: str
-    updated_at: str
+    created_at: datetime
+    updated_at: datetime
 
 
 class TaskListResponse(BaseModel):
@@ -222,11 +222,11 @@ async def get_task(
     """
     # Authorization
     if current_user_id != user_id:
-        raise HTTPException(status_code=403, detail="Forbidden")
+        raise HTTPException(status_code=403, detail=f"Access denied: You are logged in as {current_user_id} but trying to access tasks for {user_id}")
 
     task = task_service.get_task(user_id=user_id, task_id=task_id)
     if not task:
-        raise HTTPException(status_code=404, detail="Task not found")
+        raise HTTPException(status_code=404, detail=f"Task with ID {task_id} not found for user {user_id}")
 
     return task
 

@@ -6,7 +6,7 @@
  */
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Task } from '@/types/task';
@@ -14,6 +14,7 @@ import { completeTask, deleteTask } from '@/lib/tasks-api';
 import { formatDistanceToNow } from 'date-fns';
 import { PriorityBadge } from './PriorityBadge';
 import { DueDateBadge } from './DueDateBadge';
+import { useToast } from '@/lib/toast-context';
 
 interface TaskCardProps {
   task: Task;
@@ -22,21 +23,28 @@ interface TaskCardProps {
 
 export function TaskCard({ task, userId }: TaskCardProps) {
   const router = useRouter();
+  const { showToast } = useToast();
   const [isCompleting, setIsCompleting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
 
-  const createdAt = formatDistanceToNow(new Date(task.created_at), { addSuffix: true });
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const createdAt = mounted 
+    ? formatDistanceToNow(new Date(task.created_at), { addSuffix: true })
+    : '';
 
   const handleMarkComplete = async () => {
     setIsCompleting(true);
-    setError(null);
 
     try {
       await completeTask(userId, task.id);
+      showToast('Task marked as completed', 'success');
       router.refresh(); // Refresh server component data
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to complete task');
+      showToast(e instanceof Error ? e.message : 'Failed to complete task', 'error');
     } finally {
       setIsCompleting(false);
     }
@@ -48,13 +56,13 @@ export function TaskCard({ task, userId }: TaskCardProps) {
     }
 
     setIsDeleting(true);
-    setError(null);
 
     try {
       await deleteTask(userId, task.id);
+      showToast('Task deleted successfully', 'success');
       router.refresh(); // Refresh server component data
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to delete task');
+      showToast(e instanceof Error ? e.message : 'Failed to delete task', 'error');
     } finally {
       setIsDeleting(false);
     }
@@ -136,11 +144,6 @@ export function TaskCard({ task, userId }: TaskCardProps) {
               </span>
             ))}
           </div>
-        )}
-
-        {/* Error message */}
-        {error && (
-          <p className="text-sm text-red-600">{error}</p>
         )}
 
         {/* Metadata footer */}

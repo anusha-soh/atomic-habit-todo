@@ -1,0 +1,11 @@
+node_modules/
+dist/
+build/
+.next/
+out/
+coverage/
+*.min.js
+*.py
+*.log
+.env*
+C:\my-drive\spec-kit\hackathon_2_phases\phase-2-webapp\apps\api
