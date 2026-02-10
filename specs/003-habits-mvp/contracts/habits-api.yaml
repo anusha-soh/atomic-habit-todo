@@ -1,0 +1,597 @@
+openapi: 3.1.0
+info:
+  title: Habits MVP API
+  description: |
+    API for managing habits with Atomic Habits Four Laws integration.
+    Part of Phase 2 Chunk 3 - Habits MVP feature.
+  version: 1.0.0
+  contact:
+    name: Evolution of Todo Support
+    email: support@example.com
+
+servers:
+  - url: https://api.example.com
+    description: Production server
+  - url: http://localhost:8000
+    description: Development server
+
+tags:
+  - name: habits
+    description: Habit CRUD operations
+
+paths:
+  /api/{user_id}/habits:
+    parameters:
+      - $ref: '#/components/parameters/UserId'
+
+    get:
+      summary: List user's habits
+      description: Retrieve all habits for the authenticated user with optional filtering
+      operationId: listHabits
+      tags:
+        - habits
+      parameters:
+        - name: status
+          in: query
+          description: Filter by habit status
+          required: false
+          schema:
+            type: string
+            enum: [active, archived]
+            default: active
+        - name: category
+          in: query
+          description: Filter by category
+          required: false
+          schema:
+            type: string
+            enum:
+              - Health & Fitness
+              - Productivity
+              - Mindfulness
+              - Learning
+              - Social
+              - Finance
+              - Creative
+              - Other
+        - name: page
+          in: query
+          description: Page number for pagination
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          description: Number of items per page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HabitListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+    post:
+      summary: Create a new habit
+      description: Create a new habit with identity-driven approach
+      operationId: createHabit
+      tags:
+        - habits
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HabitCreate'
+            examples:
+              dailyHabit:
+                summary: Daily reading habit
+                value:
+                  identity_statement: I am a person who reads daily
+                  full_description: Read at least one chapter of a book
+                  two_minute_version: Read one page
+                  habit_stacking_cue: After I pour my morning coffee, I will read one page
+                  anchor_habit_id: null
+                  motivation: I want to expand my knowledge and vocabulary
+                  category: Learning
+                  recurring_schedule:
+                    type: daily
+                    until: "2026-12-31"
+              weeklyExercise:
+                summary: Weekly exercise habit
+                value:
+                  identity_statement: I am a person who exercises regularly
+                  full_description: Go to the gym for 1 hour
+                  two_minute_version: Put on workout clothes
+                  motivation: I want to stay healthy and energized
+                  category: Health & Fitness
+                  recurring_schedule:
+                    type: weekly
+                    days: [1, 3, 5]
+                    until: null
+      responses:
+        '201':
+          description: Habit created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HabitResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /api/{user_id}/habits/{habit_id}:
+    parameters:
+      - $ref: '#/components/parameters/UserId'
+      - $ref: '#/components/parameters/HabitId'
+
+    get:
+      summary: Get a single habit
+      description: Retrieve detailed information about a specific habit
+      operationId: getHabit
+      tags:
+        - habits
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HabitResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    patch:
+      summary: Update a habit
+      description: Partially update an existing habit
+      operationId: updateHabit
+      tags:
+        - habits
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HabitUpdate'
+            examples:
+              updateIdentity:
+                summary: Update identity statement
+                value:
+                  identity_statement: I am a person who reads every morning
+              archiveHabit:
+                summary: Archive a habit
+                value:
+                  status: archived
+              updateSchedule:
+                summary: Change schedule to weekly
+                value:
+                  recurring_schedule:
+                    type: weekly
+                    days: [1, 2, 3, 4, 5]
+                    until: null
+      responses:
+        '200':
+          description: Habit updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HabitResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    delete:
+      summary: Delete a habit
+      description: |
+        Permanently delete a habit. If the habit is used as an anchor by other habits,
+        the API will return a 400 error with a list of dependent habits.
+      operationId: deleteHabit
+      tags:
+        - habits
+      responses:
+        '200':
+          description: Habit deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Habit deleted successfully
+        '400':
+          description: Cannot delete - habit has dependencies
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: This habit is used as an anchor by 2 other habit(s)
+                  dependent_habits:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                        identity_statement:
+                          type: string
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+components:
+  parameters:
+    UserId:
+      name: user_id
+      in: path
+      required: true
+      description: UUID of the authenticated user
+      schema:
+        type: string
+        format: uuid
+
+    HabitId:
+      name: habit_id
+      in: path
+      required: true
+      description: UUID of the habit
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+    RecurringSchedule:
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          enum: [daily, weekly, monthly]
+          description: Type of recurrence
+        until:
+          type: string
+          format: date
+          nullable: true
+          description: Optional end date (ISO 8601)
+          example: "2026-12-31"
+        days:
+          type: array
+          items:
+            type: integer
+            minimum: 0
+            maximum: 6
+          description: For weekly habits - days of week (0=Sunday, 6=Saturday)
+          example: [1, 3, 5]
+        day_of_month:
+          type: integer
+          minimum: 1
+          maximum: 31
+          description: For monthly habits - day of month
+          example: 1
+
+    HabitCreate:
+      type: object
+      required:
+        - identity_statement
+        - two_minute_version
+        - category
+        - recurring_schedule
+      properties:
+        identity_statement:
+          type: string
+          minLength: 1
+          maxLength: 2000
+          description: Identity-based habit statement (Law 2)
+          example: I am a person who reads daily
+        full_description:
+          type: string
+          maxLength: 5000
+          nullable: true
+          description: Detailed description of the habit
+          example: Read at least one chapter of a book
+        two_minute_version:
+          type: string
+          minLength: 1
+          maxLength: 500
+          description: Ultra-simple starter version (Law 3)
+          example: Read one page
+        habit_stacking_cue:
+          type: string
+          maxLength: 500
+          nullable: true
+          description: Stacking cue linking to anchor habit (Law 1)
+          example: After I pour my morning coffee, I will read one page
+        anchor_habit_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: ID of the habit to stack upon
+        motivation:
+          type: string
+          maxLength: 2000
+          nullable: true
+          description: Why the user wants this habit
+          example: I want to expand my knowledge and vocabulary
+        category:
+          type: string
+          enum:
+            - Health & Fitness
+            - Productivity
+            - Mindfulness
+            - Learning
+            - Social
+            - Finance
+            - Creative
+            - Other
+          description: Habit category for organization
+        recurring_schedule:
+          $ref: '#/components/schemas/RecurringSchedule'
+
+    HabitUpdate:
+      type: object
+      properties:
+        identity_statement:
+          type: string
+          minLength: 1
+          maxLength: 2000
+          nullable: true
+        full_description:
+          type: string
+          maxLength: 5000
+          nullable: true
+        two_minute_version:
+          type: string
+          minLength: 1
+          maxLength: 500
+          nullable: true
+        habit_stacking_cue:
+          type: string
+          maxLength: 500
+          nullable: true
+        anchor_habit_id:
+          type: string
+          format: uuid
+          nullable: true
+        motivation:
+          type: string
+          maxLength: 2000
+          nullable: true
+        category:
+          type: string
+          enum:
+            - Health & Fitness
+            - Productivity
+            - Mindfulness
+            - Learning
+            - Social
+            - Finance
+            - Creative
+            - Other
+          nullable: true
+        recurring_schedule:
+          $ref: '#/components/schemas/RecurringSchedule'
+        status:
+          type: string
+          enum: [active, archived]
+          nullable: true
+
+    HabitResponse:
+      type: object
+      required:
+        - id
+        - user_id
+        - identity_statement
+        - two_minute_version
+        - category
+        - recurring_schedule
+        - status
+        - current_streak
+        - consecutive_misses
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        identity_statement:
+          type: string
+          example: I am a person who reads daily
+        full_description:
+          type: string
+          nullable: true
+          example: Read at least one chapter of a book
+        two_minute_version:
+          type: string
+          example: Read one page
+        habit_stacking_cue:
+          type: string
+          nullable: true
+          example: After I pour my morning coffee, I will read one page
+        anchor_habit_id:
+          type: string
+          format: uuid
+          nullable: true
+        motivation:
+          type: string
+          nullable: true
+          example: I want to expand my knowledge and vocabulary
+        category:
+          type: string
+          enum:
+            - Health & Fitness
+            - Productivity
+            - Mindfulness
+            - Learning
+            - Social
+            - Finance
+            - Creative
+            - Other
+        recurring_schedule:
+          $ref: '#/components/schemas/RecurringSchedule'
+        status:
+          type: string
+          enum: [active, archived]
+          default: active
+        current_streak:
+          type: integer
+          minimum: 0
+          description: Consecutive days completed (Phase 2 Chunk 4)
+          example: 0
+        last_completed_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Last completion timestamp (Phase 2 Chunk 4)
+        consecutive_misses:
+          type: integer
+          minimum: 0
+          description: Consecutive days missed (Phase 2 Chunk 4)
+          example: 0
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    HabitListResponse:
+      type: object
+      required:
+        - habits
+        - total
+        - page
+        - limit
+      properties:
+        habits:
+          type: array
+          items:
+            $ref: '#/components/schemas/HabitResponse'
+        total:
+          type: integer
+          description: Total number of habits matching the filter
+          example: 10
+        page:
+          type: integer
+          minimum: 1
+          description: Current page number
+          example: 1
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 100
+          description: Number of items per page
+          example: 50
+
+    ErrorResponse:
+      type: object
+      required:
+        - detail
+      properties:
+        detail:
+          type: string
+          description: Error message
+        errors:
+          type: array
+          description: Field-level validation errors
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              message:
+                type: string
+
+  responses:
+    ValidationError:
+      description: Validation error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            emptyIdentity:
+              summary: Empty identity statement
+              value:
+                detail: Validation error
+                errors:
+                  - field: identity_statement
+                    message: Identity statement cannot be empty
+            invalidCategory:
+              summary: Invalid category
+              value:
+                detail: Validation error
+                errors:
+                  - field: category
+                    message: Category must be one of Health & Fitness, Productivity, Mindfulness, Learning, Social, Finance, Creative, Other
+
+    UnauthorizedError:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            detail: Authentication required
+
+    ForbiddenError:
+      description: Insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            detail: You do not have permission to access this resource
+
+    NotFoundError:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            detail: Habit not found
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token from authentication
+
+security:
+  - bearerAuth: []
