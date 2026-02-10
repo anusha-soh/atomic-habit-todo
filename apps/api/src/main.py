@@ -39,9 +39,10 @@ app.add_middleware(
 )
 
 # Import and register routes
-from src.routes import auth, tasks
+from src.routes import auth, tasks, habits
 app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
 app.include_router(tasks.router, prefix="/api", tags=["Tasks"])
+app.include_router(habits.router, prefix="/api", tags=["Habits"])
 
 
 @app.get("/")

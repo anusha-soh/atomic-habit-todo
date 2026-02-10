@@ -3,7 +3,10 @@
     "allow": [
       "Bash(cat:*)",
       "Bash(dir:*)",
-      "Bash(powershell -ExecutionPolicy Bypass -File:*)"
+      "Bash(powershell -ExecutionPolicy Bypass -File:*)",
+      "Bash(alembic upgrade:*)",
+      "Bash(psql:*)",
+      "Bash(python:*)"
     ]
   }
 }

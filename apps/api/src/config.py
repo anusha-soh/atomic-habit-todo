@@ -54,3 +54,8 @@ def get_jwt_expiration_days() -> int:
 def get_log_level() -> str:
     """Get log level (default: info)"""
     return os.getenv("LOG_LEVEL", "info").lower()
+
+
+def get_enable_habits_module() -> bool:
+    """Get habits module feature flag (default: true for Phase 2+)"""
+    return os.getenv("ENABLE_HABITS_MODULE", "true").lower() == "true"
