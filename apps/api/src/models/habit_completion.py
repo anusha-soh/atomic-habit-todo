@@ -18,7 +18,19 @@ class HabitCompletion(SQLModel, table=True):
     - completed_at uses UTC timezone for consistency
     """
 
-    model_config = ConfigDict(validate_assignment=True)
+    model_config = ConfigDict(
+        validate_assignment=True,
+        json_schema_extra={
+            "example": {
+                "id": "123e4567-e89b-12d3-a456-426614174000",
+                "habit_id": "789e4567-e89b-12d3-a456-426614174001",
+                "user_id": "456e4567-e89b-12d3-a456-426614174002",
+                "completed_at": "2026-02-12T07:30:00Z",
+                "completion_type": "full",
+                "created_at": "2026-02-12T07:30:05Z"
+            }
+        }
+    )
     __tablename__ = "habit_completions"
 
     # Primary Key
@@ -83,15 +95,3 @@ class HabitCompletion(SQLModel, table=True):
         if v > now:
             raise ValueError("completed_at cannot be in the future")
         return v
-
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "id": "123e4567-e89b-12d3-a456-426614174000",
-                "habit_id": "789e4567-e89b-12d3-a456-426614174001",
-                "user_id": "456e4567-e89b-12d3-a456-426614174002",
-                "completed_at": "2026-02-12T07:30:00Z",
-                "completion_type": "full",
-                "created_at": "2026-02-12T07:30:05Z"
-            }
-        }
