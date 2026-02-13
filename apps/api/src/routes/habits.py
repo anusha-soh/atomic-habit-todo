@@ -1,21 +1,27 @@
-"""
-Habit Routes
-Phase 2 Chunk 3 - Habits MVP
-"""
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlmodel import Session
+from sqlmodel import Session, select
 from uuid import UUID
 from typing import Optional
+from datetime import datetime, timezone
 
 from src.database import get_session
+from src.models.habit import Habit
+from src.models.habit_completion import HabitCompletion
 from src.services.habit_service import HabitService
-from src.services.event_emitter import EventEmitter
+from src.services.event_emitter import EventEmitter, event_emitter
+from src.services.streak_calculator import calculate_streak, calculate_new_streak_value
 from src.middleware.auth import get_current_user_id
 from src.schemas.habit_schemas import (
     HabitCreate,
     HabitUpdate,
     HabitResponse,
-    HabitListResponse
+    HabitListResponse,
+    CompleteHabitRequest,
+    CompleteHabitResponse,
+    HabitCompletionResponse,
+    StreakInfoResponse,
+    GetCompletionsResponse,
+    UndoCompletionResponse,
 )
 
 router = APIRouter()
@@ -24,13 +30,14 @@ router = APIRouter()
 # Dependency: Get HabitService instance
 def get_habit_service(
     session: Session = Depends(get_session),
-    event_emitter: EventEmitter = Depends(lambda: EventEmitter())
+    emitter: EventEmitter = Depends(lambda: event_emitter)
 ) -> HabitService:
     """Dependency injection for HabitService"""
-    return HabitService(session, event_emitter)
+    return HabitService(session, emitter)
 
 
-# POST /api/{user_id}/habits - Create habit
+# ── Existing CRUD endpoints ──────────────────────────────────────────────────
+
 @router.post("/{user_id}/habits", response_model=HabitResponse, status_code=201)
 async def create_habit(
     user_id: UUID,
@@ -38,109 +45,48 @@ async def create_habit(
     current_user_id: UUID = Depends(get_current_user_id),
     habit_service: HabitService = Depends(get_habit_service)
 ):
-    """
-    Create a new habit for the user.
-
-    Authorization: User can only create habits for themselves.
-
-    Request Body:
-        - identity_statement: "I am a person who..." (required)
-        - two_minute_version: Starter version (required)
-        - category: Predefined category (required)
-        - recurring_schedule: Schedule data (required)
-        - full_description: Full description (optional)
-        - habit_stacking_cue: Stacking cue (optional)
-        - anchor_habit_id: Anchor habit for stacking (optional)
-        - motivation: Why this habit (optional)
-
-    Returns:
-        201 Created: Habit object
-        400 Bad Request: Validation error
-        401 Unauthorized: No valid authentication
-        403 Forbidden: User ID mismatch
-    """
-    # Authorization: Ensure current user can only create habits for themselves
+    """Create a new habit for the user"""
     if current_user_id != user_id:
-        raise HTTPException(
-            status_code=403,
-            detail="Access denied: Cannot create habits for another user"
-        )
+        raise HTTPException(status_code=403, detail="Access denied: Cannot create habits for another user")
 
     try:
-        habit = habit_service.create_habit(
-            user_id=user_id,
-            identity_statement=habit_data.identity_statement,
-            full_description=habit_data.full_description,
-            two_minute_version=habit_data.two_minute_version,
-            habit_stacking_cue=habit_data.habit_stacking_cue,
-            anchor_habit_id=habit_data.anchor_habit_id,
-            motivation=habit_data.motivation,
-            category=habit_data.category,
-            recurring_schedule=habit_data.recurring_schedule,
-        )
-        return habit
+        return habit_service.create_habit(user_id, habit_data)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
 
-# GET /api/{user_id}/habits - List habits
 @router.get("/{user_id}/habits", response_model=HabitListResponse)
 async def list_habits(
     user_id: UUID,
     page: int = Query(1, ge=1),
     limit: int = Query(50, ge=1, le=100),
-    status: Optional[str] = None,
+    status: Optional[str] = "active",
     category: Optional[str] = None,
     include_archived: bool = False,
     current_user_id: UUID = Depends(get_current_user_id),
     habit_service: HabitService = Depends(get_habit_service)
 ):
-    """
-    List habits for a user with filtering and pagination.
-
-    Authorization: User can only list their own habits.
-
-    Query Parameters:
-        - page: Page number (default: 1)
-        - limit: Items per page (default: 50, max: 100)
-        - status: Filter by status (active or archived)
-        - category: Filter by category
-        - include_archived: Include archived habits (default: false)
-
-    Returns:
-        200 OK: Paginated habit list
-        400 Bad Request: Invalid filter parameters
-        401 Unauthorized: No valid authentication
-        403 Forbidden: User ID mismatch
-    """
-    # Authorization: Ensure current user can only access their own habits
+    """List habits for a user with filtering and pagination"""
     if current_user_id != user_id:
-        raise HTTPException(
-            status_code=403,
-            detail="Access denied: Cannot access another user's habits"
-        )
+        raise HTTPException(status_code=403, detail="Access denied: Cannot access another user's habits")
 
-    try:
-        habits, total = habit_service.get_habits(
-            user_id=user_id,
-            status=status,
-            category=category,
-            include_archived=include_archived,
-            page=page,
-            limit=limit,
-        )
+    habits, total = habit_service.get_habits(
+        user_id=user_id,
+        page=page,
+        limit=limit,
+        status=status,
+        category=category,
+        include_archived=include_archived
+    )
 
-        return HabitListResponse(
-            habits=habits,
-            total=total,
-            page=page,
-            limit=limit
-        )
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    return {
+        "habits": habits,
+        "total": total,
+        "page": page,
+        "limit": limit
+    }
 
 
-# GET /api/{user_id}/habits/{habit_id} - Get single habit
 @router.get("/{user_id}/habits/{habit_id}", response_model=HabitResponse)
 async def get_habit(
     user_id: UUID,
@@ -148,32 +94,17 @@ async def get_habit(
     current_user_id: UUID = Depends(get_current_user_id),
     habit_service: HabitService = Depends(get_habit_service)
 ):
-    """
-    Get a single habit by ID.
-
-    Authorization: User can only get their own habits.
-
-    Returns:
-        200 OK: Habit object
-        401 Unauthorized: No valid authentication
-        403 Forbidden: User ID mismatch
-        404 Not Found: Habit not found
-    """
-    # Authorization: Ensure current user can only access their own habits
+    """Get a specific habit by ID"""
     if current_user_id != user_id:
-        raise HTTPException(
-            status_code=403,
-            detail="Access denied: Cannot access another user's habits"
-        )
+        raise HTTPException(status_code=403, detail="Access denied: Cannot access another user's habit")
 
-    try:
-        habit = habit_service.get_habit(user_id, habit_id)
-        return habit
-    except ValueError:
+    habit = habit_service.get_habit(user_id, habit_id)
+    if not habit:
         raise HTTPException(status_code=404, detail="Habit not found")
 
+    return habit
 
-# PATCH /api/{user_id}/habits/{habit_id} - Update habit
+
 @router.patch("/{user_id}/habits/{habit_id}", response_model=HabitResponse)
 async def update_habit(
     user_id: UUID,
@@ -182,98 +113,282 @@ async def update_habit(
     current_user_id: UUID = Depends(get_current_user_id),
     habit_service: HabitService = Depends(get_habit_service)
 ):
-    """
-    Update a habit (partial updates).
-
-    Authorization: User can only update their own habits.
-
-    Request Body: All fields optional for partial updates
-        - identity_statement
-        - two_minute_version
-        - category
-        - recurring_schedule
-        - full_description
-        - habit_stacking_cue
-        - anchor_habit_id
-        - motivation
-        - status
-
-    Returns:
-        200 OK: Updated habit object
-        400 Bad Request: Validation error or circular dependency
-        401 Unauthorized: No valid authentication
-        403 Forbidden: User ID mismatch
-        404 Not Found: Habit not found
-    """
-    # Authorization: Ensure current user can only update their own habits
+    """Update a specific habit"""
     if current_user_id != user_id:
-        raise HTTPException(
-            status_code=403,
-            detail="Access denied: Cannot update another user's habits"
-        )
+        raise HTTPException(status_code=403, detail="Access denied")
 
     try:
-        # Convert Pydantic model to dict, excluding unset fields
-        updates = habit_data.model_dump(exclude_unset=True)
-
-        habit = habit_service.update_habit(
-            user_id=user_id,
-            habit_id=habit_id,
-            **updates
-        )
+        habit = habit_service.update_habit(user_id, habit_id, habit_data)
+        if not habit:
+            raise HTTPException(status_code=404, detail="Habit not found")
         return habit
     except ValueError as e:
-        error_msg = str(e)
-        if "not found" in error_msg.lower():
-            raise HTTPException(status_code=404, detail=error_msg)
-        elif "circular" in error_msg.lower():
-            raise HTTPException(status_code=400, detail=error_msg)
-        else:
-            raise HTTPException(status_code=400, detail=error_msg)
+        if "not found" in str(e).lower():
+            raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e))
 
 
-# DELETE /api/{user_id}/habits/{habit_id} - Delete habit
-@router.delete("/{user_id}/habits/{habit_id}")
+@router.delete("/{user_id}/habits/{habit_id}", status_code=204)
 async def delete_habit(
     user_id: UUID,
     habit_id: UUID,
-    force: bool = Query(False),
+    force: bool = False,
     current_user_id: UUID = Depends(get_current_user_id),
     habit_service: HabitService = Depends(get_habit_service)
 ):
-    """
-    Delete a habit.
-
-    Authorization: User can only delete their own habits.
-
-    Query Parameters:
-        - force: Force deletion even if dependencies exist (default: false)
-
-    Returns:
-        200 OK: Success message
-        400 Bad Request: Habit has dependencies (without force)
-        401 Unauthorized: No valid authentication
-        403 Forbidden: User ID mismatch
-        404 Not Found: Habit not found
-
-    Note: If habit is used as an anchor by other habits and force=false,
-    returns 400 with list of dependent habits.
-    """
-    # Authorization: Ensure current user can only delete their own habits
+    """Delete a habit"""
     if current_user_id != user_id:
-        raise HTTPException(
-            status_code=403,
-            detail="Access denied: Cannot delete another user's habits"
-        )
+        raise HTTPException(status_code=403, detail="Access denied")
 
     try:
         habit_service.delete_habit(user_id, habit_id, force=force)
-        return {"message": "Habit deleted successfully"}
     except ValueError as e:
-        error_msg = str(e)
-        if "not found" in error_msg.lower():
-            raise HTTPException(status_code=404, detail=error_msg)
-        elif "anchor" in error_msg.lower() or "dependencies" in error_msg.lower():
-            raise HTTPException(status_code=400, detail=error_msg)
-        else:
-            raise HTTPException(status_code=400, detail=error_msg)
+        if "not found" in str(e).lower():
+            raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.post("/{user_id}/habits/{habit_id}/archive", response_model=HabitResponse)
+async def archive_habit(
+    user_id: UUID,
+    habit_id: UUID,
+    current_user_id: UUID = Depends(get_current_user_id),
+    habit_service: HabitService = Depends(get_habit_service)
+):
+    """Archive a specific habit"""
+    if current_user_id != user_id:
+        raise HTTPException(status_code=403, detail="Access denied")
+
+    try:
+        return habit_service.archive_habit(user_id, habit_id)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+
+@router.post("/{user_id}/habits/{habit_id}/restore", response_model=HabitResponse)
+async def restore_habit(
+    user_id: UUID,
+    habit_id: UUID,
+    current_user_id: UUID = Depends(get_current_user_id),
+    habit_service: HabitService = Depends(get_habit_service)
+):
+    """Restore a specific habit"""
+    if current_user_id != user_id:
+        raise HTTPException(status_code=403, detail="Access denied")
+
+    try:
+        return habit_service.restore_habit(user_id, habit_id)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+
+# ── Phase 3: US1 – Mark Habit as Complete ───────────────────────────────────
+
+@router.post(
+    "/{user_id}/habits/{habit_id}/complete",
+    response_model=CompleteHabitResponse,
+    status_code=201
+)
+async def complete_habit(
+    user_id: UUID,
+    habit_id: UUID,
+    request: CompleteHabitRequest,
+    current_user_id: UUID = Depends(get_current_user_id),
+    session: Session = Depends(get_session),
+    emitter: EventEmitter = Depends(lambda: event_emitter)
+):
+    """
+    Mark a habit as completed today.
+
+    Business rules:
+    - One completion per habit per day (UTC). Returns 409 if already completed today.
+    - Updates streak counter, last_completed_at, and resets consecutive_misses.
+    - Emits HABIT_COMPLETED event.
+    """
+    if current_user_id != user_id:
+        raise HTTPException(status_code=403, detail="Access denied")
+
+    # Verify habit exists and belongs to user
+    habit = session.get(Habit, habit_id)
+    if not habit or habit.user_id != user_id:
+        raise HTTPException(status_code=404, detail="Habit not found")
+
+    now_utc = datetime.now(timezone.utc)
+
+    # T010: Check for duplicate completion today (UTC)
+    today_date = now_utc.date()
+    existing = session.exec(
+        select(HabitCompletion)
+        .where(HabitCompletion.habit_id == habit_id)
+        .where(HabitCompletion.user_id == user_id)
+    ).all()
+
+    already_today = any(
+        c.completed_at.date() == today_date for c in existing
+    )
+    if already_today:
+        raise HTTPException(
+            status_code=409,
+            detail="Habit already completed today"
+        )
+
+    # T011: Calculate new streak using streak_calculator
+    new_streak = calculate_new_streak_value(
+        current_streak=habit.current_streak,
+        last_completed_at=habit.last_completed_at,
+        new_completion_time=now_utc
+    )
+
+    # Create completion record
+    completion = HabitCompletion(
+        habit_id=habit_id,
+        user_id=user_id,
+        completed_at=now_utc,
+        completion_type=request.completion_type,
+    )
+    session.add(completion)
+
+    # T012: Update habit streak fields
+    habit.current_streak = new_streak
+    habit.last_completed_at = now_utc
+    habit.consecutive_misses = 0
+    habit.updated_at = now_utc
+    session.add(habit)
+
+    session.commit()
+    session.refresh(completion)
+    session.refresh(habit)
+
+    # T013: Emit HABIT_COMPLETED event
+    emitter.emit(
+        event_type="HABIT_COMPLETED",
+        user_id=user_id,
+        payload={
+            "habit_id": str(habit_id),
+            "completion_type": request.completion_type,
+            "new_streak": new_streak,
+        }
+    )
+
+    return CompleteHabitResponse(
+        habit_id=str(habit_id),
+        current_streak=new_streak,
+        completion=HabitCompletionResponse.model_validate(completion),
+        message="Habit completed successfully"
+    )
+
+
+# ── Phase 5: US3 – Streak endpoint ───────────────────────────────────────────
+
+@router.get("/{user_id}/habits/{habit_id}/streak", response_model=StreakInfoResponse)
+async def get_habit_streak(
+    user_id: UUID,
+    habit_id: UUID,
+    current_user_id: UUID = Depends(get_current_user_id),
+    session: Session = Depends(get_session),
+):
+    """Get current streak information for a habit"""
+    if current_user_id != user_id:
+        raise HTTPException(status_code=403, detail="Access denied")
+
+    habit = session.get(Habit, habit_id)
+    if not habit or habit.user_id != user_id:
+        raise HTTPException(status_code=404, detail="Habit not found")
+
+    return StreakInfoResponse(
+        habit_id=str(habit_id),
+        current_streak=habit.current_streak,
+        last_completed_at=habit.last_completed_at,
+        consecutive_misses=habit.consecutive_misses,
+    )
+
+
+# ── Phase 9: US7 – Completion History ────────────────────────────────────────
+
+@router.get("/{user_id}/habits/{habit_id}/completions", response_model=GetCompletionsResponse)
+async def get_completions(
+    user_id: UUID,
+    habit_id: UUID,
+    start_date: Optional[datetime] = None,
+    end_date: Optional[datetime] = None,
+    current_user_id: UUID = Depends(get_current_user_id),
+    session: Session = Depends(get_session),
+):
+    """Get completion history for a habit with optional date range"""
+    if current_user_id != user_id:
+        raise HTTPException(status_code=403, detail="Access denied")
+
+    habit = session.get(Habit, habit_id)
+    if not habit or habit.user_id != user_id:
+        raise HTTPException(status_code=404, detail="Habit not found")
+
+    query = select(HabitCompletion).where(
+        HabitCompletion.habit_id == habit_id,
+        HabitCompletion.user_id == user_id,
+    )
+    if start_date:
+        query = query.where(HabitCompletion.completed_at >= start_date)
+    if end_date:
+        query = query.where(HabitCompletion.completed_at <= end_date)
+
+    completions = session.exec(query.order_by(HabitCompletion.completed_at.desc())).all()
+
+    return GetCompletionsResponse(
+        completions=[HabitCompletionResponse.model_validate(c) for c in completions],
+        total=len(completions),
+    )
+
+
+# ── Phase 10: US8 – Undo Completion ─────────────────────────────────────────
+
+@router.delete(
+    "/{user_id}/habits/{habit_id}/completions/{completion_id}",
+    response_model=UndoCompletionResponse,
+)
+async def undo_completion(
+    user_id: UUID,
+    habit_id: UUID,
+    completion_id: UUID,
+    current_user_id: UUID = Depends(get_current_user_id),
+    session: Session = Depends(get_session),
+):
+    """Remove an accidental completion and recalculate streak"""
+    if current_user_id != user_id:
+        raise HTTPException(status_code=403, detail="Access denied")
+
+    habit = session.get(Habit, habit_id)
+    if not habit or habit.user_id != user_id:
+        raise HTTPException(status_code=404, detail="Habit not found")
+
+    completion = session.get(HabitCompletion, completion_id)
+    if not completion or completion.habit_id != habit_id or completion.user_id != user_id:
+        raise HTTPException(status_code=404, detail="Completion not found")
+
+    # Delete the completion
+    session.delete(completion)
+    session.flush()
+
+    # Recalculate streak from remaining completions
+    remaining = session.exec(
+        select(HabitCompletion)
+        .where(HabitCompletion.habit_id == habit_id)
+        .where(HabitCompletion.user_id == user_id)
+    ).all()
+
+    new_streak = calculate_streak(remaining)
+
+    # Update habit
+    habit.current_streak = new_streak
+    habit.last_completed_at = (
+        max(remaining, key=lambda c: c.completed_at).completed_at
+        if remaining else None
+    )
+    habit.updated_at = datetime.now(timezone.utc)
+    session.add(habit)
+    session.commit()
+
+    return UndoCompletionResponse(
+        deleted=True,
+        recalculated_streak=new_streak,
+        message="Completion undone and streak recalculated",
+    )

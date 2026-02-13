@@ -5,13 +5,18 @@
 
 import type {
   Habit,
-  HabitCreateRequest,
-  HabitUpdateRequest,
+  HabitCreate,
+  HabitUpdate,
   HabitFilters,
   HabitListResponse,
+  CompleteHabitRequest,
+  CompleteHabitResponse,
+  StreakInfo,
+  CompletionHistoryResponse,
+  UndoCompletionResponse,
 } from '@/types/habit';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 /**
  * API Error class for structured error handling
@@ -40,7 +45,12 @@ async function handleResponse<T>(response: Response): Promise<T> {
     );
   }
 
-  // Handle 200 OK with no body (DELETE responses)
+  // Handle 204 No Content
+  if (response.status === 204) {
+    return undefined as T;
+  }
+
+  // Handle responses with no body
   const contentType = response.headers.get('content-type');
   if (!contentType || !contentType.includes('application/json')) {
     return undefined as T;
@@ -72,7 +82,7 @@ export async function getHabits(
   filters: HabitFilters = {}
 ): Promise<HabitListResponse> {
   const queryString = buildQueryString(filters);
-  const url = `${API_URL}/${userId}/habits${queryString ? `?${queryString}` : ''}`;
+  const url = `${API_URL}/api/${userId}/habits${queryString ? `?${queryString}` : ''}`;
 
   const response = await fetch(url, {
     method: 'GET',
@@ -89,7 +99,7 @@ export async function getHabits(
  * Get a single habit by ID
  */
 export async function getHabit(userId: string, habitId: string): Promise<Habit> {
-  const response = await fetch(`${API_URL}/${userId}/habits/${habitId}`, {
+  const response = await fetch(`${API_URL}/api/${userId}/habits/${habitId}`, {
     method: 'GET',
     credentials: 'include',
     headers: {
@@ -105,9 +115,9 @@ export async function getHabit(userId: string, habitId: string): Promise<Habit> 
  */
 export async function createHabit(
   userId: string,
-  data: HabitCreateRequest
+  data: HabitCreate
 ): Promise<Habit> {
-  const response = await fetch(`${API_URL}/${userId}/habits`, {
+  const response = await fetch(`${API_URL}/api/${userId}/habits`, {
     method: 'POST',
     credentials: 'include',
     headers: {
@@ -125,9 +135,9 @@ export async function createHabit(
 export async function updateHabit(
   userId: string,
   habitId: string,
-  data: HabitUpdateRequest
+  data: HabitUpdate
 ): Promise<Habit> {
-  const response = await fetch(`${API_URL}/${userId}/habits/${habitId}`, {
+  const response = await fetch(`${API_URL}/api/${userId}/habits/${habitId}`, {
     method: 'PATCH',
     credentials: 'include',
     headers: {
@@ -148,7 +158,7 @@ export async function deleteHabit(
   force: boolean = false
 ): Promise<void> {
   const queryString = force ? '?force=true' : '';
-  const response = await fetch(`${API_URL}/${userId}/habits/${habitId}${queryString}`, {
+  const response = await fetch(`${API_URL}/api/${userId}/habits/${habitId}${queryString}`, {
     method: 'DELETE',
     credentials: 'include',
     headers: {
@@ -166,7 +176,15 @@ export async function archiveHabit(
   userId: string,
   habitId: string
 ): Promise<Habit> {
-  return updateHabit(userId, habitId, { status: 'archived' });
+  const response = await fetch(`${API_URL}/api/${userId}/habits/${habitId}/archive`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  return handleResponse<Habit>(response);
 }
 
 /**
@@ -176,5 +194,96 @@ export async function restoreHabit(
   userId: string,
   habitId: string
 ): Promise<Habit> {
-  return updateHabit(userId, habitId, { status: 'active' });
+  const response = await fetch(`${API_URL}/api/${userId}/habits/${habitId}/restore`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  return handleResponse<Habit>(response);
+}
+
+// ── Phase 3 / Chunk 4: Completion tracking API ───────────────────────────────
+
+/**
+ * Mark a habit as completed today.
+ * Returns 409 if already completed today.
+ */
+export async function completeHabit(
+  userId: string,
+  habitId: string,
+  data: CompleteHabitRequest
+): Promise<CompleteHabitResponse> {
+  const response = await fetch(`${API_URL}/api/${userId}/habits/${habitId}/complete`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+
+  return handleResponse<CompleteHabitResponse>(response);
+}
+
+/**
+ * Get current streak info for a habit
+ */
+export async function getHabitStreak(
+  userId: string,
+  habitId: string
+): Promise<StreakInfo> {
+  const response = await fetch(`${API_URL}/api/${userId}/habits/${habitId}/streak`, {
+    method: 'GET',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+  });
+
+  return handleResponse<StreakInfo>(response);
+}
+
+/**
+ * Get completion history for a habit
+ */
+export async function getCompletionHistory(
+  userId: string,
+  habitId: string,
+  startDate?: string,
+  endDate?: string
+): Promise<CompletionHistoryResponse> {
+  const params = new URLSearchParams();
+  if (startDate) params.append('start_date', startDate);
+  if (endDate) params.append('end_date', endDate);
+
+  const qs = params.toString();
+  const response = await fetch(
+    `${API_URL}/api/${userId}/habits/${habitId}/completions${qs ? `?${qs}` : ''}`,
+    {
+      method: 'GET',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+    }
+  );
+
+  return handleResponse<CompletionHistoryResponse>(response);
+}
+
+/**
+ * Undo (delete) a specific completion and recalculate streak
+ */
+export async function undoCompletion(
+  userId: string,
+  habitId: string,
+  completionId: string
+): Promise<UndoCompletionResponse> {
+  const response = await fetch(
+    `${API_URL}/api/${userId}/habits/${habitId}/completions/${completionId}`,
+    {
+      method: 'DELETE',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+    }
+  );
+
+  return handleResponse<UndoCompletionResponse>(response);
 }

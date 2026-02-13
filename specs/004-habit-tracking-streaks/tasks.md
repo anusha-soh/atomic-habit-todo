@@ -94,21 +94,21 @@ This document breaks down the Habit Tracking & Streaks feature into actionable t
 
 ### Backend - Completion Endpoint
 
-- [ ] T008 [P] [US1] Create Pydantic request/response schemas in apps/api/src/schemas/habit_schemas.py (CompleteHabitRequest, CompleteHabitResponse)
-- [ ] T009 [US1] Implement POST /api/{user_id}/habits/{habit_id}/complete endpoint in apps/api/src/routes/habits.py
-- [ ] T010 [US1] Add duplicate completion check (409 Conflict if already completed today) in completion endpoint
-- [ ] T011 [US1] Implement streak calculation logic in completion endpoint (call streak_calculator service)
-- [ ] T012 [US1] Update habit.last_completed_at and habit.consecutive_misses in completion endpoint
+- [X] T008 [P] [US1] Create Pydantic request/response schemas in apps/api/src/schemas/habit_schemas.py (CompleteHabitRequest, CompleteHabitResponse)
+- [X] T009 [US1] Implement POST /api/{user_id}/habits/{habit_id}/complete endpoint in apps/api/src/routes/habits.py
+- [X] T010 [US1] Add duplicate completion check (409 Conflict if already completed today) in completion endpoint
+- [X] T011 [US1] Implement streak calculation logic in completion endpoint (call streak_calculator service)
+- [X] T012 [US1] Update habit.last_completed_at and habit.consecutive_misses in completion endpoint
 
 ### Backend - Events
 
-- [ ] T013 [P] [US1] Implement HABIT_COMPLETED event emission in apps/api/src/events/habit_events.py
+- [X] T013 [P] [US1] Implement HABIT_COMPLETED event emission in apps/api/src/events/habit_events.py
 
 ### Frontend - Completion UI
 
-- [ ] T014 [P] [US1] Create CompletionCheckbox component in apps/web/src/components/habits/CompletionCheckbox.tsx
-- [ ] T015 [US1] Add completion API client function in apps/web/src/lib/habits-api.ts
-- [ ] T016 [US1] Implement green checkmark animation in CompletionCheckbox (CSS or Framer Motion)
+- [X] T014 [P] [US1] Create CompletionCheckbox component in apps/web/src/components/habits/CompletionCheckbox.tsx
+- [X] T015 [US1] Add completion API client function in apps/web/src/lib/habits-api.ts
+- [X] T016 [US1] Implement green checkmark animation in CompletionCheckbox (CSS or Framer Motion)
 
 **Acceptance**: Users can mark habit complete via checkbox, completion is recorded, streak increments correctly, duplicate completions are rejected with 409, green checkmark animation plays
 
@@ -128,9 +128,9 @@ This document breaks down the Habit Tracking & Streaks feature into actionable t
 
 **Tasks**:
 
-- [ ] T017 [P] [US2] Create CompletionTypeModal component in apps/web/src/components/habits/CompletionTypeModal.tsx
-- [ ] T018 [US2] Add completion_type field handling in POST /complete endpoint (update request schema)
-- [ ] T019 [US2] Wire CompletionTypeModal to CompletionCheckbox (show modal before API call)
+- [X] T017 [P] [US2] Create CompletionTypeModal component in apps/web/src/components/habits/CompletionTypeModal.tsx
+- [X] T018 [US2] Add completion_type field handling in POST /complete endpoint (update request schema)
+- [X] T019 [US2] Wire CompletionTypeModal to CompletionCheckbox (show modal before API call)
 
 **Acceptance**: Users see modal with "Full habit" and "2-minute version" buttons, selection is sent to API, completion_type is stored in database
 
@@ -152,13 +152,13 @@ This document breaks down the Habit Tracking & Streaks feature into actionable t
 
 ### Backend - Streak Endpoint
 
-- [ ] T020 [P] [US3] Create GET /api/{user_id}/habits/{habit_id}/streak endpoint in apps/api/src/routes/habits.py
-- [ ] T021 [P] [US3] Create StreakInfoResponse schema in apps/api/src/schemas/habit_schemas.py
+- [X] T020 [P] [US3] Create GET /api/{user_id}/habits/{habit_id}/streak endpoint in apps/api/src/routes/habits.py
+- [X] T021 [P] [US3] Create StreakInfoResponse schema in apps/api/src/schemas/habit_schemas.py
 
 ### Frontend - Streak Display
 
-- [ ] T022 [P] [US3] Create StreakCounter component in apps/web/src/components/habits/StreakCounter.tsx
-- [ ] T023 [US3] Add streak API client function in apps/web/src/lib/habits-api.ts
+- [X] T022 [P] [US3] Create StreakCounter component in apps/web/src/components/habits/StreakCounter.tsx
+- [X] T023 [US3] Add streak API client function in apps/web/src/lib/habits-api.ts
 - [ ] T024 [US3] Integrate StreakCounter into habit list/card (update existing habit components)
 
 **Acceptance**: Streak counter displays "🔥 X days" next to each habit, updates in real-time after completion, shows 0 for new habits
@@ -253,8 +253,8 @@ This document breaks down the Habit Tracking & Streaks feature into actionable t
 
 **Tasks**:
 
-- [ ] T037 [P] [US7] Create GET /api/{user_id}/habits/{habit_id}/completions endpoint in apps/api/src/routes/habits.py
-- [ ] T038 [P] [US7] Create GetCompletionsResponse schema in apps/api/src/schemas/habit_schemas.py
+- [X] T037 [P] [US7] Create GET /api/{user_id}/habits/{habit_id}/completions endpoint in apps/api/src/routes/habits.py
+- [X] T038 [P] [US7] Create GetCompletionsResponse schema in apps/api/src/schemas/habit_schemas.py
 - [ ] T039 [P] [US7] Create CompletionHistory component in apps/web/src/components/habits/CompletionHistory.tsx
 - [ ] T040 [US7] Integrate CompletionHistory into habit detail page at apps/web/src/app/habits/[id]/page.tsx
 
@@ -276,7 +276,7 @@ This document breaks down the Habit Tracking & Streaks feature into actionable t
 
 **Tasks**:
 
-- [ ] T041 [P] [US8] Create DELETE /api/{user_id}/habits/{habit_id}/completions/{completion_id} endpoint in apps/api/src/routes/habits.py
+- [X] T041 [P] [US8] Create DELETE /api/{user_id}/habits/{habit_id}/completions/{completion_id} endpoint in apps/api/src/routes/habits.py
 - [ ] T042 [US8] Implement streak recalculation logic in DELETE endpoint (call streak_calculator with remaining completions)
 - [ ] T043 [P] [US8] Add "Undo" button to CompletionHistory component (calls DELETE endpoint)
 
