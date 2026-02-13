@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { completeHabit } from '@/lib/habits-api';
+import { playCompletionSound } from '@/lib/sound-player';
 import type { CompletionType } from '@/types/habit';
 import { CompletionTypeModal } from './CompletionTypeModal';
 
@@ -31,6 +32,8 @@ export function CompletionCheckbox({
   const handleCompletionTypeSelect = async (completionType: CompletionType) => {
     setShowModal(false);
     setIsSubmitting(true);
+    // Play sound immediately (before API — provides instant feedback)
+    playCompletionSound();
 
     try {
       const result = await completeHabit(userId, habitId, { completion_type: completionType });

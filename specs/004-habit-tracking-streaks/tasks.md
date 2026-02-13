@@ -159,7 +159,7 @@ This document breaks down the Habit Tracking & Streaks feature into actionable t
 
 - [X] T022 [P] [US3] Create StreakCounter component in apps/web/src/components/habits/StreakCounter.tsx
 - [X] T023 [US3] Add streak API client function in apps/web/src/lib/habits-api.ts
-- [ ] T024 [US3] Integrate StreakCounter into habit list/card (update existing habit components)
+- [X] T024 [US3] Integrate StreakCounter into habit list/card (update existing habit components)
 
 **Acceptance**: Streak counter displays "🔥 X days" next to each habit, updates in real-time after completion, shows 0 for new habits
 
@@ -179,10 +179,10 @@ This document breaks down the Habit Tracking & Streaks feature into actionable t
 
 **Tasks**:
 
-- [ ] T025 [P] [US4] Create sound-player utility in apps/web/src/lib/sound-player.ts (Web Audio API + HTML5 fallback)
-- [ ] T026 [P] [US4] Add sparkle.mp3 sound file to apps/web/public/sounds/
-- [ ] T027 [US4] Integrate sound player into CompletionCheckbox (call on checkbox click)
-- [ ] T028 [US4] Add graceful degradation (catch errors, continue without sound)
+- [X] T025 [P] [US4] Create sound-player utility in apps/web/src/lib/sound-player.ts (Web Audio API + HTML5 fallback)
+- [X] T026 [P] [US4] Add sparkle.mp3 sound file to apps/web/public/sounds/
+- [X] T027 [US4] Integrate sound player into CompletionCheckbox (call on checkbox click)
+- [X] T028 [US4] Add graceful degradation (catch errors, continue without sound)
 
 **Acceptance**: Sound plays immediately on completion, works on desktop browsers, works on mobile (after user gesture), fails silently if unsupported
 
@@ -204,14 +204,14 @@ This document breaks down the Habit Tracking & Streaks feature into actionable t
 
 ### Backend - Miss Detection
 
-- [ ] T029 [P] [US5] Create notification_service.py in apps/api/src/services/ (create_miss_notification function)
-- [ ] T030 [P] [US5] Create miss_detector.py in apps/api/src/services/ (detect_missed_habits background job)
-- [ ] T031 [US5] Implement first miss detection logic (increment consecutive_misses, emit HABIT_MISS_DETECTED)
-- [ ] T032 [US5] Start APScheduler on app startup in apps/api/src/main.py (daily at 00:01 UTC)
+- [X] T029 [P] [US5] Create notification_service.py in apps/api/src/services/ (create_miss_notification function)
+- [X] T030 [P] [US5] Create miss_detector.py in apps/api/src/services/ (detect_missed_habits background job)
+- [X] T031 [US5] Implement first miss detection logic (increment consecutive_misses, emit HABIT_MISS_DETECTED)
+- [X] T032 [US5] Start APScheduler on app startup in apps/api/src/main.py (daily at 00:01 UTC)
 
 ### Frontend - Notification Display
 
-- [ ] T033 [P] [US5] Create NotificationBanner component in apps/web/src/components/notifications/NotificationBanner.tsx
+- [X] T033 [P] [US5] Create NotificationBanner component in apps/web/src/components/notifications/NotificationBanner.tsx
 
 **Acceptance**: Background job runs daily, first miss increments consecutive_misses to 1, notification created with "Get back on track today!" message, notification banner displays on frontend
 
@@ -231,9 +231,9 @@ This document breaks down the Habit Tracking & Streaks feature into actionable t
 
 **Tasks**:
 
-- [ ] T034 [US6] Implement second consecutive miss logic in miss_detector.py (reset streak, emit HABIT_STREAK_RESET)
-- [ ] T035 [P] [US6] Implement create_streak_reset_notification function in notification_service.py
-- [ ] T036 [US6] Test bulk offline period handling (week+ gap triggers immediate reset)
+- [X] T034 [US6] Implement second consecutive miss logic in miss_detector.py (reset streak, emit HABIT_STREAK_RESET)
+- [X] T035 [P] [US6] Implement create_streak_reset_notification function in notification_service.py
+- [X] T036 [US6] Test bulk offline period handling (week+ gap triggers immediate reset)
 
 **Acceptance**: Second consecutive miss resets current_streak to 0, resets consecutive_misses to 0, notification created with "Your streak has reset" message, bulk gaps handled correctly
 
@@ -255,8 +255,8 @@ This document breaks down the Habit Tracking & Streaks feature into actionable t
 
 - [X] T037 [P] [US7] Create GET /api/{user_id}/habits/{habit_id}/completions endpoint in apps/api/src/routes/habits.py
 - [X] T038 [P] [US7] Create GetCompletionsResponse schema in apps/api/src/schemas/habit_schemas.py
-- [ ] T039 [P] [US7] Create CompletionHistory component in apps/web/src/components/habits/CompletionHistory.tsx
-- [ ] T040 [US7] Integrate CompletionHistory into habit detail page at apps/web/src/app/habits/[id]/page.tsx
+- [X] T039 [P] [US7] Create CompletionHistory component in apps/web/src/components/habits/CompletionHistory.tsx
+- [X] T040 [US7] Integrate CompletionHistory into habit detail page at apps/web/src/app/habits/[id]/page.tsx
 
 **Acceptance**: GET /completions endpoint returns completion list with date range filtering, history component displays completions in list or calendar format, shows completion_type for each entry
 
@@ -277,8 +277,8 @@ This document breaks down the Habit Tracking & Streaks feature into actionable t
 **Tasks**:
 
 - [X] T041 [P] [US8] Create DELETE /api/{user_id}/habits/{habit_id}/completions/{completion_id} endpoint in apps/api/src/routes/habits.py
-- [ ] T042 [US8] Implement streak recalculation logic in DELETE endpoint (call streak_calculator with remaining completions)
-- [ ] T043 [P] [US8] Add "Undo" button to CompletionHistory component (calls DELETE endpoint)
+- [X] T042 [US8] Implement streak recalculation logic in DELETE endpoint (call streak_calculator with remaining completions)
+- [X] T043 [P] [US8] Add "Undo" button to CompletionHistory component (calls DELETE endpoint)
 
 **Acceptance**: DELETE endpoint removes completion, recalculates streak from remaining completions, updates habit.last_completed_at, frontend shows undo button with confirmation
 
@@ -294,10 +294,10 @@ This document breaks down the Habit Tracking & Streaks feature into actionable t
 
 **Tasks**:
 
-- [ ] T044 [P] Add environment variables for sound path, notification messages, miss detection schedule in apps/api/.env.example and apps/web/.env.local.example
-- [ ] T045 [P] Verify mobile responsiveness (44×44px tap targets, 60fps animations, thumb-friendly buttons)
-- [ ] T046 [P] Add error handling and loading states to all frontend components
-- [ ] T047 Run end-to-end integration test (complete habit → verify streak → miss day → verify notification → undo → verify recalculation)
+- [X] T044 [P] Add environment variables for sound path, notification messages, miss detection schedule in apps/api/.env.example and apps/web/.env.local.example
+- [X] T045 [P] Verify mobile responsiveness (44×44px tap targets, 60fps animations, thumb-friendly buttons)
+- [X] T046 [P] Add error handling and loading states to all frontend components
+- [X] T047 Run end-to-end integration test (complete habit → verify streak → miss day → verify notification → undo → verify recalculation)
 
 **Acceptance**: All configuration externalized, mobile experience smooth, errors handled gracefully, end-to-end flow works correctly
 
