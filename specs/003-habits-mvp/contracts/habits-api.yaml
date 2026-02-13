@@ -213,16 +213,8 @@ paths:
       tags:
         - habits
       responses:
-        '200':
-          description: Habit deleted successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: Habit deleted successfully
+        '204':
+          description: Habit deleted successfully (no content)
         '400':
           description: Cannot delete - habit has dependencies
           content:
@@ -587,11 +579,11 @@ components:
             detail: Habit not found
 
   securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
-      description: JWT token from authentication
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: auth_token
+      description: JWT token stored in httpOnly cookie
 
 security:
-  - bearerAuth: []
+  - cookieAuth: []

@@ -261,8 +261,8 @@ components:
     cookieAuth:
       type: apiKey
       in: cookie
-      name: session_token
-      description: Session token stored in httpOnly cookie
+      name: auth_token
+      description: JWT token stored in httpOnly cookie
 
   parameters:
     UserIdPath:
@@ -439,21 +439,12 @@ components:
     Error:
       type: object
       required:
-        - error
-        - message
+        - detail
       properties:
-        error:
+        detail:
           type: string
-          description: Error type
-          example: "BadRequest"
-        message:
-          type: string
-          description: Human-readable error message
+          description: Human-readable error message (FastAPI default format)
           example: "Title cannot be empty"
-        details:
-          type: object
-          description: Additional error details (optional)
-          additionalProperties: true
 
   responses:
     BadRequest:
@@ -463,8 +454,7 @@ components:
           schema:
             $ref: '#/components/schemas/Error'
           example:
-            error: "BadRequest"
-            message: "Title cannot be empty or only whitespace"
+            detail: "Title cannot be empty or only whitespace"
 
     Unauthorized:
       description: Not authenticated
@@ -473,8 +463,7 @@ components:
           schema:
             $ref: '#/components/schemas/Error'
           example:
-            error: "Unauthorized"
-            message: "Authentication required"
+            detail: "Authentication required"
 
     Forbidden:
       description: Authenticated but not authorized to access this resource
@@ -483,8 +472,7 @@ components:
           schema:
             $ref: '#/components/schemas/Error'
           example:
-            error: "Forbidden"
-            message: "Access denied: You are logged in as {current_user_id} but trying to access tasks for {user_id}"
+            detail: "Access denied: you do not have permission to access tasks for this user"
 
     NotFound:
       description: Resource not found
@@ -493,8 +481,7 @@ components:
           schema:
             $ref: '#/components/schemas/Error'
           example:
-            error: "NotFound"
-            message: "Task with ID {task_id} not found for user {user_id}"
+            detail: "Task not found"
 
 security:
   - cookieAuth: []
