@@ -10,11 +10,11 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createHabit, updateHabit, getHabits } from '@/lib/habits-api';
-import { 
-  Habit, 
-  HabitCategory, 
-  HabitStatus, 
-  RecurringSchedule 
+import {
+  Habit,
+  HabitCategory,
+  HabitStatus,
+  RecurringSchedule
 } from '@/types/habit';
 import { useToast } from '@/lib/toast-context';
 
@@ -39,7 +39,7 @@ export function HabitForm({ userId, habitId, initialData, onSuccess }: HabitForm
   const [motivation, setMotivation] = useState(initialData?.motivation || '');
   const [category, setCategory] = useState<HabitCategory>(initialData?.category || HabitCategory.HEALTH_FITNESS);
   const [status, setStatus] = useState<HabitStatus>(initialData?.status || HabitStatus.ACTIVE);
-  
+
   // Recurring Schedule State
   const [scheduleType, setScheduleType] = useState<RecurringSchedule['type']>(initialData?.recurring_schedule?.type || 'daily');
   const [scheduleDays, setScheduleDays] = useState<number[]>(initialData?.recurring_schedule?.days || []);
@@ -123,7 +123,7 @@ export function HabitForm({ userId, habitId, initialData, onSuccess }: HabitForm
   };
 
   const toggleDay = (day: number) => {
-    setScheduleDays(prev => 
+    setScheduleDays(prev =>
       prev.includes(day) ? prev.filter(d => d !== day) : [...prev, day]
     );
   };
@@ -139,18 +139,18 @@ export function HabitForm({ userId, habitId, initialData, onSuccess }: HabitForm
   ];
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+    <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl bg-notebook-paper-white p-6 rounded-xl shadow-notebook-md border border-notebook-line">
       {/* Identity Statement */}
       <div>
-        <label htmlFor="identity" className="block text-sm font-semibold text-gray-800 mb-1">
-          Identity Statement <span className="text-red-500">*</span>
+        <label htmlFor="identity" className="block text-sm font-semibold font-caveat text-notebook-ink mb-1">
+          Identity Statement <span className="text-notebook-ink-red">*</span>
         </label>
-        <p className="text-xs text-gray-500 mb-2">Focus on who you are becoming (e.g., "I am a person who exercises daily")</p>
+        <p className="text-xs text-notebook-ink-light font-inter mb-2">Focus on who you are becoming (e.g., "I am a person who exercises daily")</p>
         <textarea
           id="identity"
           value={identityStatement}
           onChange={(e) => setIdentityStatement(e.target.value)}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+          className="w-full px-4 py-3 border-0 border-b-2 border-notebook-line bg-transparent rounded-none font-inter text-notebook-ink focus:outline-none focus:border-notebook-ink-blue focus:border-b-[3px] transition-all"
           placeholder="I am a person who..."
           required
           rows={2}
@@ -159,16 +159,16 @@ export function HabitForm({ userId, habitId, initialData, onSuccess }: HabitForm
 
       {/* 2-Minute Version */}
       <div>
-        <label htmlFor="twoMinute" className="block text-sm font-semibold text-gray-800 mb-1">
-          2-Minute Version <span className="text-red-500">*</span>
+        <label htmlFor="twoMinute" className="block text-sm font-semibold font-caveat text-notebook-ink mb-1">
+          2-Minute Version <span className="text-notebook-ink-red">*</span>
         </label>
-        <p className="text-xs text-gray-500 mb-2">Law 3: Make It Easy. A version of this habit that takes less than 2 minutes.</p>
+        <p className="text-xs text-notebook-ink-light font-inter mb-2">Law 3: Make It Easy. A version of this habit that takes less than 2 minutes.</p>
         <input
           type="text"
           id="twoMinute"
           value={twoMinuteVersion}
           onChange={(e) => setTwoMinuteVersion(e.target.value)}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+          className="w-full px-4 py-3 border-0 border-b-2 border-notebook-line bg-transparent rounded-none font-inter text-notebook-ink focus:outline-none focus:border-notebook-ink-blue focus:border-b-[3px] transition-all"
           placeholder="e.g., Put on my running shoes"
           required
         />
@@ -177,14 +177,14 @@ export function HabitForm({ userId, habitId, initialData, onSuccess }: HabitForm
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Category */}
         <div>
-          <label htmlFor="category" className="block text-sm font-semibold text-gray-800 mb-2">
+          <label htmlFor="category" className="block text-sm font-semibold font-caveat text-notebook-ink mb-2">
             Category
           </label>
           <select
             id="category"
             value={category}
             onChange={(e) => setCategory(e.target.value as HabitCategory)}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+            className="w-full px-4 py-3 border-0 border-b-2 border-notebook-line bg-transparent rounded-none font-inter text-notebook-ink focus:outline-none focus:border-notebook-ink-blue focus:border-b-[3px]"
           >
             {Object.values(HabitCategory).map((cat) => (
               <option key={cat} value={cat}>{cat}</option>
@@ -195,14 +195,14 @@ export function HabitForm({ userId, habitId, initialData, onSuccess }: HabitForm
         {/* Status (Edit Mode Only) */}
         {isEditMode && (
           <div>
-            <label htmlFor="status" className="block text-sm font-semibold text-gray-800 mb-2">
+            <label htmlFor="status" className="block text-sm font-semibold font-caveat text-notebook-ink mb-2">
               Status
             </label>
             <select
               id="status"
               value={status}
               onChange={(e) => setStatus(e.target.value as HabitStatus)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+              className="w-full px-4 py-3 border-0 border-b-2 border-notebook-line bg-transparent rounded-none font-inter text-notebook-ink focus:outline-none focus:border-notebook-ink-blue focus:border-b-[3px]"
             >
               <option value={HabitStatus.ACTIVE}>Active</option>
               <option value={HabitStatus.ARCHIVED}>Archived</option>
@@ -212,8 +212,8 @@ export function HabitForm({ userId, habitId, initialData, onSuccess }: HabitForm
       </div>
 
       {/* Habit Stacking */}
-      <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
-        <label htmlFor="anchor" className="block text-sm font-semibold text-blue-900 mb-2">
+      <div className="bg-notebook-paper-alt p-4 rounded-lg border border-notebook-line">
+        <label htmlFor="anchor" className="block text-sm font-semibold font-caveat text-notebook-ink-blue mb-2">
           Habit Stacking (Law 1: Make It Obvious)
         </label>
         <select
@@ -233,7 +233,7 @@ export function HabitForm({ userId, habitId, initialData, onSuccess }: HabitForm
               setHabitStackingCue('');
             }
           }}
-          className="w-full px-4 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white mb-3"
+          className="w-full px-4 py-2 border-0 border-b-2 border-notebook-line bg-transparent rounded-none font-inter text-notebook-ink focus:outline-none focus:border-notebook-ink-blue focus:border-b-[3px] mb-3"
           disabled={isLoadingHabits || existingHabits.length === 0}
         >
           <option value="">Select an anchor habit...</option>
@@ -241,14 +241,14 @@ export function HabitForm({ userId, habitId, initialData, onSuccess }: HabitForm
             <option key={h.id} value={h.id}>{h.identity_statement}</option>
           ))}
         </select>
-        
+
         {existingHabits.length === 0 && !isLoadingHabits && (
-          <p className="text-xs text-blue-600 mb-3 italic">Create more habits to enable stacking!</p>
+          <p className="text-xs text-notebook-ink-blue mb-3 italic font-inter">Create more habits to enable stacking!</p>
         )}
 
         {anchorHabitId && (
           <div>
-            <label htmlFor="cue" className="block text-xs font-semibold text-blue-800 mb-1 uppercase tracking-wider">
+            <label htmlFor="cue" className="block text-xs font-semibold text-notebook-ink-medium mb-1 uppercase tracking-wider font-inter">
               Stacking Cue
             </label>
             <input
@@ -256,7 +256,7 @@ export function HabitForm({ userId, habitId, initialData, onSuccess }: HabitForm
               id="cue"
               value={habitStackingCue}
               onChange={(e) => setHabitStackingCue(e.target.value)}
-              className="w-full px-3 py-2 border border-blue-200 rounded-md focus:ring-2 focus:ring-blue-500 bg-white"
+              className="w-full px-3 py-2 border-0 border-b-2 border-notebook-line bg-transparent rounded-none font-inter text-notebook-ink focus:outline-none focus:border-notebook-ink-blue focus:border-b-[3px]"
               placeholder="After I [X], I will [Y]"
             />
           </div>
@@ -264,14 +264,14 @@ export function HabitForm({ userId, habitId, initialData, onSuccess }: HabitForm
       </div>
 
       {/* Recurring Schedule */}
-      <div className="border-t pt-6">
-        <label className="block text-sm font-semibold text-gray-800 mb-3">
+      <div className="border-t border-notebook-line pt-6">
+        <label className="block text-sm font-semibold font-caveat text-notebook-ink mb-3">
           How often will you do this?
         </label>
-        <p className="text-sm text-blue-600 mb-3">
+        <p className="text-sm text-notebook-ink-blue font-inter mb-3">
           Tasks will be automatically created based on this schedule for the next 7 days.
         </p>
-        
+
         <div className="flex gap-4 mb-4">
           {(['daily', 'weekly', 'monthly'] as const).map((type) => (
             <label key={type} className="flex items-center cursor-pointer group">
@@ -283,10 +283,10 @@ export function HabitForm({ userId, habitId, initialData, onSuccess }: HabitForm
                 onChange={() => setScheduleType(type)}
                 className="hidden"
               />
-              <span className={`px-4 py-2 rounded-full text-sm font-medium border transition-all ${
-                scheduleType === type 
-                  ? 'bg-blue-600 border-blue-600 text-white' 
-                  : 'bg-white border-gray-300 text-gray-600 group-hover:border-blue-400'
+              <span className={`px-4 py-2 rounded-full text-sm font-patrick-hand font-medium border transition-all ${
+                scheduleType === type
+                  ? 'bg-notebook-ink-blue border-notebook-ink-blue text-notebook-paper-white'
+                  : 'bg-notebook-paper-white border-notebook-line text-notebook-ink-medium group-hover:border-notebook-ink-blue'
               }`}>
                 {type.charAt(0).toUpperCase() + type.slice(1)}
               </span>
@@ -296,17 +296,17 @@ export function HabitForm({ userId, habitId, initialData, onSuccess }: HabitForm
 
         {scheduleType === 'weekly' && (
           <div className="mb-4">
-            <p className="text-xs text-gray-500 mb-2">Select days of the week:</p>
+            <p className="text-xs text-notebook-ink-light font-inter mb-2">Select days of the week:</p>
             <div className="flex flex-wrap gap-2">
               {daysOfWeek.map((day) => (
                 <button
                   key={day.value}
                   type="button"
                   onClick={() => toggleDay(day.value)}
-                  className={`w-10 h-10 rounded-full text-xs font-bold border transition-all ${
+                  className={`w-10 h-10 rounded-full text-xs font-patrick-hand font-bold border transition-all ${
                     scheduleDays.includes(day.value)
-                      ? 'bg-blue-100 border-blue-500 text-blue-700'
-                      : 'bg-gray-50 border-gray-200 text-gray-400'
+                      ? 'bg-notebook-ink-blue border-notebook-ink-blue text-notebook-paper-white'
+                      : 'bg-notebook-paper-alt border-notebook-line text-notebook-ink-light'
                   }`}
                 >
                   {day.label}
@@ -318,7 +318,7 @@ export function HabitForm({ userId, habitId, initialData, onSuccess }: HabitForm
 
         {scheduleType === 'monthly' && (
           <div className="mb-4 flex items-center gap-3">
-            <label htmlFor="dayOfMonth" className="text-sm text-gray-600">Day of month:</label>
+            <label htmlFor="dayOfMonth" className="text-sm text-notebook-ink-medium font-inter">Day of month:</label>
             <input
               type="number"
               id="dayOfMonth"
@@ -326,13 +326,13 @@ export function HabitForm({ userId, habitId, initialData, onSuccess }: HabitForm
               max="31"
               value={scheduleDayOfMonth}
               onChange={(e) => setScheduleDayOfMonth(parseInt(e.target.value))}
-              className="w-20 px-3 py-2 border border-gray-300 rounded-md"
+              className="w-20 px-3 py-2 border-0 border-b-2 border-notebook-line bg-transparent rounded-none font-inter text-notebook-ink focus:outline-none focus:border-notebook-ink-blue"
             />
           </div>
         )}
 
         <div>
-          <label htmlFor="until" className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wider">
+          <label htmlFor="until" className="block text-xs font-semibold text-notebook-ink-light font-inter mb-1 uppercase tracking-wider">
             Repeat until (optional)
           </label>
           <input
@@ -340,41 +340,41 @@ export function HabitForm({ userId, habitId, initialData, onSuccess }: HabitForm
             id="until"
             value={scheduleUntil}
             onChange={(e) => setScheduleUntil(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+            className="px-3 py-2 border-0 border-b-2 border-notebook-line bg-transparent rounded-none font-inter text-notebook-ink text-sm focus:outline-none focus:border-notebook-ink-blue"
           />
         </div>
       </div>
 
       {/* Motivation & Description */}
-      <div className="border-t pt-6">
+      <div className="border-t border-notebook-line pt-6">
         <details className="group">
-          <summary className="list-none cursor-pointer flex items-center text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors">
-            <span className="mr-2 transform group-open:rotate-90 transition-transform">▶</span>
+          <summary className="list-none cursor-pointer flex items-center text-sm font-semibold font-caveat text-notebook-ink-medium hover:text-notebook-ink transition-colors">
+            <span className="mr-2 transform group-open:rotate-90 transition-transform">&#9654;</span>
             Advanced: Motivation & Description
           </summary>
           <div className="mt-4 space-y-4">
             <div>
-              <label htmlFor="motivation" className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wider">
+              <label htmlFor="motivation" className="block text-xs font-semibold text-notebook-ink-light font-inter mb-1 uppercase tracking-wider">
                 What is your motivation? (Law 2: Make It Attractive)
               </label>
               <textarea
                 id="motivation"
                 value={motivation}
                 onChange={(e) => setMotivation(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm"
+                className="w-full px-4 py-2 border-0 border-b-2 border-notebook-line bg-transparent rounded-none font-inter text-notebook-ink text-sm focus:outline-none focus:border-notebook-ink-blue focus:border-b-[3px]"
                 rows={2}
                 placeholder="Why do you want to build this habit?"
               />
             </div>
             <div>
-              <label htmlFor="fullDesc" className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wider">
+              <label htmlFor="fullDesc" className="block text-xs font-semibold text-notebook-ink-light font-inter mb-1 uppercase tracking-wider">
                 Full Description
               </label>
               <textarea
                 id="fullDesc"
                 value={fullDescription}
                 onChange={(e) => setFullDescription(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm"
+                className="w-full px-4 py-2 border-0 border-b-2 border-notebook-line bg-transparent rounded-none font-inter text-notebook-ink text-sm focus:outline-none focus:border-notebook-ink-blue focus:border-b-[3px]"
                 rows={3}
                 placeholder="Detailed explanation of the habit..."
               />
@@ -384,11 +384,11 @@ export function HabitForm({ userId, habitId, initialData, onSuccess }: HabitForm
       </div>
 
       {/* Form Actions */}
-      <div className="flex justify-end gap-3 pt-4 border-t">
+      <div className="flex justify-end gap-3 pt-4 border-t border-notebook-line">
         <button
           type="button"
           onClick={() => router.back()}
-          className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+          className="px-6 py-2.5 border border-notebook-line rounded-lg text-notebook-ink-medium font-patrick-hand font-medium hover:bg-notebook-paper-alt transition-colors"
           disabled={isSubmitting}
         >
           Cancel
@@ -396,10 +396,10 @@ export function HabitForm({ userId, habitId, initialData, onSuccess }: HabitForm
         <button
           type="submit"
           disabled={isSubmitting}
-          className="px-6 py-2.5 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg flex items-center gap-2"
+          className="px-6 py-2.5 bg-notebook-ink-blue text-notebook-paper-white rounded-lg font-patrick-hand font-semibold hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-notebook-md hover:shadow-notebook-lg flex items-center gap-2"
         >
           {isSubmitting && (
-            <svg className="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24">
+            <svg className="animate-spin h-4 w-4 text-notebook-paper-white" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
             </svg>

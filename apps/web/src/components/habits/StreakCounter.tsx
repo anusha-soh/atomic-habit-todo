@@ -11,6 +11,7 @@ interface StreakCounterProps {
 /**
  * Displays the current habit streak with a fire emoji.
  * Animates (bounce) when the streak value changes.
+ * Shows milestone text at 7, 21, and 30 day streaks.
  */
 export function StreakCounter({ streak, compact = false }: StreakCounterProps) {
   const prevRef = useRef(streak);
@@ -29,21 +30,34 @@ export function StreakCounter({ streak, compact = false }: StreakCounterProps) {
 
   if (streak === 0) {
     return compact ? null : (
-      <span className="text-xs text-gray-400">No streak yet</span>
+      <span className="text-xs font-inter text-notebook-ink-light">No streak yet</span>
     );
   }
 
+  const milestoneText =
+    streak >= 30 ? 'Unstoppable — 30 day streak!' :
+    streak >= 21 ? 'Incredible — 21 day streak!' :
+    streak >= 7 ? 'Amazing — 7 day streak!' :
+    null;
+
   return (
-    <span
-      ref={spanRef}
-      className="inline-flex items-center gap-1 font-semibold text-orange-500"
-      aria-label={`${streak} day streak`}
-    >
-      🔥
-      <span className="tabular-nums">{streak}</span>
-      {!compact && (
-        <span className="text-sm font-normal text-gray-600">
-          {streak === 1 ? 'day' : 'days'}
+    <span className="inline-flex items-center gap-1">
+      <span
+        ref={spanRef}
+        className="inline-flex items-center gap-1 font-semibold text-notebook-ink-red"
+        aria-label={`${streak} day streak`}
+      >
+        🔥
+        <span className="tabular-nums">{streak}</span>
+        {!compact && (
+          <span className="text-sm font-normal font-inter text-notebook-ink-medium">
+            {streak === 1 ? 'day' : 'days'}
+          </span>
+        )}
+      </span>
+      {milestoneText && (
+        <span className="ml-2 font-caveat text-notebook-ink-green text-sm">
+          {milestoneText}
         </span>
       )}
     </span>

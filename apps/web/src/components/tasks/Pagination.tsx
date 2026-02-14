@@ -31,41 +31,41 @@ export function Pagination({ total, limit, currentPage }: PaginationProps) {
   const getPageNumbers = () => {
     const pages = [];
     const maxVisiblePages = 5;
-    
+
     if (totalPages <= maxVisiblePages) {
       for (let i = 1; i <= totalPages; i++) pages.push(i);
     } else {
       pages.push(1);
-      
+
       let start = Math.max(2, currentPage - 1);
       let end = Math.min(totalPages - 1, currentPage + 1);
-      
+
       if (currentPage <= 2) end = 4;
       if (currentPage >= totalPages - 1) start = totalPages - 3;
-      
+
       if (start > 2) pages.push('...');
       for (let i = start; i <= end; i++) pages.push(i);
       if (end < totalPages - 1) pages.push('...');
-      
+
       pages.push(totalPages);
     }
     return pages;
   };
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between mt-8 pt-4 border-t border-gray-200 gap-4">
-      <p className="text-sm text-gray-500">
-        Showing <span className="font-medium">{(currentPage - 1) * limit + 1}</span> to{' '}
-        <span className="font-medium">{Math.min(currentPage * limit, total)}</span> of{' '}
-        <span className="font-medium">{total}</span> tasks
+    <div className="flex flex-col sm:flex-row items-center justify-between mt-8 pt-4 border-t border-notebook-line gap-4">
+      <p className="text-sm text-notebook-ink-light font-inter">
+        Showing <span className="font-medium text-notebook-ink">{(currentPage - 1) * limit + 1}</span> to{' '}
+        <span className="font-medium text-notebook-ink">{Math.min(currentPage * limit, total)}</span> of{' '}
+        <span className="font-medium text-notebook-ink">{total}</span> tasks
       </p>
-      
+
       <nav className="inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
         {/* Previous Button */}
         <Link
           href={createPageUrl(Math.max(1, currentPage - 1))}
-          className={`relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 touch-target ${
-            currentPage === 1 ? 'pointer-events-none opacity-50' : ''
+          className={`relative inline-flex items-center px-2 py-2 rounded-l-md border border-notebook-line bg-notebook-paper-white text-sm font-patrick-hand text-notebook-ink-medium hover:bg-notebook-paper-alt touch-target ${
+            currentPage === 1 ? 'pointer-events-none text-notebook-ink-light opacity-50' : ''
           }`}
         >
           <span className="sr-only">Previous</span>
@@ -80,10 +80,10 @@ export function Pagination({ total, limit, currentPage }: PaginationProps) {
             <Link
               key={index}
               href={createPageUrl(page)}
-              className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium touch-target ${
+              className={`relative inline-flex items-center px-4 py-2 border text-sm font-patrick-hand touch-target ${
                 currentPage === page
-                  ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
-                  : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                  ? 'z-10 bg-notebook-ink-blue border-notebook-ink-blue text-notebook-paper-white'
+                  : 'bg-notebook-paper-white border-notebook-line text-notebook-ink-medium hover:bg-notebook-paper-alt'
               }`}
             >
               {page}
@@ -91,7 +91,7 @@ export function Pagination({ total, limit, currentPage }: PaginationProps) {
           ) : (
             <span
               key={index}
-              className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700"
+              className="relative inline-flex items-center px-4 py-2 border border-notebook-line bg-notebook-paper-white text-sm font-patrick-hand text-notebook-ink-medium"
             >
               {page}
             </span>
@@ -101,8 +101,8 @@ export function Pagination({ total, limit, currentPage }: PaginationProps) {
         {/* Next Button */}
         <Link
           href={createPageUrl(Math.min(totalPages, currentPage + 1))}
-          className={`relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 touch-target ${
-            currentPage === totalPages ? 'pointer-events-none opacity-50' : ''
+          className={`relative inline-flex items-center px-2 py-2 rounded-r-md border border-notebook-line bg-notebook-paper-white text-sm font-patrick-hand text-notebook-ink-medium hover:bg-notebook-paper-alt touch-target ${
+            currentPage === totalPages ? 'pointer-events-none text-notebook-ink-light opacity-50' : ''
           }`}
         >
           <span className="sr-only">Next</span>

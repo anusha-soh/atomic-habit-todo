@@ -15,6 +15,7 @@ interface NotificationBannerProps {
 
 /**
  * Non-intrusive banner that shows missed-habit alerts at the top of the page.
+ * Restyled T043 — Notebook design system (US7)
  * Auto-dismisses after 8 seconds.
  */
 export function NotificationBanner({ notifications, onDismiss }: NotificationBannerProps) {
@@ -34,24 +35,19 @@ export function NotificationBanner({ notifications, onDismiss }: NotificationBan
           <div
             key={notif.id}
             role="alert"
-            className={[
-              'flex items-start gap-3 rounded-xl px-4 py-3 shadow-lg text-sm font-medium',
-              notif.type === 'STREAK_RESET'
-                ? 'bg-amber-50 border border-amber-200 text-amber-900'
-                : 'bg-blue-50 border border-blue-200 text-blue-900',
-            ].join(' ')}
+            className="flex items-start gap-3 rounded-xl px-4 py-3 bg-notebook-highlight-yellow shadow-notebook-md text-sm font-patrick-hand text-notebook-ink"
           >
             <span className="text-lg flex-shrink-0" aria-hidden>
-              {notif.type === 'STREAK_RESET' ? '⚠️' : '🔔'}
+              {notif.type === 'STREAK_RESET' ? String.fromCodePoint(0x26A0, 0xFE0F) : String.fromCodePoint(0x1F514)}
             </span>
             <span className="flex-1">{notif.message}</span>
             <button
               type="button"
               aria-label="Dismiss notification"
               onClick={() => onDismiss(notif.id)}
-              className="text-gray-400 hover:text-gray-600 ml-2 flex-shrink-0"
+              className="text-notebook-ink-light hover:text-notebook-ink ml-2 flex-shrink-0"
             >
-              ✕
+              {String.fromCharCode(0x2715)}
             </button>
           </div>
         ) : null

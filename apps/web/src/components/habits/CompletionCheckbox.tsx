@@ -69,9 +69,10 @@ export function CompletionCheckbox({
           // 44×44px minimum tap target (mobile-first)
           'w-11 h-11 rounded-full border-2 transition-all duration-200',
           checked
-            ? 'bg-green-500 border-green-500 cursor-default'
-            : 'bg-white border-gray-300 hover:border-green-400 cursor-pointer',
+            ? 'bg-notebook-ink-green border-notebook-ink-green cursor-default'
+            : 'bg-notebook-paper-white border-notebook-line hover:border-notebook-ink-green cursor-pointer',
           isSubmitting ? 'opacity-60' : '',
+          showAnimation ? 'animate-highlight-flash' : '',
         ].join(' ')}
       >
         {/* Checkmark icon */}
@@ -92,7 +93,7 @@ export function CompletionCheckbox({
 
         {/* Spinner while submitting */}
         {isSubmitting && !checked && (
-          <span className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+          <span className="w-4 h-4 border-2 border-notebook-ink-light border-t-transparent rounded-full animate-spin" />
         )}
       </button>
 

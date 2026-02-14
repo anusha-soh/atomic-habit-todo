@@ -45,8 +45,8 @@ export default function DashboardPage() {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
-          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-notebook-ink-blue border-r-transparent"></div>
+          <p className="mt-4 text-notebook-ink-medium">Loading...</p>
         </div>
       </div>
     )
@@ -55,7 +55,7 @@ export default function DashboardPage() {
   if (error) {
     return (
       <div className="flex min-h-screen items-center justify-center p-4">
-        <div className="rounded-md bg-red-50 p-4 text-red-800">
+        <div className="bg-notebook-highlight-pink/50 text-notebook-ink-red font-patrick-hand rounded-lg p-4">
           {error}
         </div>
       </div>
@@ -69,9 +69,9 @@ export default function DashboardPage() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       {/* Main content */}
-      <div className="rounded-lg bg-white p-6 shadow-sm border border-gray-200">
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">Welcome!</h2>
-        <div className="space-y-2 text-gray-600">
+      <div className="rounded-lg bg-notebook-paper-white p-6 shadow-notebook-md border border-notebook-line">
+        <h2 className="font-caveat text-3xl text-notebook-ink mb-4">Welcome!</h2>
+        <div className="space-y-2 text-notebook-ink-medium font-inter">
           <p>
             <strong>Email:</strong> {user.email}
           </p>
@@ -79,7 +79,7 @@ export default function DashboardPage() {
             <strong>Account created:</strong>{' '}
             {mounted ? new Date(user.created_at).toLocaleDateString() : 'Loading...'}
           </p>
-          <p className="mt-4 text-sm text-green-600 font-medium">
+          <p className="mt-4 text-sm text-notebook-ink-green font-medium">
             ✅ You're successfully authenticated.
           </p>
         </div>
@@ -87,21 +87,25 @@ export default function DashboardPage() {
 
       {/* Quick Actions */}
       <div className="mt-8 grid gap-6 md:grid-cols-2">
-        <Link href="/tasks" className="group rounded-lg border border-gray-200 bg-white p-6 hover:border-blue-500 transition-colors shadow-sm">
-          <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 flex items-center gap-2">
-            <span>📋</span> Manage Tasks
-          </h3>
-          <p className="mt-2 text-sm text-gray-600">
-            View, create, and organize your daily to-do list.
-          </p>
-        </Link>
-        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm opacity-60">
-          <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-            <span>📈</span> Habits
-          </h3>
-          <p className="mt-2 text-sm text-gray-600">
-            Coming soon in Phase 2 Chunk 3.
-          </p>
+        <div className="animate-fade-in-up" style={{ animationDelay: '100ms' }}>
+          <Link href="/tasks" className="block group rounded-lg border border-notebook-line bg-notebook-paper-white p-6 shadow-notebook-sm hover:shadow-notebook-hover hover:-translate-y-1 transition-all duration-200">
+            <h3 className="font-patrick-hand text-notebook-ink group-hover:text-notebook-ink-blue flex items-center gap-2">
+              <span>📋</span> Manage Tasks
+            </h3>
+            <p className="mt-2 text-sm text-notebook-ink-medium font-inter">
+              View, create, and organize your daily to-do list.
+            </p>
+          </Link>
+        </div>
+        <div className="animate-fade-in-up" style={{ animationDelay: '200ms' }}>
+          <Link href="/habits" className="block group rounded-lg border border-notebook-line bg-notebook-paper-white p-6 shadow-notebook-sm hover:shadow-notebook-hover hover:-translate-y-1 transition-all duration-200">
+            <h3 className="font-patrick-hand text-notebook-ink group-hover:text-notebook-ink-blue flex items-center gap-2">
+              <span>📈</span> Habits
+            </h3>
+            <p className="mt-2 text-sm text-notebook-ink-medium font-inter">
+              Track and build your daily habits.
+            </p>
+          </Link>
         </div>
       </div>
     </div>

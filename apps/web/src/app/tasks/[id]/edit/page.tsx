@@ -44,23 +44,23 @@ export default async function EditTaskPage({ params }: EditTaskPageProps) {
       <div className="mb-8">
         <Link
           href="/tasks"
-          className="text-blue-600 hover:text-blue-800 text-sm mb-4 inline-block"
+          className="text-notebook-ink-blue hover:text-notebook-ink-blue/80 font-patrick-hand text-sm mb-4 inline-block"
         >
           &larr; Back to Tasks
         </Link>
-        <h1 className="text-3xl font-bold text-gray-900">Edit Task</h1>
+        <h1 className="text-4xl font-caveat text-notebook-ink">Edit Task</h1>
       </div>
 
       {/* Error state */}
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6">
+        <div className="bg-notebook-highlight-pink/50 border border-notebook-ink-red/20 text-notebook-ink-red font-patrick-hand px-4 py-3 rounded mb-6">
           {error}
         </div>
       )}
 
       {/* Edit form */}
       {task && (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="bg-notebook-paper-white rounded-lg shadow-notebook-sm border border-notebook-line p-6">
           <TaskForm
             userId={userId}
             taskId={taskId}

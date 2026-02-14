@@ -54,8 +54,8 @@ export function GeneratedTasksList({ userId, habitId }: GeneratedTasksListProps)
   if (loading) {
     return (
       <div className="mt-6">
-        <h3 className="text-lg font-semibold text-gray-800 mb-3">Generated Tasks</h3>
-        <p className="text-sm text-gray-500">Loading...</p>
+        <h3 className="text-lg font-caveat text-notebook-ink mb-3">Generated Tasks</h3>
+        <p className="text-sm font-inter text-notebook-ink-light">Loading...</p>
       </div>
     );
   }
@@ -63,13 +63,13 @@ export function GeneratedTasksList({ userId, habitId }: GeneratedTasksListProps)
   return (
     <div className="mt-6">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-lg font-semibold text-gray-800">
+        <h3 className="text-lg font-caveat text-notebook-ink">
           Generated Tasks ({total})
         </h3>
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="text-sm border rounded px-2 py-1"
+          className="text-sm font-patrick-hand border border-notebook-line rounded px-2 py-1 bg-notebook-paper-white text-notebook-ink-medium"
         >
           <option value="">All</option>
           <option value="pending">Pending</option>
@@ -78,7 +78,7 @@ export function GeneratedTasksList({ userId, habitId }: GeneratedTasksListProps)
       </div>
 
       {tasks.length === 0 ? (
-        <p className="text-sm text-gray-500">No generated tasks yet.</p>
+        <p className="text-sm font-inter text-notebook-ink-light">No generated tasks yet.</p>
       ) : (
         <ul className="space-y-2">
           {tasks.map((task) => (
@@ -86,26 +86,26 @@ export function GeneratedTasksList({ userId, habitId }: GeneratedTasksListProps)
               key={task.id}
               className={`flex items-center justify-between p-3 rounded-lg border ${
                 task.completed
-                  ? 'bg-gray-50 border-gray-200'
-                  : 'bg-white border-gray-200'
+                  ? 'bg-notebook-paper-alt border-notebook-line'
+                  : 'bg-notebook-paper-white border-notebook-line'
               }`}
             >
               <div className="flex-1">
-                <span className={`text-sm font-medium ${
-                  task.completed ? 'text-gray-500 line-through' : 'text-gray-900'
+                <span className={`text-sm font-inter font-medium ${
+                  task.completed ? 'text-notebook-ink-light line-through' : 'text-notebook-ink'
                 }`}>
                   {task.title}
                 </span>
                 {task.due_date && (
-                  <span className="ml-2 text-xs text-gray-500">
+                  <span className="ml-2 text-xs font-inter text-notebook-ink-light">
                     {format(new Date(task.due_date), 'MMM d, yyyy')}
                   </span>
                 )}
               </div>
-              <span className={`text-xs px-2 py-0.5 rounded-full ${
+              <span className={`text-xs font-patrick-hand px-2 py-0.5 rounded-full ${
                 task.completed
-                  ? 'bg-green-100 text-green-800'
-                  : 'bg-yellow-100 text-yellow-800'
+                  ? 'bg-notebook-highlight-mint/50 text-notebook-ink-green'
+                  : 'bg-notebook-highlight-yellow/50 text-notebook-ink'
               }`}>
                 {task.status}
               </span>

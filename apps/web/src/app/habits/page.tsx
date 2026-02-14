@@ -78,7 +78,7 @@ export default function HabitsPage() {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-notebook-ink-blue"></div>
       </div>
     );
   }
@@ -90,14 +90,14 @@ export default function HabitsPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
         <div>
-          <h1 className="text-5xl font-extrabold text-gray-900 tracking-tight mb-4">Your Habits</h1>
-          <p className="text-xl text-gray-600 max-w-2xl">
+          <h1 className="text-5xl font-caveat text-notebook-ink tracking-tight mb-4">Your Habits</h1>
+          <p className="text-xl text-notebook-ink-medium font-inter italic max-w-2xl">
             "Every action you take is a vote for the type of person you wish to become."
           </p>
         </div>
         <Link 
           href="/habits/new"
-          className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg hover:shadow-xl active:scale-95 gap-2"
+          className="inline-flex items-center px-6 py-3 bg-notebook-ink-blue text-notebook-paper-white font-patrick-hand rounded-xl hover:bg-notebook-ink-blue/90 transition-all shadow-notebook-sm hover:shadow-notebook-hover active:scale-95 gap-2"
         >
           <span className="text-xl">+</span>
           <span>New Habit</span>
@@ -116,27 +116,29 @@ export default function HabitsPage() {
       {fetchingHabits ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {[1, 2, 3].map(i => (
-            <div key={i} className="bg-gray-50 border border-gray-100 rounded-xl h-64 animate-pulse" />
+            <div key={i} className="bg-notebook-paper-alt border border-notebook-line rounded-xl h-64 animate-pulse" />
           ))}
         </div>
       ) : habits.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {habits.map((habit) => (
-            <HabitCard key={habit.id} habit={habit} userId={user.id} />
+          {habits.map((habit, index) => (
+            <div key={habit.id} className="animate-fade-in-up" style={{ animationDelay: `${index * 100}ms` }}>
+              <HabitCard habit={habit} userId={user.id} />
+            </div>
           ))}
         </div>
       ) : (
-        <div className="bg-white border-2 border-dashed border-gray-200 rounded-3xl p-20 text-center">
+        <div className="bg-notebook-paper-white border-2 border-dashed border-notebook-line rounded-3xl p-20 text-center">
           <div className="text-6xl mb-6">🌱</div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">No habits found</h2>
-          <p className="text-gray-500 mb-8 max-w-md mx-auto">
+          <h2 className="text-2xl font-caveat text-notebook-ink mb-2">No habits found</h2>
+          <p className="text-notebook-ink-medium font-inter mb-8 max-w-md mx-auto">
             {category || status !== HabitStatus.ACTIVE 
               ? "Try clearing your filters to see your habits."
               : "You haven't started building any habits yet. Take the first step today!"}
           </p>
           <Link 
             href="/habits/new"
-            className="inline-flex items-center px-8 py-3 bg-gray-900 text-white font-bold rounded-xl hover:bg-black transition-all"
+            className="inline-flex items-center px-8 py-3 bg-notebook-ink-blue text-notebook-paper-white font-patrick-hand rounded-xl hover:bg-notebook-ink-blue/90 transition-all"
           >
             Get Started
           </Link>
@@ -145,8 +147,8 @@ export default function HabitsPage() {
 
       {/* Summary Footer */}
       {!fetchingHabits && total > 0 && (
-        <div className="mt-12 pt-8 border-t border-gray-100 text-center">
-          <p className="text-gray-400 font-medium">
+        <div className="mt-12 pt-8 border-t border-notebook-line text-center">
+          <p className="text-notebook-ink-light font-inter">
             Showing {habits.length} of {total} habits
           </p>
         </div>

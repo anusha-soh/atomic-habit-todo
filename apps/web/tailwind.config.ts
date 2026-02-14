@@ -8,22 +8,44 @@ const config: Config = {
   ],
   theme: {
     extend: {
-      // Mobile-first breakpoints (default Tailwind breakpoints)
       screens: {
-        'sm': '640px',   // Large phones, landscape
-        'md': '768px',   // Tablets
-        'lg': '1024px',  // Small desktops
-        'xl': '1280px',  // Large desktops
-        '2xl': '1536px', // Extra large screens
+        'sm': '640px',
+        'md': '768px',
+        'lg': '1024px',
+        'xl': '1280px',
+        '2xl': '1536px',
       },
       colors: {
         background: 'var(--background)',
         foreground: 'var(--foreground)',
+        'notebook-paper': 'var(--notebook-paper)',
+        'notebook-paper-alt': 'var(--notebook-paper-alt)',
+        'notebook-paper-white': 'var(--notebook-paper-white)',
+        'notebook-line': 'var(--notebook-line)',
+        'notebook-ink': 'var(--notebook-ink)',
+        'notebook-ink-medium': 'var(--notebook-ink-medium)',
+        'notebook-ink-light': 'var(--notebook-ink-light)',
+        'notebook-ink-red': 'var(--notebook-ink-red)',
+        'notebook-ink-blue': 'var(--notebook-ink-blue)',
+        'notebook-ink-green': 'var(--notebook-ink-green)',
+        'notebook-highlight-yellow': 'var(--notebook-highlight-yellow)',
+        'notebook-highlight-pink': 'var(--notebook-highlight-pink)',
+        'notebook-highlight-mint': 'var(--notebook-highlight-mint)',
+      },
+      fontFamily: {
+        caveat: ['var(--font-caveat)', 'cursive'],
+        'patrick-hand': ['var(--font-patrick-hand)', 'cursive'],
+        inter: ['var(--font-inter)', 'sans-serif'],
+      },
+      boxShadow: {
+        'notebook-sm': 'var(--notebook-shadow-sm)',
+        'notebook-md': 'var(--notebook-shadow-md)',
+        'notebook-lg': 'var(--notebook-shadow-lg)',
+        'notebook-hover': 'var(--notebook-shadow-hover)',
       },
     },
   },
   plugins: [
-    // Custom touch-target utility plugin
     function({ addUtilities }: any) {
       addUtilities({
         '.touch-target': {

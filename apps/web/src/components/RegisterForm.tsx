@@ -83,7 +83,7 @@ export function RegisterForm() {
       {/* General error message */}
       {error && (
         <div
-          className="rounded-md bg-red-50 p-4 text-sm text-red-800"
+          className="bg-notebook-highlight-yellow p-4 rounded text-notebook-ink-red font-patrick-hand"
           role="alert"
           aria-live="polite"
         >
@@ -110,10 +110,10 @@ export function RegisterForm() {
           aria-required="true"
           aria-invalid={!!emailError}
           aria-describedby={emailError ? "email-error" : undefined}
-          className={emailError ? 'border-red-500' : ''}
+          className={emailError ? 'border-notebook-ink-red' : ''}
         />
         {emailError && (
-          <p id="email-error" className="text-sm text-red-600" role="alert">{emailError}</p>
+          <p id="email-error" className="text-sm text-notebook-ink-red font-patrick-hand" role="alert">{emailError}</p>
         )}
       </div>
 
@@ -136,12 +136,12 @@ export function RegisterForm() {
           aria-required="true"
           aria-invalid={!!passwordError}
           aria-describedby={passwordError ? "password-error password-hint" : "password-hint"}
-          className={passwordError ? 'border-red-500' : ''}
+          className={passwordError ? 'border-notebook-ink-red' : ''}
         />
         {passwordError && (
-          <p id="password-error" className="text-sm text-red-600" role="alert">{passwordError}</p>
+          <p id="password-error" className="text-sm text-notebook-ink-red font-patrick-hand" role="alert">{passwordError}</p>
         )}
-        <p id="password-hint" className="text-xs text-gray-500">
+        <p id="password-hint" className="text-xs text-notebook-ink-light">
           Use at least 8 characters
         </p>
       </div>

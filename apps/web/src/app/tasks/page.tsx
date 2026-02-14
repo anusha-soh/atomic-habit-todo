@@ -60,10 +60,10 @@ export default async function TasksPage({ searchParams }: TasksPageProps) {
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Tasks</h1>
+        <h1 className="text-4xl font-caveat text-notebook-ink">Tasks</h1>
         <Link
           href="/tasks/new"
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          className="px-4 py-2 bg-notebook-ink-blue text-notebook-paper-white font-patrick-hand hover:bg-notebook-ink-blue/90 rounded-lg shadow-notebook-sm focus:outline-none focus:ring-2 focus:ring-notebook-ink-blue focus:ring-offset-2"
         >
           + New Task
         </Link>
@@ -74,7 +74,7 @@ export default async function TasksPage({ searchParams }: TasksPageProps) {
 
       {/* Error state */}
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6">
+        <div className="bg-notebook-highlight-pink/50 border border-notebook-ink-red/20 text-notebook-ink-red font-patrick-hand px-4 py-3 rounded mb-6">
           {error}
         </div>
       )}
@@ -84,8 +84,10 @@ export default async function TasksPage({ searchParams }: TasksPageProps) {
         <EmptyState hasFilters={hasFilters} />
       ) : (
         <div className="space-y-4">
-          {tasks.map((task) => (
-            <TaskCard key={task.id} task={task} userId={userId} />
+          {tasks.map((task, index) => (
+            <div key={task.id} className="animate-fade-in-up" style={{ animationDelay: `${index * 100}ms` }}>
+              <TaskCard task={task} userId={userId} />
+            </div>
           ))}
         </div>
       )}

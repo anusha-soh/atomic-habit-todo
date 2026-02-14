@@ -103,14 +103,14 @@ export function TaskForm({ userId, taskId, initialData, onSuccess }: TaskFormPro
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4 bg-notebook-paper-white rounded-xl p-6 shadow-notebook-md">
       {/* Loading overlay */}
       {isSubmitting && (
         <div className="fixed inset-0 bg-black bg-opacity-25 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-xl">
+          <div className="bg-notebook-paper-white p-6 rounded-lg shadow-xl">
             <div className="flex items-center">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mr-3"></div>
-              <span>{isEditMode ? 'Updating task...' : 'Creating task...'}</span>
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-notebook-ink-blue mr-3"></div>
+              <span className="font-inter text-notebook-ink">{isEditMode ? 'Updating task...' : 'Creating task...'}</span>
             </div>
           </div>
         </div>
@@ -118,16 +118,16 @@ export function TaskForm({ userId, taskId, initialData, onSuccess }: TaskFormPro
 
       {/* Title field */}
       <div>
-        <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
-          Title <span className="text-red-500">*</span>
+        <label htmlFor="title" className="block text-sm font-medium font-caveat text-notebook-ink mb-1">
+          Title <span className="text-notebook-ink-red">*</span>
         </label>
         <input
           type="text"
           id="title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-            errors.title ? 'border-red-500' : 'border-gray-300'
+          className={`w-full px-3 py-2 border-0 border-b-2 bg-transparent rounded-none font-inter text-notebook-ink focus:outline-none focus:border-notebook-ink-blue focus:border-b-[3px] ${
+            errors.title ? 'border-notebook-ink-red' : 'border-notebook-line'
           } ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
           placeholder="Enter task title"
           maxLength={500}
@@ -135,14 +135,14 @@ export function TaskForm({ userId, taskId, initialData, onSuccess }: TaskFormPro
           required
         />
         {errors.title && (
-          <p className="mt-1 text-sm text-red-600">{errors.title}</p>
+          <p className="mt-1 text-notebook-ink-red font-patrick-hand text-sm">{errors.title}</p>
         )}
-        <p className="mt-1 text-xs text-gray-500">{title.length}/500 characters</p>
+        <p className="mt-1 text-notebook-ink-light font-inter text-xs">{title.length}/500 characters</p>
       </div>
 
       {/* Description field */}
       <div>
-        <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="description" className="block text-sm font-medium font-caveat text-notebook-ink mb-1">
           Description
         </label>
         <textarea
@@ -150,30 +150,30 @@ export function TaskForm({ userId, taskId, initialData, onSuccess }: TaskFormPro
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           rows={4}
-          className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-            errors.description ? 'border-red-500' : 'border-gray-300'
+          className={`w-full px-3 py-2 border-0 border-b-2 bg-transparent rounded-none font-inter text-notebook-ink focus:outline-none focus:border-notebook-ink-blue focus:border-b-[3px] ${
+            errors.description ? 'border-notebook-ink-red' : 'border-notebook-line'
           } ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
           placeholder="Enter task description (optional)"
           maxLength={5000}
           disabled={isSubmitting}
         />
         {errors.description && (
-          <p className="mt-1 text-sm text-red-600">{errors.description}</p>
+          <p className="mt-1 text-notebook-ink-red font-patrick-hand text-sm">{errors.description}</p>
         )}
-        <p className="mt-1 text-xs text-gray-500">{description.length}/5000 characters</p>
+        <p className="mt-1 text-notebook-ink-light font-inter text-xs">{description.length}/5000 characters</p>
       </div>
 
       {/* Status field (only in edit mode) */}
       {isEditMode && (
         <div>
-          <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="status" className="block text-sm font-medium font-caveat text-notebook-ink mb-1">
             Status
           </label>
           <select
             id="status"
             value={status}
             onChange={(e) => setStatus(e.target.value as TaskStatus)}
-            className={`w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+            className={`w-full px-3 py-2 border-0 border-b-2 border-notebook-line bg-transparent rounded-none font-inter text-notebook-ink focus:outline-none focus:border-notebook-ink-blue focus:border-b-[3px] ${
               isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
             }`}
             disabled={isSubmitting}
@@ -187,14 +187,14 @@ export function TaskForm({ userId, taskId, initialData, onSuccess }: TaskFormPro
 
       {/* Priority field */}
       <div>
-        <label htmlFor="priority" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="priority" className="block text-sm font-medium font-caveat text-notebook-ink mb-1">
           Priority
         </label>
         <select
           id="priority"
           value={priority || ''}
           onChange={(e) => setPriority(e.target.value as TaskPriority || null)}
-          className={`w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+          className={`w-full px-3 py-2 border-0 border-b-2 border-notebook-line bg-transparent rounded-none font-inter text-notebook-ink focus:outline-none focus:border-notebook-ink-blue focus:border-b-[3px] ${
             isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
           }`}
           disabled={isSubmitting}
@@ -208,7 +208,7 @@ export function TaskForm({ userId, taskId, initialData, onSuccess }: TaskFormPro
 
       {/* Due Date field */}
       <div>
-        <label htmlFor="dueDate" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="dueDate" className="block text-sm font-medium font-caveat text-notebook-ink mb-1">
           Due Date
         </label>
         <input
@@ -216,7 +216,7 @@ export function TaskForm({ userId, taskId, initialData, onSuccess }: TaskFormPro
           id="dueDate"
           value={dueDate}
           onChange={(e) => setDueDate(e.target.value)}
-          className={`w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+          className={`w-full px-3 py-2 border-0 border-b-2 border-notebook-line bg-transparent rounded-none font-inter text-notebook-ink focus:outline-none focus:border-notebook-ink-blue focus:border-b-[3px] ${
             isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
           }`}
           disabled={isSubmitting}
@@ -225,7 +225,7 @@ export function TaskForm({ userId, taskId, initialData, onSuccess }: TaskFormPro
 
       {/* Tags field */}
       <div>
-        <label htmlFor="tags" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="tags" className="block text-sm font-medium font-caveat text-notebook-ink mb-1">
           Tags
         </label>
         <input
@@ -233,13 +233,13 @@ export function TaskForm({ userId, taskId, initialData, onSuccess }: TaskFormPro
           id="tags"
           value={tags}
           onChange={(e) => setTags(e.target.value)}
-          className={`w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+          className={`w-full px-3 py-2 border-0 border-b-2 border-notebook-line bg-transparent rounded-none font-inter text-notebook-ink focus:outline-none focus:border-notebook-ink-blue focus:border-b-[3px] ${
             isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
           }`}
           placeholder="Enter tags separated by commas (e.g., work, urgent, client)"
           disabled={isSubmitting}
         />
-        <p className="mt-1 text-xs text-gray-500">Separate tags with commas</p>
+        <p className="mt-1 text-notebook-ink-light font-inter text-xs">Separate tags with commas</p>
       </div>
 
       {/* Submit button */}
@@ -247,7 +247,7 @@ export function TaskForm({ userId, taskId, initialData, onSuccess }: TaskFormPro
         <button
           type="button"
           onClick={() => router.back()}
-          className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-4 py-2 border border-notebook-line rounded-md text-notebook-ink-medium hover:bg-notebook-paper-alt focus:outline-none focus:ring-2 focus:ring-notebook-ink-blue disabled:opacity-50 disabled:cursor-not-allowed font-patrick-hand"
           disabled={isSubmitting}
         >
           Cancel
@@ -255,12 +255,12 @@ export function TaskForm({ userId, taskId, initialData, onSuccess }: TaskFormPro
         <button
           type="submit"
           disabled={isSubmitting}
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed relative"
+          className="px-4 py-2 bg-notebook-ink-blue text-notebook-paper-white rounded-md hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-notebook-ink-blue focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed relative font-patrick-hand"
         >
           {isSubmitting
             ? (
               <span className="flex items-center">
-                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-notebook-paper-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>

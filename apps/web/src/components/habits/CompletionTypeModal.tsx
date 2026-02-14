@@ -7,6 +7,10 @@ interface CompletionTypeModalProps {
   onClose: () => void;
 }
 
+/**
+ * CompletionTypeModal
+ * Restyled T044 — Notebook design system (US7)
+ */
 export function CompletionTypeModal({ onSelect, onClose }: CompletionTypeModalProps) {
   return (
     <div
@@ -17,23 +21,23 @@ export function CompletionTypeModal({ onSelect, onClose }: CompletionTypeModalPr
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl shadow-xl max-w-xs w-full p-6"
+        className="bg-notebook-paper-white rounded-xl shadow-notebook-lg border border-notebook-line max-w-xs w-full p-6"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="text-lg font-semibold text-gray-900 mb-1">Complete this habit</h2>
-        <p className="text-sm text-gray-500 mb-5">Choose how you completed it today</p>
+        <h2 className="font-caveat text-2xl text-notebook-ink mb-1">Complete this habit</h2>
+        <p className="text-sm font-inter text-notebook-ink-medium mb-5">Choose how you completed it today</p>
 
         <div className="flex flex-col gap-3">
-          {/* Full habit button — large tap target */}
+          {/* Full habit button */}
           <button
             type="button"
             onClick={() => onSelect('full')}
-            className="flex items-center gap-3 w-full min-h-[56px] px-4 py-3 rounded-xl bg-green-50 border-2 border-green-200 hover:border-green-400 hover:bg-green-100 transition-colors text-left"
+            className="flex items-center gap-3 w-full min-h-[56px] px-4 py-3 rounded-lg bg-notebook-paper-alt hover:bg-notebook-highlight-yellow border border-notebook-line transition-colors text-left font-patrick-hand text-notebook-ink"
           >
-            <span className="text-2xl">🏆</span>
+            <span className="text-2xl">{String.fromCodePoint(0x1F3C6)}</span>
             <div>
-              <p className="font-medium text-gray-900">Full habit</p>
-              <p className="text-xs text-gray-500">Complete version</p>
+              <p className="font-patrick-hand text-base text-notebook-ink">Full habit</p>
+              <p className="text-xs font-inter text-notebook-ink-medium">Complete version</p>
             </div>
           </button>
 
@@ -41,12 +45,12 @@ export function CompletionTypeModal({ onSelect, onClose }: CompletionTypeModalPr
           <button
             type="button"
             onClick={() => onSelect('two_minute')}
-            className="flex items-center gap-3 w-full min-h-[56px] px-4 py-3 rounded-xl bg-blue-50 border-2 border-blue-200 hover:border-blue-400 hover:bg-blue-100 transition-colors text-left"
+            className="flex items-center gap-3 w-full min-h-[56px] px-4 py-3 rounded-lg bg-notebook-paper-alt hover:bg-notebook-highlight-yellow border border-notebook-line transition-colors text-left font-patrick-hand text-notebook-ink"
           >
-            <span className="text-2xl">⚡</span>
+            <span className="text-2xl">{String.fromCodePoint(0x26A1)}</span>
             <div>
-              <p className="font-medium text-gray-900">2-minute version</p>
-              <p className="text-xs text-gray-500">Never miss twice</p>
+              <p className="font-patrick-hand text-base text-notebook-ink">2-minute version</p>
+              <p className="text-xs font-inter text-notebook-ink-medium">Never miss twice</p>
             </div>
           </button>
         </div>
@@ -54,7 +58,7 @@ export function CompletionTypeModal({ onSelect, onClose }: CompletionTypeModalPr
         <button
           type="button"
           onClick={onClose}
-          className="mt-4 w-full py-2 text-sm text-gray-400 hover:text-gray-600 transition-colors"
+          className="mt-4 w-full py-2 text-sm text-notebook-ink-light hover:text-notebook-ink transition-colors font-patrick-hand"
         >
           Cancel
         </button>

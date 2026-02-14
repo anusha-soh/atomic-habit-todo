@@ -20,14 +20,14 @@ export function DueDateBadge({ dueDate, status }: DueDateBadgeProps) {
   const isOverdueDate = isOverdue(dueDate, status);
 
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border font-patrick-hand ${
       isOverdueDate
-        ? 'bg-red-100 text-red-800 border-red-200'
-        : 'bg-gray-100 text-gray-800 border-gray-200'
+        ? 'bg-notebook-ink-red/10 text-notebook-ink-red border-notebook-ink-red/20'
+        : 'bg-notebook-paper-alt text-notebook-ink-medium border-notebook-line'
     }`}>
       {isOverdueDate && (
         <svg
-          className="w-3 h-3 mr-1 text-red-500"
+          className="w-3 h-3 mr-1 text-notebook-ink-red"
           fill="currentColor"
           viewBox="0 0 20 20"
         >

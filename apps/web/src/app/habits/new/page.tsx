@@ -42,7 +42,7 @@ export default function NewHabitPage() {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-notebook-ink-blue"></div>
       </div>
     );
   }
@@ -52,28 +52,28 @@ export default function NewHabitPage() {
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
       {/* Breadcrumbs */}
-      <nav className="flex mb-8 text-sm text-gray-500 font-medium" aria-label="Breadcrumb">
+      <nav className="flex mb-8 text-sm font-patrick-hand text-notebook-ink-light" aria-label="Breadcrumb">
         <ol className="flex items-center space-x-2">
           <li>
-            <Link href="/dashboard" className="hover:text-blue-600">Dashboard</Link>
+            <Link href="/dashboard" className="hover:text-notebook-ink-blue transition-colors">Dashboard</Link>
           </li>
           <li>
-            <span className="mx-2 text-gray-300">/</span>
+            <span className="mx-2 text-notebook-line">/</span>
           </li>
           <li>
-            <Link href="/habits" className="hover:text-blue-600">Habits</Link>
+            <Link href="/habits" className="hover:text-notebook-ink-blue transition-colors">Habits</Link>
           </li>
           <li>
-            <span className="mx-2 text-gray-300">/</span>
+            <span className="mx-2 text-notebook-line">/</span>
           </li>
-          <li className="text-gray-900 font-bold">New Habit</li>
+          <li className="text-notebook-ink font-bold">New Habit</li>
         </ol>
       </nav>
 
       <header className="mb-10">
-        <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight">Build a New Habit</h1>
-        <p className="mt-3 text-lg text-gray-600 max-w-2xl">
-          "Your habits are how you embody your identity." — James Clear
+        <h1 className="text-5xl font-caveat text-notebook-ink tracking-tight">Build a New Habit</h1>
+        <p className="mt-3 text-lg font-inter text-notebook-ink-medium italic max-w-2xl">
+          &ldquo;Your habits are how you embody your identity.&rdquo; &mdash; James Clear
         </p>
       </header>
 
@@ -83,34 +83,34 @@ export default function NewHabitPage() {
         </div>
 
         <div className="space-y-8">
-          <section className="bg-orange-50 p-6 rounded-2xl border border-orange-100">
-            <h2 className="text-lg font-bold text-orange-900 mb-4 flex items-center gap-2">
+          <section className="bg-notebook-highlight-yellow/30 p-6 rounded-2xl border border-notebook-highlight-yellow/50">
+            <h2 className="text-lg font-caveat text-notebook-ink mb-4 flex items-center gap-2">
               <span>💡</span> The 4 Laws
             </h2>
-            <ul className="space-y-4 text-sm">
+            <ul className="space-y-4 text-sm font-inter">
               <li>
-                <strong className="text-orange-800 block mb-0.5">1. Make It Obvious</strong>
-                <p className="text-orange-700 opacity-80">Use Habit Stacking to link this to something you already do.</p>
+                <strong className="text-notebook-ink block mb-0.5">1. Make It Obvious</strong>
+                <p className="text-notebook-ink-medium">Use Habit Stacking to link this to something you already do.</p>
               </li>
               <li>
-                <strong className="text-orange-800 block mb-0.5">2. Make It Attractive</strong>
-                <p className="text-orange-700 opacity-80">Write your Identity Statement to focus on who you are becoming.</p>
+                <strong className="text-notebook-ink block mb-0.5">2. Make It Attractive</strong>
+                <p className="text-notebook-ink-medium">Write your Identity Statement to focus on who you are becoming.</p>
               </li>
               <li>
-                <strong className="text-orange-800 block mb-0.5">3. Make It Easy</strong>
-                <p className="text-orange-700 opacity-80">Start with a version that takes less than 2 minutes.</p>
+                <strong className="text-notebook-ink block mb-0.5">3. Make It Easy</strong>
+                <p className="text-notebook-ink-medium">Start with a version that takes less than 2 minutes.</p>
               </li>
               <li>
-                <strong className="text-orange-800 block mb-0.5">4. Make It Satisfying</strong>
-                <p className="text-orange-700 opacity-80">Track your progress and build a streak (coming soon!).</p>
+                <strong className="text-notebook-ink block mb-0.5">4. Make It Satisfying</strong>
+                <p className="text-notebook-ink-medium">Track your progress and build a streak (coming soon!).</p>
               </li>
             </ul>
           </section>
 
-          <section className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
-            <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4">Pro Tip</h2>
-            <p className="text-sm text-gray-600 leading-relaxed italic">
-              "Focus on the trajectory, not the current results. If you are a person who goes to the gym, you will eventually be a fit person."
+          <section className="bg-notebook-paper-alt p-6 rounded-2xl border border-notebook-line">
+            <h2 className="text-sm font-patrick-hand text-notebook-ink-light uppercase tracking-wider mb-4">Pro Tip</h2>
+            <p className="text-sm font-inter text-notebook-ink-medium leading-relaxed italic">
+              &ldquo;Focus on the trajectory, not the current results. If you are a person who goes to the gym, you will eventually be a fit person.&rdquo;
             </p>
           </section>
         </div>

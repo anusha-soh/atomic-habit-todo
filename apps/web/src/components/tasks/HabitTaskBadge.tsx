@@ -6,7 +6,7 @@
 
 export function HabitTaskBadge() {
   return (
-    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border bg-purple-100 text-purple-800 border-purple-200">
+    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border bg-notebook-ink-blue/10 text-notebook-ink-blue border-notebook-ink-blue/20 font-patrick-hand">
       Habit
     </span>
   );

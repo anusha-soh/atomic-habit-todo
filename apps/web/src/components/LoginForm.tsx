@@ -53,7 +53,7 @@ export function LoginForm() {
       {/* General error message */}
       {error && (
         <div
-          className="rounded-md bg-red-50 p-4 text-sm text-red-800"
+          className="bg-notebook-highlight-yellow p-4 rounded text-notebook-ink-red font-patrick-hand"
           role="alert"
           aria-live="polite"
         >

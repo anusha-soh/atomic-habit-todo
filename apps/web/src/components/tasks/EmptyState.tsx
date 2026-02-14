@@ -1,8 +1,9 @@
 /**
  * EmptyState Component
  * Phase 2 Chunk 2 - Polish (T151)
+ * Restyled T039 — Notebook design system (US7)
  *
- * Provides an empty state UI for the task list
+ * Provides an empty state UI for the task list with notebook aesthetic
  */
 import Link from 'next/link';
 
@@ -14,17 +15,18 @@ interface EmptyStateProps {
 export function EmptyState({ hasFilters, onClearFilters }: EmptyStateProps) {
   if (hasFilters) {
     return (
-      <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
-        <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-gray-100 mb-4">
-          <svg className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-        </div>
-        <h3 className="text-lg font-medium text-gray-900">No tasks match your filters</h3>
-        <p className="text-gray-500 mt-1 mb-6">Try adjusting your search or filters to find what you're looking for.</p>
+      <div className="bg-notebook-paper-white border-2 border-dashed border-notebook-line rounded-2xl p-12 text-center">
+        <svg className="mx-auto mb-4 w-16 h-16 text-notebook-ink-light" viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+          <path d="M20 44L44 20l-4-4L16 40l4 4z" />
+          <path d="M40 16l4 4" />
+          <path d="M16 40l-2 6 6-2" />
+          <line x1="12" y1="52" x2="52" y2="52" strokeDasharray="4 4" />
+        </svg>
+        <h3 className="font-caveat text-2xl text-notebook-ink">No tasks match your filters</h3>
+        <p className="font-inter text-notebook-ink-medium mt-1 mb-6">No tasks match your filters. Try a different view!</p>
         <button
           onClick={onClearFilters}
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          className="inline-flex items-center px-5 py-2.5 font-patrick-hand text-base rounded-lg text-notebook-ink-blue bg-notebook-highlight-blue/20 hover:bg-notebook-highlight-blue/40 border border-notebook-ink-blue/30 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-ink-blue transition-colors"
         >
           Clear all filters
         </button>
@@ -33,17 +35,18 @@ export function EmptyState({ hasFilters, onClearFilters }: EmptyStateProps) {
   }
 
   return (
-    <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
-      <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 mb-4">
-        <svg className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-        </svg>
-      </div>
-      <h3 className="text-lg font-medium text-gray-900">No tasks yet</h3>
-      <p className="text-gray-500 mt-1 mb-6">Get started by creating your first task to stay organized.</p>
+    <div className="bg-notebook-paper-white border-2 border-dashed border-notebook-line rounded-2xl p-12 text-center">
+      <svg className="mx-auto mb-4 w-16 h-16 text-notebook-ink-light" viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+        <path d="M20 44L44 20l-4-4L16 40l4 4z" />
+        <path d="M40 16l4 4" />
+        <path d="M16 40l-2 6 6-2" />
+        <line x1="12" y1="52" x2="52" y2="52" strokeDasharray="4 4" />
+      </svg>
+      <h3 className="font-caveat text-2xl text-notebook-ink">Your task list is a blank page</h3>
+      <p className="font-inter text-notebook-ink-medium mt-1 mb-6">Your task list is a blank page — time to write your story!</p>
       <Link
         href="/tasks/new"
-        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+        className="inline-flex items-center px-5 py-2.5 font-patrick-hand text-base rounded-lg shadow-notebook-sm text-white bg-notebook-ink-blue hover:bg-notebook-ink-blue/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-ink-blue transition-colors"
       >
         + Create Task
       </Link>

@@ -16,6 +16,7 @@ import { PriorityBadge } from './PriorityBadge';
 import { DueDateBadge } from './DueDateBadge';
 import { HabitTaskBadge } from './HabitTaskBadge';
 import { useToast } from '@/lib/toast-context';
+import { SketchyBorder } from '@/components/ui/sketchy-border';
 
 interface TaskCardProps {
   task: Task;
@@ -28,6 +29,7 @@ export function TaskCard({ task, userId }: TaskCardProps) {
   const [isCompleting, setIsCompleting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [showCompletionFlash, setShowCompletionFlash] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -43,6 +45,8 @@ export function TaskCard({ task, userId }: TaskCardProps) {
     try {
       await completeTask(userId, task.id);
       showToast('Task marked as completed', 'success');
+      setShowCompletionFlash(true);
+      setTimeout(() => setShowCompletionFlash(false), 500);
       router.refresh(); // Refresh server component data
     } catch (e) {
       showToast(e instanceof Error ? e.message : 'Failed to complete task', 'error');
@@ -70,22 +74,22 @@ export function TaskCard({ task, userId }: TaskCardProps) {
   };
 
   const statusColors = {
-    pending: 'bg-yellow-100 text-yellow-800',
-    in_progress: 'bg-blue-100 text-blue-800',
-    completed: 'bg-green-100 text-green-800',
+    pending: 'bg-notebook-highlight-yellow text-notebook-ink-medium',
+    in_progress: 'bg-notebook-ink-blue/10 text-notebook-ink-blue',
+    completed: 'bg-notebook-highlight-mint text-notebook-ink-green',
   };
 
   return (
-    <div className={`border rounded-lg p-4 hover:shadow-md transition-shadow ${
-      task.completed ? 'bg-gray-50 border-gray-200' : 'bg-white border-gray-200'
-    }`}>
+    <div className={`rounded-lg p-4 transition-all duration-200 ${
+      task.completed ? 'bg-notebook-paper-alt shadow-notebook-sm opacity-75' : 'bg-notebook-highlight-yellow shadow-notebook-md hover:shadow-notebook-hover hover:-translate-y-1'
+    } ${showCompletionFlash ? 'animate-highlight-flash' : ''}`}>
       <div className="flex flex-col space-y-3">
         {/* Header with title and actions */}
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1">
             {/* Title */}
-            <h3 className={`text-lg font-semibold ${
-              task.completed ? 'text-gray-500 line-through' : 'text-gray-900'
+            <h3 className={`font-caveat text-xl ${
+              task.completed ? 'text-notebook-ink-light line-through' : 'text-notebook-ink'
             }`}>
               {task.title}
             </h3>
@@ -102,7 +106,7 @@ export function TaskCard({ task, userId }: TaskCardProps) {
           <div className="flex items-center gap-2">
             <Link
               href={`/tasks/${task.id}/edit`}
-              className="px-3 py-1 text-sm text-gray-600 border border-gray-300 rounded hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-1 text-sm text-notebook-ink-medium border border-notebook-line rounded hover:bg-notebook-paper-alt focus:outline-none focus:ring-2 focus:ring-notebook-ink-blue font-patrick-hand"
             >
               Edit
             </Link>
@@ -110,7 +114,7 @@ export function TaskCard({ task, userId }: TaskCardProps) {
               <button
                 onClick={handleMarkComplete}
                 disabled={isCompleting}
-                className="px-3 py-1 text-sm text-white bg-green-600 rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-3 py-1 text-sm bg-notebook-ink-green text-notebook-paper-white rounded hover:bg-notebook-ink-green/90 focus:outline-none focus:ring-2 focus:ring-notebook-ink-green font-patrick-hand disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isCompleting ? 'Completing...' : 'Complete'}
               </button>
@@ -118,7 +122,7 @@ export function TaskCard({ task, userId }: TaskCardProps) {
             <button
               onClick={handleDelete}
               disabled={isDeleting}
-              className="px-3 py-1 text-sm text-white bg-red-600 rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-3 py-1 text-sm bg-notebook-ink-red text-notebook-paper-white rounded hover:bg-notebook-ink-red/90 focus:outline-none focus:ring-2 focus:ring-notebook-ink-red font-patrick-hand disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isDeleting ? 'Deleting...' : 'Delete'}
             </button>
@@ -127,8 +131,8 @@ export function TaskCard({ task, userId }: TaskCardProps) {
 
         {/* Description */}
         {task.description && (
-          <p className={`text-sm line-clamp-2 ${
-            task.completed ? 'text-gray-400' : 'text-gray-600'
+          <p className={`line-clamp-2 ${
+            task.completed ? 'text-notebook-ink-light font-inter text-sm' : 'text-notebook-ink-medium font-inter text-sm'
           }`}>
             {task.description}
           </p>
@@ -140,7 +144,7 @@ export function TaskCard({ task, userId }: TaskCardProps) {
             {task.tags.map((tag) => (
               <span
                 key={tag}
-                className="px-2 py-0.5 text-xs bg-gray-100 text-gray-600 rounded-full"
+                className="px-2 py-0.5 text-xs bg-notebook-paper-white text-notebook-ink-medium font-inter rounded-full"
               >
                 {tag}
               </span>
@@ -149,7 +153,7 @@ export function TaskCard({ task, userId }: TaskCardProps) {
         )}
 
         {/* Metadata footer */}
-        <div className="flex items-center justify-between text-xs text-gray-500 pt-2 border-t border-gray-100">
+        <div className="flex items-center justify-between text-xs text-notebook-ink-light font-inter pt-2 border-t border-notebook-line/50">
           <span>Created {createdAt}</span>
           <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColors[task.status]}`}>
             {task.status.replace('_', ' ')}

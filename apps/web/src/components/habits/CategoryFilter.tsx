@@ -23,10 +23,10 @@ export function CategoryFilter({ selectedCategory, onChange }: CategoryFilterPro
         <button
           key={cat.label}
           onClick={() => onChange(cat.value)}
-          className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+          className={`px-4 py-2 rounded-full text-sm font-patrick-hand font-medium transition-all ${
             selectedCategory === cat.value
-              ? 'bg-blue-600 text-white shadow-md'
-              : 'bg-white text-gray-600 border border-gray-200 hover:border-blue-400'
+              ? 'bg-notebook-ink-blue text-notebook-paper-white shadow-md'
+              : 'text-notebook-ink-medium bg-notebook-paper-white border border-notebook-line hover:border-notebook-ink-blue/40'
           }`}
         >
           {cat.label}

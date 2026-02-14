@@ -19,16 +19,16 @@ export function StatusFilter({ selectedStatus, onChange }: StatusFilterProps) {
   ];
 
   return (
-    <div className="flex bg-gray-100 p-1 rounded-lg">
+    <div className="flex bg-notebook-paper-alt p-1 rounded-lg border border-notebook-line/50">
       {statuses.map((s) => (
         <button
           key={s.label}
           type="button"
           onClick={() => onChange(s.value)}
-          className={`px-4 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider transition-all ${
+          className={`px-4 py-1.5 rounded-md text-xs font-patrick-hand font-bold uppercase tracking-wider transition-all ${
             selectedStatus === s.value
-              ? 'bg-white text-gray-900 shadow-sm'
-              : 'text-gray-500 hover:text-gray-700'
+              ? 'bg-notebook-ink-blue text-notebook-paper-white border border-notebook-ink-blue shadow-sm'
+              : 'text-notebook-ink-medium bg-notebook-paper-white border border-notebook-line hover:text-notebook-ink'
           }`}
         >
           {s.label}
