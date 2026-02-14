@@ -13,6 +13,7 @@ from dotenv import load_dotenv
 
 from src.models.user import User
 from src.models.task import Task
+from src.models.habit import Habit
 from src.services.event_emitter import EventEmitter
 
 # Load environment variables from .env file
@@ -210,17 +211,87 @@ def multiple_tasks_fixture(session: Session, user_id: UUID):
 
 
 # ============================================================================
+# Habit Fixtures
+# ============================================================================
+
+@pytest.fixture(name="sample_habit")
+def sample_habit_fixture(session: Session, user_id: UUID):
+    """Create a sample habit for testing (US1)"""
+    habit = Habit(
+        id=uuid4(),
+        user_id=user_id,
+        identity_statement="I am a person who reads daily",
+        two_minute_version="Read one page",
+        category="Learning",
+        recurring_schedule={"type": "daily"},
+        status="active",
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc),
+    )
+    session.add(habit)
+    session.commit()
+    session.refresh(habit)
+    return habit
+
+
+@pytest.fixture(name="sample_habits_multiple")
+def sample_habits_multiple_fixture(session: Session, user_id: UUID):
+    """Create multiple habits in different categories for filtering tests (US4)"""
+    categories = ["Health & Fitness", "Productivity", "Learning"]
+    habits = []
+    for i, cat in enumerate(categories):
+        habit = Habit(
+            id=uuid4(),
+            user_id=user_id,
+            identity_statement=f"Habit {i} for {cat}",
+            two_minute_version=f"Start {i}",
+            category=cat,
+            recurring_schedule={"type": "daily"},
+            status="active" if i < 2 else "archived",
+            created_at=datetime.now(timezone.utc),
+            updated_at=datetime.now(timezone.utc),
+        )
+        session.add(habit)
+        habits.append(habit)
+
+    session.commit()
+    for h in habits:
+        session.refresh(h)
+    return habits
+
+
+@pytest.fixture(name="sample_habit_with_anchor")
+def sample_habit_with_anchor_fixture(session: Session, user_id: UUID, sample_habit):
+    """Create a habit stacked on an anchor habit (US3)"""
+    habit = Habit(
+        id=uuid4(),
+        user_id=user_id,
+        identity_statement="I am a person who meditates",
+        two_minute_version="Take 3 breaths",
+        category="Mindfulness",
+        anchor_habit_id=sample_habit.id,
+        habit_stacking_cue=f"After I {sample_habit.identity_statement}, I will meditate",
+        recurring_schedule={"type": "daily"},
+        status="active",
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc),
+    )
+    session.add(habit)
+    session.commit()
+    session.refresh(habit)
+    return habit
+
+
+# ============================================================================
 # API Client Fixtures (for integration tests)
 # ============================================================================
 
 @pytest.fixture(name="client")
 def client_fixture():
-    """Create FastAPI test client (to be implemented in integration tests)"""
-    # This will be implemented when we write integration tests
-    # from fastapi.testclient import TestClient
-    # from src.main import app
-    # return TestClient(app)
-    pass
+    """Create FastAPI test client for integration tests"""
+    from fastapi.testclient import TestClient
+    from src.main import app
+    return TestClient(app)
 
 
 # ============================================================================

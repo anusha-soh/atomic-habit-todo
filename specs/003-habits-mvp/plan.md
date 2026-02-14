@@ -13,7 +13,7 @@ Build a comprehensive habit management system implementing the Atomic Habits Fou
 
 **Language/Version**: Python 3.13+ (backend), TypeScript 5.8+ (frontend)
 **Primary Dependencies**: FastAPI, SQLModel, Next.js 16+, TailwindCSS 4+
-**Storage**: Neon Serverless PostgreSQL (JSONB for recurring schedules, ARRAY for tags)
+**Storage**: Neon Serverless PostgreSQL (JSONB for recurring schedules)
 **Testing**: pytest (backend), Jest + React Testing Library (frontend)
 **Target Platform**: Web application (Vercel frontend, Render backend)
 **Project Type**: Web (monorepo: apps/api + apps/web)

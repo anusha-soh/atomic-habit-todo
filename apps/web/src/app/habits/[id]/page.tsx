@@ -14,6 +14,7 @@ import { getHabit, deleteHabit, archiveHabit, restoreHabit } from '@/lib/habits-
 import { Habit, HabitCategory, HabitStatus } from '@/types/habit';
 import { CompletionCheckbox } from '@/components/habits/CompletionCheckbox';
 import { CompletionHistory } from '@/components/habits/CompletionHistory';
+import { GeneratedTasksList } from '@/components/habits/GeneratedTasksList';
 import { StreakCounter } from '@/components/habits/StreakCounter';
 import { useToast } from '@/lib/toast-context';
 
@@ -247,6 +248,9 @@ export default function HabitDetailPage({ params }: { params: Promise<{ id: stri
               <span className="text-sm text-gray-600 font-medium">Mark as complete today</span>
             </div>
           )}
+
+          {/* Generated Tasks (Chunk 5) */}
+          <GeneratedTasksList habitId={habit.id} userId={user.id} />
 
           {/* Completion History */}
           <div>

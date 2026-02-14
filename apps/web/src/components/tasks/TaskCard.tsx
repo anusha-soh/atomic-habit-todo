@@ -14,6 +14,7 @@ import { completeTask, deleteTask } from '@/lib/tasks-api';
 import { formatDistanceToNow } from 'date-fns';
 import { PriorityBadge } from './PriorityBadge';
 import { DueDateBadge } from './DueDateBadge';
+import { HabitTaskBadge } from './HabitTaskBadge';
 import { useToast } from '@/lib/toast-context';
 
 interface TaskCardProps {
@@ -89,8 +90,9 @@ export function TaskCard({ task, userId }: TaskCardProps) {
               {task.title}
             </h3>
 
-            {/* Priority badge and Due Date badge */}
+            {/* Priority badge, Due Date badge, and Habit badge */}
             <div className="flex flex-wrap gap-2 mt-1">
+              {task.is_habit_task && <HabitTaskBadge />}
               {task.priority && <PriorityBadge priority={task.priority} />}
               {task.due_date && <DueDateBadge dueDate={task.due_date} status={task.status} />}
             </div>

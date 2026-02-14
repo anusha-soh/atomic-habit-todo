@@ -7,12 +7,13 @@ from sqlmodel import Session
 from pydantic import BaseModel, Field
 from uuid import UUID
 from typing import Optional
-from datetime import datetime
+from datetime import datetime, timezone
 
 from src.database import get_session
 from src.services.task_service import TaskService, UNSET
 from src.services.event_emitter import EventEmitter
 from src.middleware.auth import get_current_user_id
+from src.schemas.habit_schemas import HabitSyncResponse
 
 router = APIRouter()
 
@@ -49,8 +50,15 @@ class TaskResponse(BaseModel):
     tags: list[str]
     due_date: Optional[datetime]
     completed: bool
+    is_habit_task: bool = False
+    generated_by_habit_id: Optional[UUID] = None
     created_at: datetime
     updated_at: datetime
+
+
+class TaskCompleteResponse(TaskResponse):
+    """Task completion response — extends TaskResponse with optional habit sync info"""
+    habit_sync: Optional[HabitSyncResponse] = None
 
 
 class TaskListResponse(BaseModel):
@@ -81,6 +89,7 @@ async def list_tasks(
     tags: Optional[str] = None,
     search: Optional[str] = None,
     sort: str = "created_desc",
+    is_habit_task: Optional[bool] = None,
     current_user_id: UUID = Depends(get_current_user_id),
     task_service: TaskService = Depends(get_task_service)
 ):
@@ -128,7 +137,8 @@ async def list_tasks(
             priority=priority_value,
             tags=tag_list,
             search=search,
-            sort=sort
+            sort=sort,
+            is_habit_task=is_habit_task,
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error retrieving tasks: {str(e)}")
@@ -290,17 +300,19 @@ async def update_task(
         raise HTTPException(status_code=500, detail=f"Error updating task: {str(e)}")
 
 
-@router.patch("/{user_id}/tasks/{task_id}/complete", response_model=TaskResponse)
+@router.patch("/{user_id}/tasks/{task_id}/complete", response_model=TaskCompleteResponse)
 async def complete_task(
     user_id: UUID,
     task_id: UUID,
+    completion_type: str = Query("full", pattern="^(full|two_minute)$"),
     current_user_id: UUID = Depends(get_current_user_id),
-    task_service: TaskService = Depends(get_task_service)
+    task_service: TaskService = Depends(get_task_service),
+    session: Session = Depends(get_session),
+    event_emitter_dep: EventEmitter = Depends(lambda: EventEmitter()),
 ):
     """
-    Mark a task as completed.
-
-    Implementation: US2 (T048)
+    Mark a task as completed. If the task is habit-generated, also syncs
+    the completion to the linked habit and returns streak info.
     """
     # Authorization
     if current_user_id != user_id:
@@ -308,13 +320,113 @@ async def complete_task(
 
     try:
         task = task_service.mark_complete(user_id=user_id, task_id=task_id)
-        return task
     except ValueError as e:
         if "not found" in str(e).lower():
             raise HTTPException(status_code=404, detail=f"Task not found: {str(e)}")
         raise HTTPException(status_code=400, detail=f"Validation error: {str(e)}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error completing task: {str(e)}")
+
+    # Habit sync: if task is habit-generated, update the linked habit's streak
+    habit_sync = None
+    _is_habit_task = getattr(task, 'is_habit_task', None) if not isinstance(task, dict) else task.get('is_habit_task')
+    _generated_by_habit_id = getattr(task, 'generated_by_habit_id', None) if not isinstance(task, dict) else task.get('generated_by_habit_id')
+    if _is_habit_task and _generated_by_habit_id:
+        try:
+            from src.models.habit import Habit
+            from src.models.habit_completion import HabitCompletion
+            from src.services.streak_calculator import calculate_new_streak_value
+            from sqlmodel import select as sql_select
+
+            habit = session.get(Habit, _generated_by_habit_id)
+            if habit and habit.user_id == user_id:
+                now_utc = datetime.now(timezone.utc)
+                today_date = now_utc.date()
+
+                # Check if already completed today (avoid duplicate)
+                existing_completions = session.exec(
+                    sql_select(HabitCompletion)
+                    .where(HabitCompletion.habit_id == habit.id)
+                    .where(HabitCompletion.user_id == user_id)
+                ).all()
+
+                already_today = any(
+                    c.completed_at.date() == today_date for c in existing_completions
+                )
+
+                if already_today:
+                    habit_sync = HabitSyncResponse(
+                        synced=False,
+                        habit_id=str(habit.id),
+                        message="Habit already completed today",
+                    )
+                else:
+                    new_streak = calculate_new_streak_value(
+                        current_streak=habit.current_streak,
+                        last_completed_at=habit.last_completed_at,
+                        new_completion_time=now_utc,
+                    )
+
+                    completion = HabitCompletion(
+                        habit_id=habit.id,
+                        user_id=user_id,
+                        completed_at=now_utc,
+                        completion_type=completion_type,
+                    )
+                    session.add(completion)
+
+                    habit.current_streak = new_streak
+                    habit.last_completed_at = now_utc
+                    habit.consecutive_misses = 0
+                    habit.updated_at = now_utc
+                    session.add(habit)
+                    session.commit()
+                    session.refresh(habit)
+
+                    habit_sync = HabitSyncResponse(
+                        synced=True,
+                        habit_id=str(habit.id),
+                        new_streak=new_streak,
+                        completion_type=completion_type,
+                        message=f"Great! Your habit streak for '{habit.identity_statement}' is now {new_streak} days",
+                    )
+
+                    event_emitter_dep.emit(
+                        "HABIT_COMPLETED",
+                        user_id,
+                        {
+                            "habit_id": str(habit.id),
+                            "completion_type": completion_type,
+                            "new_streak": new_streak,
+                            "via_task": str(_get_attr(task, 'id')),
+                        },
+                    )
+            # else: habit deleted (FK set NULL in DB, but Python still has old value)
+            # → habit_sync stays None
+        except Exception:
+            # Graceful degradation: task completes even if habit sync fails
+            pass
+
+    def _get_attr(obj, key):
+        return obj[key] if isinstance(obj, dict) else getattr(obj, key)
+
+    # Build response
+    return TaskCompleteResponse(
+        id=_get_attr(task, 'id'),
+        user_id=_get_attr(task, 'user_id'),
+        title=_get_attr(task, 'title'),
+        description=_get_attr(task, 'description'),
+        status=_get_attr(task, 'status'),
+        priority=_get_attr(task, 'priority'),
+        tags=_get_attr(task, 'tags'),
+        due_date=_get_attr(task, 'due_date'),
+        completed=_get_attr(task, 'completed'),
+        is_habit_task=_get_attr(task, 'is_habit_task') or False,
+        generated_by_habit_id=_get_attr(task, 'generated_by_habit_id'),
+        created_at=_get_attr(task, 'created_at'),
+        updated_at=_get_attr(task, 'updated_at'),
+        habit_sync=habit_sync,
+    )
 
 
 @router.delete("/{user_id}/tasks/{task_id}", status_code=204)

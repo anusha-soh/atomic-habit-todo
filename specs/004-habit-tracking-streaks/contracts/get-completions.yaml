@@ -1,0 +1,158 @@
+openapi: 3.1.0
+info:
+  title: Get Habit Completions API
+  version: 1.0.0
+  description: Retrieve completion history for a habit with optional date range filtering
+
+paths:
+  /api/{user_id}/habits/{habit_id}/completions:
+    get:
+      summary: Get completion history for a habit
+      description: |
+        Retrieve all completions for a habit, optionally filtered by date range.
+        Results are sorted by completion date (newest first).
+
+        **Use Cases**:
+        - Display completion calendar on habit detail page
+        - Generate completion analytics
+        - Export completion history
+
+      operationId: getHabitCompletions
+      tags:
+        - Habits
+        - Completions
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: User ID
+          schema:
+            type: string
+            format: uuid
+            example: "123e4567-e89b-12d3-a456-426614174000"
+        - name: habit_id
+          in: path
+          required: true
+          description: Habit ID
+          schema:
+            type: string
+            format: uuid
+            example: "789e4567-e89b-12d3-a456-426614174001"
+        - name: start_date
+          in: query
+          required: false
+          description: Filter completions from this date (inclusive, UTC, ISO 8601)
+          schema:
+            type: string
+            format: date-time
+            example: "2026-01-01T00:00:00Z"
+        - name: end_date
+          in: query
+          required: false
+          description: Filter completions to this date (inclusive, UTC, ISO 8601)
+          schema:
+            type: string
+            format: date-time
+            example: "2026-01-31T23:59:59Z"
+      responses:
+        '200':
+          description: Completions retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - completions
+                  - total
+                properties:
+                  completions:
+                    type: array
+                    description: List of completions (sorted newest first)
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                        habit_id:
+                          type: string
+                          format: uuid
+                        user_id:
+                          type: string
+                          format: uuid
+                        completed_at:
+                          type: string
+                          format: date-time
+                          description: Completion timestamp (UTC, ISO 8601)
+                        completion_type:
+                          type: string
+                          enum: [full, two_minute]
+                        created_at:
+                          type: string
+                          format: date-time
+                  total:
+                    type: integer
+                    minimum: 0
+                    description: Total number of completions returned
+              examples:
+                multiple_completions:
+                  summary: Multiple completions over time
+                  value:
+                    completions:
+                      - id: "456e4567-e89b-12d3-a456-426614174002"
+                        habit_id: "789e4567-e89b-12d3-a456-426614174001"
+                        user_id: "123e4567-e89b-12d3-a456-426614174000"
+                        completed_at: "2026-01-10T07:30:00Z"
+                        completion_type: "full"
+                        created_at: "2026-01-10T07:30:05Z"
+                      - id: "456e4567-e89b-12d3-a456-426614174003"
+                        habit_id: "789e4567-e89b-12d3-a456-426614174001"
+                        user_id: "123e4567-e89b-12d3-a456-426614174000"
+                        completed_at: "2026-01-09T07:15:00Z"
+                        completion_type: "two_minute"
+                        created_at: "2026-01-09T07:15:03Z"
+                      - id: "456e4567-e89b-12d3-a456-426614174004"
+                        habit_id: "789e4567-e89b-12d3-a456-426614174001"
+                        user_id: "123e4567-e89b-12d3-a456-426614174000"
+                        completed_at: "2026-01-08T06:45:00Z"
+                        completion_type: "full"
+                        created_at: "2026-01-08T06:45:02Z"
+                    total: 3
+                no_completions:
+                  summary: No completions (new habit)
+                  value:
+                    completions: []
+                    total: 0
+        '400':
+          description: Invalid query parameters (e.g., end_date < start_date)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+              example:
+                error: "end_date must be >= start_date"
+        '404':
+          description: Habit not found or user does not have access
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+              example:
+                error: "Habit not found"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+              example:
+                error: "Failed to retrieve completions"

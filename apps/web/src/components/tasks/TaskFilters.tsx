@@ -23,6 +23,9 @@ export function TaskFilters({ currentFilters }: TaskFiltersProps) {
   const [tags, setTags] = useState(currentFilters?.tags || '');
   const [search, setSearch] = useState(currentFilters?.search || '');
   const [sort, setSort] = useState<TaskSortOption>(currentFilters?.sort || 'created_desc');
+  const [habitTaskFilter, setHabitTaskFilter] = useState<string>(
+    currentFilters?.is_habit_task === true ? 'true' : currentFilters?.is_habit_task === false ? 'false' : ''
+  );
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Update URL when filters change
@@ -33,7 +36,8 @@ export function TaskFilters({ currentFilters }: TaskFiltersProps) {
     if (priority) params.set('priority', priority);
     if (tags) params.set('tags', tags);
     if (search) params.set('search', search);
-    if (sort && sort !== 'created_desc') params.set('sort', sort); // Only add if not default
+    if (sort && sort !== 'created_desc') params.set('sort', sort);
+    if (habitTaskFilter) params.set('is_habit_task', habitTaskFilter);
 
     router.push(`/tasks?${params.toString()}`);
   }, [status, priority, tags, search, sort, router]);
@@ -44,12 +48,30 @@ export function TaskFilters({ currentFilters }: TaskFiltersProps) {
     setTags('');
     setSearch('');
     setSort('created_desc');
+    setHabitTaskFilter('');
     router.push('/tasks');
     setIsMobileMenuOpen(false);
   };
 
   const FilterInputs = ({ isMobile = false }: { isMobile?: boolean }) => (
-    <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-5'}`}>
+    <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-6'}`}>
+      {/* Habit task filter */}
+      <div>
+        <label htmlFor={`${isMobile ? 'mobile-' : ''}habit-filter`} className="block text-sm font-medium text-gray-700 mb-1">
+          Source
+        </label>
+        <select
+          id={`${isMobile ? 'mobile-' : ''}habit-filter`}
+          value={habitTaskFilter}
+          onChange={(e) => setHabitTaskFilter(e.target.value)}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 touch-target"
+        >
+          <option value="">All Tasks</option>
+          <option value="true">Habit Tasks Only</option>
+          <option value="false">Manual Tasks Only</option>
+        </select>
+      </div>
+
       {/* Status filter */}
       <div>
         <label htmlFor={`${isMobile ? 'mobile-' : ''}status-filter`} className="block text-sm font-medium text-gray-700 mb-1">
@@ -211,7 +233,7 @@ export function TaskFilters({ currentFilters }: TaskFiltersProps) {
       )}
 
       {/* Active filters display */}
-      {(status || priority || tags || search) && (
+      {(status || priority || tags || search || habitTaskFilter) && (
         <div className="mt-4 flex flex-wrap gap-2">
           {status && (
             <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 touch-target">
@@ -235,6 +257,12 @@ export function TaskFilters({ currentFilters }: TaskFiltersProps) {
             <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 touch-target">
               Search: "{search}"
               <button onClick={() => setSearch('')} className="ml-2 text-green-600 hover:text-green-800 text-lg">×</button>
+            </span>
+          )}
+          {habitTaskFilter && (
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 touch-target">
+              {habitTaskFilter === 'true' ? 'Habit Tasks' : 'Manual Tasks'}
+              <button onClick={() => setHabitTaskFilter('')} className="ml-2 text-purple-600 hover:text-purple-800 text-lg">×</button>
             </span>
           )}
         </div>

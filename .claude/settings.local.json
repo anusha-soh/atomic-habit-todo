@@ -6,7 +6,12 @@
       "Bash(powershell -ExecutionPolicy Bypass -File:*)",
       "Bash(alembic upgrade:*)",
       "Bash(psql:*)",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(powershell:*)"
     ]
+  },
+  "enabledPlugins": {
+    "context7-plugin@context7-marketplace": false,
+    "claude-mem@thedotmack": false
   }
 }

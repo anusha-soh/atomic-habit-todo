@@ -1,0 +1,132 @@
+openapi: 3.1.0
+info:
+  title: Get Habit Streak API
+  version: 1.0.0
+  description: Retrieve current streak information for a habit
+
+paths:
+  /api/{user_id}/habits/{habit_id}/streak:
+    get:
+      summary: Get current streak information
+      description: |
+        Retrieve the current streak status for a habit, including:
+        - Current streak count (consecutive days completed)
+        - Last completion timestamp
+        - Consecutive misses count (for "never miss twice" tracking)
+
+        **Use Cases**:
+        - Display streak badge on habit card
+        - Show progress visualization
+        - Calculate next milestone (7, 21, 66 days)
+
+      operationId: getHabitStreak
+      tags:
+        - Habits
+        - Streaks
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: User ID
+          schema:
+            type: string
+            format: uuid
+            example: "123e4567-e89b-12d3-a456-426614174000"
+        - name: habit_id
+          in: path
+          required: true
+          description: Habit ID
+          schema:
+            type: string
+            format: uuid
+            example: "789e4567-e89b-12d3-a456-426614174001"
+      responses:
+        '200':
+          description: Streak information retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - habit_id
+                  - current_streak
+                  - last_completed_at
+                  - consecutive_misses
+                properties:
+                  habit_id:
+                    type: string
+                    format: uuid
+                    description: ID of the habit
+                  current_streak:
+                    type: integer
+                    minimum: 0
+                    description: |
+                      Current streak (consecutive days completed).
+                      - 0 = no active streak
+                      - 1+ = consecutive days without miss
+                  last_completed_at:
+                    type: string
+                    format: date-time
+                    nullable: true
+                    description: |
+                      Timestamp of most recent completion (UTC, ISO 8601).
+                      Null if habit never completed.
+                  consecutive_misses:
+                    type: integer
+                    minimum: 0
+                    description: |
+                      Count of consecutive missed days.
+                      - 0 = no misses or streak active
+                      - 1 = one miss (notification sent)
+                      - 2+ = triggers streak reset (should not see >1 in practice)
+              examples:
+                active_streak:
+                  summary: Active streak (5 days)
+                  value:
+                    habit_id: "789e4567-e89b-12d3-a456-426614174001"
+                    current_streak: 5
+                    last_completed_at: "2026-01-10T07:30:00Z"
+                    consecutive_misses: 0
+                never_completed:
+                  summary: Never completed (new habit)
+                  value:
+                    habit_id: "789e4567-e89b-12d3-a456-426614174001"
+                    current_streak: 0
+                    last_completed_at: null
+                    consecutive_misses: 0
+                first_miss:
+                  summary: One miss detected (notification sent)
+                  value:
+                    habit_id: "789e4567-e89b-12d3-a456-426614174001"
+                    current_streak: 5
+                    last_completed_at: "2026-01-08T07:30:00Z"
+                    consecutive_misses: 1
+                streak_reset:
+                  summary: Streak reset after 2nd miss
+                  value:
+                    habit_id: "789e4567-e89b-12d3-a456-426614174001"
+                    current_streak: 0
+                    last_completed_at: "2026-01-05T07:30:00Z"
+                    consecutive_misses: 0
+        '404':
+          description: Habit not found or user does not have access
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+              example:
+                error: "Habit not found"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+              example:
+                error: "Failed to retrieve streak information"

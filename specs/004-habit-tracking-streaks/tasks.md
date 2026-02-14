@@ -359,14 +359,14 @@ This document breaks down the Habit Tracking & Streaks feature into actionable t
 
 ## Testing Strategy
 
-**Note**: This feature does NOT require TDD or test-first development per the spec. Tests can be added post-implementation if desired, but are not blocking for task completion.
+Tests verify acceptance criteria from the spec (Constitution §X: "Test Specs, Not Implementation"). TDD is enforced per Constitution §Testing Requirements: write tests first (red), implement (green), then refactor.
 
-**Recommended Test Coverage** (optional):
-- Unit tests: Streak calculation logic (test_streak_calculator.py)
-- Unit tests: Miss detection logic (test_miss_detector.py)
-- Contract tests: API endpoint schemas (test_completion_contract.py)
-- Integration tests: Full completion flow (test_completion_flow.py)
-- Component tests: Frontend components (CompletionCheckbox.test.tsx)
+**Required Test Coverage**:
+- Unit tests: Streak calculation logic (`test_streak_calculator.py`)
+- Unit tests: Miss detection logic (`test_miss_detector.py`)
+- Contract tests: API endpoint schemas (`test_completion_contract.py`)
+- Integration tests: Full completion flow (`test_completion_flow.py`)
+- Component tests: Frontend components (`CompletionCheckbox.test.tsx`)
 
 **Manual Testing Checklist** (required):
 - [ ] Complete habit → Verify completion recorded

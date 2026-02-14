@@ -1,0 +1,116 @@
+openapi: 3.1.0
+info:
+  title: Undo Habit Completion API
+  version: 1.0.0
+  description: Remove an accidental habit completion and recalculate streak
+
+paths:
+  /api/{user_id}/habits/{habit_id}/completions/{completion_id}:
+    delete:
+      summary: Undo a habit completion
+      description: |
+        Delete a completion record and recalculate the habit's streak based on remaining completions.
+
+        **Business Rules**:
+        - Completion record is permanently deleted
+        - Streak is recalculated from scratch using remaining completions
+        - last_completed_at updated to most recent remaining completion (or NULL if none)
+        - No events emitted (silent undo)
+
+        **Use Cases**:
+        - Correct accidental completion (e.g., tapped wrong habit)
+        - Remove duplicate completion entered by mistake
+        - Testing/debugging
+
+      operationId: undoHabitCompletion
+      tags:
+        - Habits
+        - Completions
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: User ID
+          schema:
+            type: string
+            format: uuid
+            example: "123e4567-e89b-12d3-a456-426614174000"
+        - name: habit_id
+          in: path
+          required: true
+          description: Habit ID
+          schema:
+            type: string
+            format: uuid
+            example: "789e4567-e89b-12d3-a456-426614174001"
+        - name: completion_id
+          in: path
+          required: true
+          description: Completion ID to delete
+          schema:
+            type: string
+            format: uuid
+            example: "456e4567-e89b-12d3-a456-426614174002"
+      responses:
+        '200':
+          description: Completion undone successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - deleted
+                  - recalculated_streak
+                  - message
+                properties:
+                  deleted:
+                    type: boolean
+                    description: Always true if successful
+                    example: true
+                  recalculated_streak:
+                    type: integer
+                    minimum: 0
+                    description: New streak value after recalculation
+                  message:
+                    type: string
+                    example: "Completion undone and streak recalculated"
+              examples:
+                streak_reduced:
+                  summary: Streak reduced after undo
+                  value:
+                    deleted: true
+                    recalculated_streak: 4
+                    message: "Completion undone and streak recalculated"
+                streak_reset_to_zero:
+                  summary: Last completion deleted (streak reset)
+                  value:
+                    deleted: true
+                    recalculated_streak: 0
+                    message: "Completion undone and streak recalculated"
+        '404':
+          description: Completion not found or user does not have access
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+              examples:
+                completion_not_found:
+                  value:
+                    error: "Completion not found"
+                habit_not_found:
+                  value:
+                    error: "Habit not found"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+              example:
+                error: "Failed to undo completion"

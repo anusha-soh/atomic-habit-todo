@@ -53,6 +53,8 @@ class TaskService:
         due_date: Optional[datetime] = None,
         created_at: Optional[datetime] = None,
         updated_at: Optional[datetime] = None,
+        generated_by_habit_id: Optional[UUID] = None,
+        is_habit_task: bool = False,
     ) -> Task:
         """
         Create a new task for the user.
@@ -95,6 +97,8 @@ class TaskService:
             priority=priority,
             tags=trimmed_tags,
             due_date=due_date,
+            generated_by_habit_id=generated_by_habit_id,
+            is_habit_task=is_habit_task,
         )
         
         if created_at:
@@ -132,6 +136,7 @@ class TaskService:
         tags: Optional[list[str]] = None,
         search: Optional[str] = None,
         sort: str = "created_desc",
+        is_habit_task: Optional[bool] = None,
     ) -> tuple[list[Task], int]:
         """
         Retrieve tasks for a user with filtering, searching, and sorting.
@@ -179,6 +184,10 @@ class TaskService:
                 func.coalesce(Task.description, '').ilike(f"%{escaped}%")
             ))
 
+        if is_habit_task is not None:
+            logger.debug(f"Applying is_habit_task filter: {is_habit_task}")
+            query = query.where(Task.is_habit_task == is_habit_task)
+
         # Apply sort
         sort_map = {
             "created_desc": Task.created_at.desc(),
@@ -216,7 +225,9 @@ class TaskService:
                 Task.title.ilike(f"%{escaped}%"),
                 func.coalesce(Task.description, '').ilike(f"%{escaped}%")
             ))
-            
+        if is_habit_task is not None:
+            count_query = count_query.where(Task.is_habit_task == is_habit_task)
+
         total = self.session.exec(count_query).one()
         logger.debug(f"Total tasks matching query: {total}")
 

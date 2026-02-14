@@ -31,7 +31,36 @@ async def lifespan(app: FastAPI):
 
         scheduler = BackgroundScheduler()
         # Run miss detection daily at 00:01 UTC
-        scheduler.add_job(detect_missed_habits, "cron", hour=0, minute=1)
+        scheduler.add_job(detect_missed_habits, "cron", hour=0, minute=1, id="miss_detection")
+
+        # Chunk 5: Run habit task generation daily at 00:01 UTC (after miss detection)
+        if os.getenv("DISABLE_BACKGROUND_JOBS", "false").lower() != "true":
+            def run_habit_task_generation():
+                """Generate tasks for all active habits with recurring schedules."""
+                import logging
+                from datetime import datetime
+                logger = logging.getLogger("habit_task_generation")
+                start = datetime.now()
+                try:
+                    from src.database import get_db_session
+                    from src.services.event_emitter import event_emitter
+                    from src.services.habit_task_service import HabitTaskGenerationService
+                    lookahead = int(os.getenv("HABIT_TASK_LOOKAHEAD_DAYS", "7"))
+                    with get_db_session() as session:
+                        gen_service = HabitTaskGenerationService(session, event_emitter)
+                        results = gen_service.generate_tasks_for_all_habits(lookahead)
+                        total_gen = sum(r.generated for r in results)
+                        total_skip = sum(r.skipped for r in results)
+                        elapsed = (datetime.now() - start).total_seconds()
+                        logger.info(
+                            f"Habit task generation complete: {len(results)} habits, "
+                            f"{total_gen} generated, {total_skip} skipped, {elapsed:.1f}s"
+                        )
+                except Exception as e:
+                    logger.error(f"Habit task generation failed: {e}")
+
+            scheduler.add_job(run_habit_task_generation, "cron", hour=0, minute=1, id="habit_task_gen")
+
         scheduler.start()
         yield
         scheduler.shutdown()

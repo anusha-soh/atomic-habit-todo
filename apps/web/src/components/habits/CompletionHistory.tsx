@@ -20,11 +20,18 @@ export function CompletionHistory({ habitId, userId, onUndo }: CompletionHistory
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [undoingId, setUndoingId] = useState<string | null>(null);
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const resp = await getCompletionHistory(userId, habitId);
+      const resp = await getCompletionHistory(
+        userId,
+        habitId,
+        startDate || undefined,
+        endDate || undefined,
+      );
       setCompletions(resp.completions);
       setTotal(resp.total);
     } catch {
@@ -32,7 +39,7 @@ export function CompletionHistory({ habitId, userId, onUndo }: CompletionHistory
     } finally {
       setLoading(false);
     }
-  }, [userId, habitId]);
+  }, [userId, habitId, startDate, endDate]);
 
   useEffect(() => {
     load();
@@ -68,6 +75,44 @@ export function CompletionHistory({ habitId, userId, onUndo }: CompletionHistory
 
   return (
     <div>
+      <div className="flex flex-wrap items-end gap-2 mb-4">
+        <label className="flex flex-col text-xs text-gray-500">
+          From
+          <input
+            type="date"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            className="mt-0.5 text-sm border border-gray-200 rounded px-2 py-1"
+            aria-label="Start date"
+          />
+        </label>
+        <label className="flex flex-col text-xs text-gray-500">
+          To
+          <input
+            type="date"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+            className="mt-0.5 text-sm border border-gray-200 rounded px-2 py-1"
+            aria-label="End date"
+          />
+        </label>
+        <button
+          type="button"
+          onClick={load}
+          className="text-xs font-medium px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded transition-colors"
+        >
+          Filter
+        </button>
+        {(startDate || endDate) && (
+          <button
+            type="button"
+            onClick={() => { setStartDate(''); setEndDate(''); }}
+            className="text-xs text-gray-400 hover:text-gray-600 px-2 py-1.5 transition-colors"
+          >
+            Clear
+          </button>
+        )}
+      </div>
       <p className="text-xs text-gray-400 mb-3">{total} completion{total !== 1 ? 's' : ''} total</p>
       <ul className="divide-y divide-gray-100">
         {completions.map((c) => (

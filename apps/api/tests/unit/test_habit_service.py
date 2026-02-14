@@ -27,8 +27,8 @@ def test_create_habit_service(habit_service, user_id, mock_event_emitter):
     assert habit.identity_statement == habit_data.identity_statement
     assert habit.user_id == user_id
     
-    # Verify event emission
-    mock_event_emitter.emit.assert_called_once_with(
+    # Verify HABIT_CREATED event was emitted (create_habit also triggers task generation events)
+    mock_event_emitter.emit.assert_any_call(
         event_type="HABIT_CREATED",
         user_id=user_id,
         payload={

@@ -1,0 +1,175 @@
+openapi: 3.1.0
+info:
+  title: Complete Habit API
+  version: 1.0.0
+  description: Log a habit completion with optional completion type (full or 2-minute version)
+
+paths:
+  /api/{user_id}/habits/{habit_id}/complete:
+    post:
+      summary: Complete a habit
+      description: |
+        Log a habit completion for today. Creates a completion record and updates the habit's streak.
+
+        **Business Rules**:
+        - One completion per habit per day (UTC day boundary)
+        - Streak increments if last completion was yesterday
+        - Streak resets to 1 if last completion was 2+ days ago
+        - Duplicate completions for same day return 409 Conflict
+
+        **Events Emitted**: HABIT_COMPLETED
+      operationId: completeHabit
+      tags:
+        - Habits
+        - Completions
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: User ID
+          schema:
+            type: string
+            format: uuid
+            example: "123e4567-e89b-12d3-a456-426614174000"
+        - name: habit_id
+          in: path
+          required: true
+          description: Habit ID
+          schema:
+            type: string
+            format: uuid
+            example: "789e4567-e89b-12d3-a456-426614174001"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - completion_type
+              properties:
+                completion_type:
+                  type: string
+                  enum:
+                    - full
+                    - two_minute
+                  description: |
+                    Type of completion:
+                    - `full`: User completed the full habit
+                    - `two_minute`: User completed the 2-minute version
+                  example: full
+            examples:
+              full_completion:
+                summary: Full habit completion
+                value:
+                  completion_type: full
+              two_minute_completion:
+                summary: 2-minute version completion
+                value:
+                  completion_type: two_minute
+      responses:
+        '201':
+          description: Habit completed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - habit_id
+                  - current_streak
+                  - completion
+                  - message
+                properties:
+                  habit_id:
+                    type: string
+                    format: uuid
+                    description: ID of the completed habit
+                  current_streak:
+                    type: integer
+                    minimum: 0
+                    description: Updated streak count (consecutive days)
+                  completion:
+                    type: object
+                    description: The created completion record
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                      habit_id:
+                        type: string
+                        format: uuid
+                      user_id:
+                        type: string
+                        format: uuid
+                      completed_at:
+                        type: string
+                        format: date-time
+                        description: Completion timestamp (UTC, ISO 8601)
+                      completion_type:
+                        type: string
+                        enum: [full, two_minute]
+                      created_at:
+                        type: string
+                        format: date-time
+                  message:
+                    type: string
+                    example: "Habit completed successfully"
+              example:
+                habit_id: "789e4567-e89b-12d3-a456-426614174001"
+                current_streak: 5
+                completion:
+                  id: "456e4567-e89b-12d3-a456-426614174002"
+                  habit_id: "789e4567-e89b-12d3-a456-426614174001"
+                  user_id: "123e4567-e89b-12d3-a456-426614174000"
+                  completed_at: "2026-01-10T07:30:00Z"
+                  completion_type: "full"
+                  created_at: "2026-01-10T07:30:05Z"
+                message: "Habit completed successfully"
+        '400':
+          description: Invalid request (bad completion_type or completed_at in future)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+              example:
+                error: "Invalid completion_type. Must be 'full' or 'two_minute'"
+        '404':
+          description: Habit not found or user does not have access
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+              example:
+                error: "Habit not found"
+        '409':
+          description: Completion already exists for today
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  existing_completion_id:
+                    type: string
+                    format: uuid
+              example:
+                error: "Completion already exists for today"
+                existing_completion_id: "456e4567-e89b-12d3-a456-426614174002"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+              example:
+                error: "Failed to complete habit"

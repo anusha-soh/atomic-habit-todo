@@ -3,7 +3,8 @@ Task Model
 Phase 2 Chunk 2 - Tasks Full Feature Set
 """
 from sqlmodel import SQLModel, Field, Column
-from sqlalchemy import ARRAY, String, Text
+from sqlalchemy import ARRAY, Boolean, ForeignKey, String, Text
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from uuid import UUID, uuid4
 from datetime import datetime, timezone
 from typing import Optional
@@ -39,6 +40,22 @@ class Task(SQLModel, table=True):
     tags: list[str] = Field(default_factory=list, sa_column=Column(ARRAY(String), nullable=True))
     due_date: Optional[datetime] = Field(default=None)
     completed: bool = Field(default=False, nullable=False)
+
+    # Habit ↔ Task connection (Chunk 5)
+    generated_by_habit_id: Optional[UUID] = Field(
+        default=None,
+        sa_column=Column(
+            PG_UUID(as_uuid=True),
+            ForeignKey("habits.id", ondelete="SET NULL"),
+            nullable=True,
+            index=True
+        )
+    )
+    is_habit_task: bool = Field(
+        default=False,
+        sa_column=Column(Boolean, nullable=False, default=False)
+    )
+
     created_at: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc), nullable=False
     )

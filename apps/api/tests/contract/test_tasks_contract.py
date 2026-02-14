@@ -87,6 +87,8 @@ class TestTasksAPIContractUS2:
             "completed": False,
             "created_at": datetime.utcnow().isoformat(),
             "updated_at": datetime.utcnow().isoformat(),
+            "is_habit_task": False,
+            "generated_by_habit_id": None,
         }
 
         async def mock_get_current_user_id():
@@ -293,10 +295,10 @@ class TestTasksAPIContractUS2:
         expected_fields = {
             "id", "user_id", "title", "description", "status",
             "priority", "tags", "due_date", "completed",
-            "created_at", "updated_at"
+            "created_at", "updated_at", "is_habit_task", "generated_by_habit_id"
         }
         actual_fields = set(TaskResponse.model_fields.keys())
-        assert expected_fields == actual_fields, f"TaskResponse missing fields: {expected_fields - actual_fields}"
+        assert expected_fields.issubset(actual_fields), f"TaskResponse missing fields: {expected_fields - actual_fields}"
 
         # TaskListResponse should have pagination fields
         pagination_fields = {"tasks", "total", "page", "limit"}

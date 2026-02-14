@@ -5,6 +5,7 @@
 
 import type {
   Task,
+  TaskCompleteResponse,
   TaskCreateRequest,
   TaskUpdateRequest,
   TaskFilters,
@@ -139,21 +140,26 @@ export async function updateTask(
 }
 
 /**
- * Mark a task as completed
+ * Mark a task as completed. Optionally pass completion_type for habit-generated tasks.
  */
 export async function completeTask(
   userId: string,
-  taskId: string
-): Promise<Task> {
-  const response = await fetch(`${API_URL}/${userId}/tasks/${taskId}/complete`, {
-    method: 'PATCH',
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
+  taskId: string,
+  completionType: 'full' | 'two_minute' = 'full'
+): Promise<TaskCompleteResponse> {
+  const params = new URLSearchParams({ completion_type: completionType });
+  const response = await fetch(
+    `${API_URL}/${userId}/tasks/${taskId}/complete?${params}`,
+    {
+      method: 'PATCH',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }
+  );
 
-  return handleResponse<Task>(response);
+  return handleResponse<TaskCompleteResponse>(response);
 }
 
 /**

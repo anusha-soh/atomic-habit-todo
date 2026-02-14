@@ -1,10 +1,13 @@
 from typing import List, Optional, Tuple, Any
 from uuid import UUID
 from datetime import datetime, timezone
+import logging
 from sqlalchemy.orm import Session
 from src.models.habit import Habit
 from src.schemas.habit_schemas import HabitCreate, HabitUpdate
 from src.services.event_emitter import EventEmitter
+
+logger = logging.getLogger(__name__)
 
 
 class HabitService:
@@ -57,7 +60,17 @@ class HabitService:
                 "recurring_schedule": habit.recurring_schedule
             }
         )
-        
+
+        # Generate tasks for habit if recurring schedule is set (Chunk 5)
+        if habit.recurring_schedule and habit.recurring_schedule.get("type"):
+            try:
+                from src.services.habit_task_service import HabitTaskGenerationService
+                gen_service = HabitTaskGenerationService(self.session, self.event_emitter)
+                result = gen_service.generate_tasks_for_habit(habit.id, user_id)
+                logger.info(f"Auto-generated {result.generated} tasks for new habit {habit.id}")
+            except Exception as e:
+                logger.error(f"Failed to auto-generate tasks for habit {habit.id}: {e}")
+
         return habit
 
     def get_habits(
@@ -124,8 +137,12 @@ class HabitService:
                 raise ValueError("Anchor habit not found or unauthorized")
 
         # Handle recurring_schedule conversion if present
+        schedule_changed = False
         if "recurring_schedule" in updates and updates["recurring_schedule"]:
-            updates["recurring_schedule"] = updates["recurring_schedule"].model_dump()
+            old_schedule = habit.recurring_schedule
+            new_schedule = updates["recurring_schedule"].model_dump()
+            schedule_changed = old_schedule != new_schedule
+            updates["recurring_schedule"] = new_schedule
 
         # Apply updates
         for key, value in updates.items():
@@ -145,6 +162,16 @@ class HabitService:
                 "updated_fields": list(updates.keys())
             }
         )
+
+        # Regenerate tasks if recurring schedule changed (Chunk 5)
+        if schedule_changed:
+            try:
+                from src.services.habit_task_service import HabitTaskGenerationService
+                gen_service = HabitTaskGenerationService(self.session, self.event_emitter)
+                result = gen_service.regenerate_future_tasks(habit.id, user_id)
+                logger.info(f"Regenerated tasks for habit {habit.id}: {result.generated} created")
+            except Exception as e:
+                logger.error(f"Failed to regenerate tasks for habit {habit.id}: {e}")
 
         return habit
 

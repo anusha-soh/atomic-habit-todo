@@ -26,8 +26,28 @@ export interface Task {
   tags: string[];  // Array of user-defined tags
   due_date: string | null;  // ISO 8601 timestamp or null
   completed: boolean;
+  is_habit_task: boolean;  // Chunk 5: true if generated from a habit
+  generated_by_habit_id: string | null;  // Chunk 5: source habit UUID
   created_at: string;  // ISO 8601 timestamp
   updated_at: string;  // ISO 8601 timestamp
+}
+
+/**
+ * Habit sync response returned when completing a habit-generated task
+ */
+export interface HabitSyncResponse {
+  synced: boolean;
+  habit_id: string | null;
+  new_streak: number | null;
+  completion_type: string | null;
+  message: string;
+}
+
+/**
+ * Task completion response with optional habit sync
+ */
+export interface TaskCompleteResponse extends Task {
+  habit_sync: HabitSyncResponse | null;
 }
 
 /**
@@ -65,6 +85,7 @@ export interface TaskFilters {
   sort?: TaskSortOption;
   page?: number;
   limit?: number;
+  is_habit_task?: boolean;  // Chunk 5: filter by habit-generated tasks
 }
 
 /**

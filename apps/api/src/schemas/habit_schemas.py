@@ -104,3 +104,29 @@ class UndoCompletionResponse(BaseModel):
     deleted: bool
     recalculated_streak: int
     message: str
+
+
+# ── Chunk 5: Habits ↔ Tasks Connection ────────────────────────────────────────
+
+class GenerateTasksRequest(BaseModel):
+    """Request body for POST /habits/{id}/generate-tasks"""
+    lookahead_days: int = Field(default=7, ge=1, le=30)
+
+
+class GenerateTasksResponse(BaseModel):
+    """Response for POST /habits/{id}/generate-tasks"""
+    generated: int
+    skipped: int
+    habit_id: str
+    dates_generated: list[str]
+    dates_skipped: list[str]
+    message: str
+
+
+class HabitSyncResponse(BaseModel):
+    """Habit sync info returned when completing a habit-generated task"""
+    synced: bool
+    habit_id: Optional[str] = None
+    new_streak: Optional[int] = None
+    completion_type: Optional[str] = None
+    message: str
