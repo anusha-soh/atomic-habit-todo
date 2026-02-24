@@ -59,7 +59,7 @@
 
 ### 🔴 Red Phase — Write Failing Tests First
 
-- [x] T008 [US1] Write test `test_complete_task_habit_sync_failure` in `apps/api/tests/routes/test_tasks.py`: mock `HabitService.sync_completion` (or equivalent) to raise `RuntimeError("sync error")`, call the complete-task endpoint, assert HTTP 200, assert `response.json()["task"]["status"] == "completed"`, assert `response.json()["habit_sync"]["synced"] == False`, assert `response.json()["habit_sync"]["error"]` is a non-empty string — run `pytest`, confirm test **FAILS** (currently the exception is swallowed and `habit_sync.error` is never set)
+- [x] T008 [US1] Write test `test_complete_task_habit_sync_failure` in `apps/api/tests/integration/test_task_complete_sync.py`: mock `HabitService.sync_completion` (or equivalent) to raise `RuntimeError("sync error")`, call the complete-task endpoint, assert HTTP 200, assert `response.json()["task"]["status"] == "completed"`, assert `response.json()["habit_sync"]["synced"] == False`, assert `response.json()["habit_sync"]["error"]` is a non-empty string — run `pytest`, confirm test **FAILS** (currently the exception is swallowed and `habit_sync.error` is never set)
 
 > ⚠️ Verify T008 is **RED** before continuing.
 
@@ -127,8 +127,8 @@
 
 ### 🔴 Red Phase — Write Failing Tests First
 
-- [x] T022 [US6] Write test `test_health_endpoint_db_failure` in `apps/api/tests/test_main.py`: override the DB session dependency to raise `sqlalchemy.exc.OperationalError`, call `GET /health`, assert HTTP status is 503, assert `response.json()["database"] == "disconnected"` — run `pytest`, confirm **FAILS** (currently returns 200 with hardcoded "connected")
-- [x] T023 [P] [US6] Write test `test_health_endpoint_healthy` in same file: call `GET /health` with a working test DB session, assert HTTP 200, assert `"version"` key present, assert `"uptime_seconds"` is an integer ≥ 0 — run `pytest`, confirm **FAILS** (uptime_seconds and version currently missing)
+- [x] T022 [US6] Write test `test_health_endpoint_db_failure` in `apps/api/tests/integration/test_health_endpoint.py`: override the DB session dependency to raise `sqlalchemy.exc.OperationalError`, call `GET /health`, assert HTTP status is 503, assert `response.json()["database"] == "disconnected"` — run `pytest`, confirm **FAILS** (currently returns 200 with hardcoded "connected")
+- [x] T023 [P] [US6] Write test `test_health_endpoint_healthy` in `apps/api/tests/integration/test_health_endpoint.py`: call `GET /health` with a working test DB session, assert HTTP 200, assert `"version"` key present, assert `"uptime_seconds"` is an integer ≥ 0 — run `pytest`, confirm **FAILS** (uptime_seconds and version currently missing)
 
 > ⚠️ Verify T022–T023 are **RED** before continuing.
 
@@ -148,7 +148,7 @@
 
 ### 🔴 Red Phase — Write Failing Tests First
 
-- [x] T025 [US5] Write test `test_login_rate_limit` in `apps/api/tests/routes/test_auth.py`: send 12 consecutive POST requests to `/api/auth/login` with invalid credentials using the test client, assert at least one response has status 429 — run `pytest`, confirm **FAILS** (currently all return 401, no rate limiting exists)
+- [x] T025 [US5] Write test `test_login_rate_limit` in `apps/api/tests/integration/test_rate_limiting.py`: send 12 consecutive POST requests to `/api/auth/login` with invalid credentials using the test client, assert at least one response has status 429 — run `pytest`, confirm **FAILS** (currently all return 401, no rate limiting exists)
 
 > ⚠️ Verify T025 is **RED** before continuing.
 
@@ -219,9 +219,9 @@
 
 ### 🔴 Red Phase — Write Failing Tests First
 
-- [x] T042 [P] [US8] Write test `test_task_update_invalid_status` in `apps/api/tests/routes/test_tasks.py`: send `PATCH` with `{"status": "not_a_real_status"}`, assert HTTP 422 — run `pytest`, confirm **FAILS** if schema uses `Optional[str]` and accepts any value
-- [x] T043 [P] [US8] Write test `test_habit_update_invalid_category` in `apps/api/tests/routes/test_habits.py`: send `PATCH` with `{"category": "not_a_category"}`, assert HTTP 422 — run `pytest`, confirm **FAILS** if schema uses `Optional[str]`
-- [x] T044 [P] [US8] Write test `test_task_update_description_too_long` in `apps/api/tests/routes/test_tasks.py`: send `PATCH` with `{"description": "x" * 5001}`, assert HTTP 422 — run `pytest`, confirm **FAILS** if `description` has no max_length on update
+- [x] T042 [P] [US8] Write test `test_task_update_invalid_status` in `apps/api/tests/integration/test_validation.py`: send `PATCH` with `{"status": "not_a_real_status"}`, assert HTTP 422 — run `pytest`, confirm **FAILS** if schema uses `Optional[str]` and accepts any value
+- [x] T043 [P] [US8] Write test `test_habit_update_invalid_category` in `apps/api/tests/integration/test_validation.py`: send `PATCH` with `{"category": "not_a_category"}`, assert HTTP 422 — run `pytest`, confirm **FAILS** if schema uses `Optional[str]`
+- [x] T044 [P] [US8] Write test `test_task_update_description_too_long` in `apps/api/tests/integration/test_validation.py`: send `PATCH` with `{"description": "x" * 5001}`, assert HTTP 422 — run `pytest`, confirm **FAILS** if `description` has no max_length on update
 
 > ⚠️ Verify T042–T044 are **RED** before continuing.
 
@@ -265,8 +265,8 @@
 
 ### 🔴 Red Phase — Write Failing Tests First
 
-- [x] T052 [US10] Write test `test_event_emitter_uses_logging_on_failure` in `apps/api/tests/services/test_event_emitter.py`: mock `builtins.open` (or file write) to raise `OSError`, call `emitter.emit(...)`, use `unittest.mock.patch('logging.Logger.warning')` to assert `logger.warning` was called — run `pytest`, confirm **FAILS** (currently uses `print()` not `logging`)
-- [x] T053 [P] [US10] Write test `test_event_emitter_escalates_after_threshold` in same file: trigger 3 consecutive failures, assert the 3rd call used `logger.error` not `logger.warning` — run `pytest`, confirm **FAILS**
+- [x] T052 [US10] Write test `test_event_emitter_uses_logging_on_failure` in `apps/api/tests/unit/test_event_emitter.py`: mock `builtins.open` (or file write) to raise `OSError`, call `emitter.emit(...)`, use `unittest.mock.patch('logging.Logger.warning')` to assert `logger.warning` was called — run `pytest`, confirm **FAILS** (currently uses `print()` not `logging`)
+- [x] T053 [P] [US10] Write test `test_event_emitter_escalates_after_threshold` in `apps/api/tests/unit/test_event_emitter.py`: trigger 3 consecutive failures, assert the 3rd call used `logger.error` not `logger.warning` — run `pytest`, confirm **FAILS**
 
 > ⚠️ Verify T052–T053 are **RED** before continuing.
 
@@ -285,7 +285,7 @@
 ### 🔴 Red Phase — Write Failing Tests First
 
 - [x] T055 [P] Write unit test in `apps/web/tests/unit/RegisterForm.test.tsx` (add to existing file): fill `password` with "abc123" and `confirmPassword` with "xyz999", click submit, assert an element with text "Passwords do not match" is visible and `onSubmit` was NOT called — run `pnpm test --run`, confirm **FAILS** (confirmPassword field does not exist)
-- [x] T056 [P] Write test `test_streak_uses_utc` in `apps/api/tests/services/test_streak_calculator.py`: mock `datetime.now` to return a naive datetime, assert the streak calculator raises or uses UTC-aware datetime — run `pytest`, confirm **FAILS** (currently calls `datetime.now().astimezone()` using local system timezone)
+- [x] T056 [P] Write test `test_streak_uses_utc` in `apps/api/tests/unit/test_streak_calculator.py`: mock `datetime.now` to return a naive datetime, assert the streak calculator raises or uses UTC-aware datetime — run `pytest`, confirm **FAILS** (currently calls `datetime.now().astimezone()` using local system timezone)
 
 > ⚠️ Verify T055–T056 are **RED** before continuing.
 

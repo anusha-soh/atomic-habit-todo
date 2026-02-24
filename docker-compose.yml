@@ -1,0 +1,52 @@
+version: "3.8"
+
+services:
+  # PostgreSQL for integration tests (port 5433 to avoid conflicts)
+  test-db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+      POSTGRES_DB: test_db
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test -d test_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # PostgreSQL for local full-stack development
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: atomichabits
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d atomichabits"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # Backend API server (local development)
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+    ports:
+      - "8000:7860"
+    env_file:
+      - .env.docker
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/atomichabits
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:

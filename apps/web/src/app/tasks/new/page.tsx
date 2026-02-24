@@ -5,16 +5,28 @@
  * Page for creating new tasks with TaskForm component
  */
 import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
+import { API_BASE } from '@/lib/api';
 import { TaskForm } from '@/components/tasks/TaskForm';
 
 export default async function NewTaskPage() {
-  // Get user ID from session cookie (simplified - in production use proper auth)
+  // Get user UUID via /api/auth/me (auth_token cookie holds JWT, not user ID)
   const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get('session_token');
+  const authToken = cookieStore.get('auth_token')?.value;
+  if (!authToken) redirect('/login');
 
-  // For development, use a test user ID if no session
-  // In production, redirect to login if no session
-  const userId = sessionCookie?.value || 'test-user-id';
+  let userId: string;
+  try {
+    const meRes = await fetch(`${API_BASE}/api/auth/me`, {
+      headers: { Cookie: `auth_token=${authToken}` },
+      cache: 'no-store',
+    });
+    if (!meRes.ok) redirect('/login');
+    const meData = await meRes.json();
+    userId = meData.user.id;
+  } catch {
+    redirect('/login');
+  }
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">

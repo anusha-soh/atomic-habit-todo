@@ -93,6 +93,8 @@ export function RegisterForm() {
           setError('Email already registered')
         } else if (err.status === 400) {
           setError(err.message || 'Invalid email or password')
+        } else if (err.status === 429) {
+          setError('Too many registration attempts. Please wait a few minutes and try again.')
         } else {
           setError('Registration failed. Please try again.')
         }

@@ -69,7 +69,7 @@ class UserProfileResponse(BaseModel):
 @router.post("/register", response_model=RegisterResponse, status_code=status.HTTP_201_CREATED)
 @limiter.limit("5/5minute")
 async def register(
-    http_request: Request,
+    request: Request,
     register_data: RegisterRequest,
     response: Response,
     db: Session = Depends(get_session)
@@ -133,7 +133,7 @@ async def register(
 @router.post("/login", response_model=LoginResponse)
 @limiter.limit("10/minute")
 async def login(
-    http_request: Request,
+    request: Request,
     login_data: LoginRequest,
     response: Response,
     db: Session = Depends(get_session)

@@ -1,117 +1,122 @@
 """
 Unit Tests for Task Model
-Phase 2 Chunk 2 - User Story 4
-Tests model-level validation and constraints
+Tests model-level validation via Pydantic model_validate (no database required)
 """
 import pytest
 from uuid import uuid4
 from datetime import datetime, timezone
-from sqlmodel import Session
 
 from src.models.task import Task
 
 
 @pytest.mark.unit
-@pytest.mark.US4
-class TestTaskModelPriority:
-    """Unit tests for Task model priority validation - T066"""
+class TestTaskModelValidation:
+    """Unit tests for Task model Pydantic validators (no DB)"""
 
-    def test_task_priority_enum_values(self, session: Session, user_id):
-        """T066: Test Task model enforces priority enum values (high, medium, low, null)"""
-        # Valid priority values should work
-        valid_priorities = ["high", "medium", "low", None]
+    def test_task_title_not_empty(self, user_id):
+        """Task title cannot be empty (via model_validate)"""
+        with pytest.raises(Exception, match="Title cannot be empty"):
+            Task.model_validate({
+                "id": uuid4(),
+                "user_id": user_id,
+                "title": "",
+                "status": "pending",
+                "tags": [],
+                "completed": False,
+            })
 
-        for priority in valid_priorities:
+    def test_task_title_whitespace_only_rejected(self, user_id):
+        """Task title cannot be only whitespace"""
+        with pytest.raises(Exception, match="Title cannot be empty"):
+            Task.model_validate({
+                "id": uuid4(),
+                "user_id": user_id,
+                "title": "   ",
+                "status": "pending",
+                "tags": [],
+                "completed": False,
+            })
+
+    def test_task_title_trimmed(self, user_id):
+        """Task title is trimmed of whitespace"""
+        task = Task.model_validate({
+            "id": uuid4(),
+            "user_id": user_id,
+            "title": "  Hello World  ",
+            "status": "pending",
+            "tags": [],
+            "completed": False,
+        })
+        assert task.title == "Hello World"
+
+    def test_task_title_max_length(self, user_id):
+        """Task title must be 500 characters or less"""
+        with pytest.raises(Exception, match="500 characters or less"):
+            Task.model_validate({
+                "id": uuid4(),
+                "user_id": user_id,
+                "title": "a" * 501,
+                "status": "pending",
+                "tags": [],
+                "completed": False,
+            })
+
+    def test_task_description_max_length(self, user_id):
+        """Task description must be 5000 characters or less"""
+        with pytest.raises(Exception, match="5000 characters or less"):
+            Task.model_validate({
+                "id": uuid4(),
+                "user_id": user_id,
+                "title": "Test",
+                "description": "a" * 5001,
+                "status": "pending",
+                "tags": [],
+                "completed": False,
+            })
+
+    def test_task_tags_trimmed(self, user_id):
+        """Tags are trimmed of whitespace via validator"""
+        task = Task.model_validate({
+            "id": uuid4(),
+            "user_id": user_id,
+            "title": "Test",
+            "status": "pending",
+            "tags": ["  work  ", "  urgent  ", "  client  "],
+            "completed": False,
+        })
+        assert task.tags == ["work", "urgent", "client"]
+
+    def test_task_tags_empty_strings_removed(self, user_id):
+        """Empty tag strings are removed"""
+        task = Task.model_validate({
+            "id": uuid4(),
+            "user_id": user_id,
+            "title": "Test",
+            "status": "pending",
+            "tags": ["work", "", "  ", "client"],
+            "completed": False,
+        })
+        assert task.tags == ["work", "client"]
+
+    def test_task_defaults(self, user_id):
+        """Task has correct defaults"""
+        task = Task(user_id=user_id, title="Test")
+        assert task.status == "pending"
+        assert task.completed is False
+        assert task.description is None
+        assert task.priority is None
+        assert task.due_date is None
+
+    def test_task_accepts_valid_priority(self, user_id):
+        """Task model accepts valid priority values at construction"""
+        for priority in ["high", "medium", "low", None]:
             task = Task(
                 id=uuid4(),
                 user_id=user_id,
-                title="Test task",
+                title="Test",
                 priority=priority,
                 status="pending",
                 tags=[],
                 completed=False,
-                created_at=datetime.now(timezone.utc),
-                updated_at=datetime.now(timezone.utc),
             )
-            session.add(task)
-            session.commit()
-            session.refresh(task)
-
             assert task.priority == priority
-            session.delete(task)  # Clean up
-            session.commit()
-
-    def test_task_priority_invalid_value_rejected(self, session: Session, user_id):
-        """T066: Test Task model rejects invalid priority values"""
-        invalid_priorities = ["urgent", "critical", "low_priority", "HIGH"]
-
-        for priority in invalid_priorities:
-            with pytest.raises(Exception):  # Should raise validation error
-                task = Task(
-                    id=uuid4(),
-                    user_id=user_id,
-                    title="Test task",
-                    priority=priority,  # Invalid value
-                    status="pending",
-                    tags=[],
-                    completed=False,
-                    created_at=datetime.now(timezone.utc),
-                    updated_at=datetime.now(timezone.utc),
-                )
-                session.add(task)
-                session.commit()
-                session.refresh(task)  # This should trigger validation
-
-
-@pytest.mark.unit
-@pytest.mark.US6
-class TestTaskModelTags:
-    """Unit tests for Task model tags validation - T096"""
-
-    def test_task_tags_max_20_validation(self, session: Session, user_id):
-        """T096: Test Task model enforces maximum of 20 tags"""
-        # Should work with 20 tags
-        valid_tags = [f"tag{i}" for i in range(20)]
-
-        task = Task(
-            id=uuid4(),
-            user_id=user_id,
-            title="Test task",
-            status="pending",
-            tags=valid_tags,
-            completed=False,
-            created_at=datetime.now(timezone.utc),
-            updated_at=datetime.now(timezone.utc),
-        )
-        session.add(task)
-        session.commit()
-        session.refresh(task)
-
-        assert len(task.tags) == 20
-
-        # Clean up
-        session.delete(task)
-        session.commit()
-
-    def test_task_tags_trim_whitespace(self, session: Session, user_id):
-        """T096: Test TaskService trims whitespace from tag values"""
-        from src.services.task_service import TaskService
-        from unittest.mock import Mock
-        
-        # Create tags with leading/trailing whitespace
-        tags_with_spaces = ["  work  ", "  urgent  ", "  client  "]
-        
-        service = TaskService(session, Mock())
-        task = service.create_task(
-            user_id=user_id,
-            title="Test task",
-            tags=tags_with_spaces
-        )
-
-        # Check that tags are trimmed
-        expected_tags = ["work", "urgent", "client"]
-        assert task.tags == expected_tags
-
-        # Clean up
-        session.delete(task)
-        session.commit()

@@ -6,7 +6,9 @@
  */
 import Link from 'next/link';
 import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 import { notFound } from 'next/navigation';
+import { API_BASE } from '@/lib/api';
 import { TaskForm } from '@/components/tasks/TaskForm';
 import { getTask } from '@/lib/tasks-api';
 
@@ -17,10 +19,23 @@ interface EditTaskPageProps {
 export default async function EditTaskPage({ params }: EditTaskPageProps) {
   const { id: taskId } = await params;
 
-  // Get user ID from session cookie
+  // Get user UUID via /api/auth/me (auth_token cookie holds JWT, not user ID)
   const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get('session_token');
-  const userId = sessionCookie?.value || 'test-user-id';
+  const authToken = cookieStore.get('auth_token')?.value;
+  if (!authToken) redirect('/login');
+
+  let userId: string;
+  try {
+    const meRes = await fetch(`${API_BASE}/api/auth/me`, {
+      headers: { Cookie: `auth_token=${authToken}` },
+      cache: 'no-store',
+    });
+    if (!meRes.ok) redirect('/login');
+    const meData = await meRes.json();
+    userId = meData.user.id;
+  } catch {
+    redirect('/login');
+  }
 
   let task;
   let error: string | null = null;

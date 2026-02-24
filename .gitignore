@@ -21,7 +21,8 @@ preview/
 .env
 .env.local
 .env.*.local
-*.env
+# Note: .env.docker is intentionally committed (contains only localhost defaults)
+!.env.docker
 
 # Logs
 logs/
