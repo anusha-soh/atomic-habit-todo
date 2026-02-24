@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import type { CompletionType } from '@/types/habit';
 
 interface CompletionTypeModalProps {
@@ -12,6 +13,13 @@ interface CompletionTypeModalProps {
  * Restyled T044 — Notebook design system (US7)
  */
 export function CompletionTypeModal({ onSelect, onClose }: CompletionTypeModalProps) {
+  // Close on Escape key
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [onClose]);
+
   return (
     <div
       role="dialog"
@@ -32,7 +40,7 @@ export function CompletionTypeModal({ onSelect, onClose }: CompletionTypeModalPr
           <button
             type="button"
             onClick={() => onSelect('full')}
-            className="flex items-center gap-3 w-full min-h-[56px] px-4 py-3 rounded-lg bg-notebook-paper-alt hover:bg-notebook-highlight-yellow border border-notebook-line transition-colors text-left font-patrick-hand text-notebook-ink"
+            className="flex items-center gap-3 w-full min-h-[56px] px-4 py-3 rounded-lg bg-notebook-paper-alt hover:bg-notebook-highlight-yellow border border-notebook-line transition-colors text-left font-patrick-hand text-notebook-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-notebook-ink-blue focus-visible:ring-offset-1"
           >
             <span className="text-2xl">{String.fromCodePoint(0x1F3C6)}</span>
             <div>
@@ -45,7 +53,7 @@ export function CompletionTypeModal({ onSelect, onClose }: CompletionTypeModalPr
           <button
             type="button"
             onClick={() => onSelect('two_minute')}
-            className="flex items-center gap-3 w-full min-h-[56px] px-4 py-3 rounded-lg bg-notebook-paper-alt hover:bg-notebook-highlight-yellow border border-notebook-line transition-colors text-left font-patrick-hand text-notebook-ink"
+            className="flex items-center gap-3 w-full min-h-[56px] px-4 py-3 rounded-lg bg-notebook-paper-alt hover:bg-notebook-highlight-yellow border border-notebook-line transition-colors text-left font-patrick-hand text-notebook-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-notebook-ink-blue focus-visible:ring-offset-1"
           >
             <span className="text-2xl">{String.fromCodePoint(0x26A1)}</span>
             <div>
@@ -58,7 +66,7 @@ export function CompletionTypeModal({ onSelect, onClose }: CompletionTypeModalPr
         <button
           type="button"
           onClick={onClose}
-          className="mt-4 w-full py-2 text-sm text-notebook-ink-light hover:text-notebook-ink transition-colors font-patrick-hand"
+          className="mt-4 w-full py-2 text-sm text-notebook-ink-light hover:text-notebook-ink transition-colors font-patrick-hand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-notebook-ink-blue focus-visible:ring-offset-1"
         >
           Cancel
         </button>

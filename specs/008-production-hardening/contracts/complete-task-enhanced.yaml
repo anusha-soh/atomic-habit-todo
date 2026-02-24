@@ -1,0 +1,84 @@
+openapi: "3.1.0"
+info:
+  title: Complete Task — Enhanced Response
+  version: "1.1.0"
+  description: Adds optional error field to habit_sync on sync failure (backward-compatible)
+
+paths:
+  /{user_id}/tasks/{task_id}/complete:
+    patch:
+      summary: Mark task as complete (with habit sync)
+      operationId: completeTask
+      tags: [Tasks]
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: task_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Task marked complete. habit_sync.synced may be false if sync failed.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CompleteTaskResponse"
+        "401":
+          description: Not authenticated
+        "403":
+          description: Not authorized
+        "404":
+          description: Task not found
+        "409":
+          description: Task already completed
+
+components:
+  schemas:
+    HabitSyncResult:
+      type: object
+      required: [synced]
+      properties:
+        synced:
+          type: boolean
+          description: True if habit streak was updated, false if sync failed or task is not habit-generated
+        habit_id:
+          type: string
+          format: uuid
+          nullable: true
+        new_streak:
+          type: integer
+          nullable: true
+          description: New streak count after completion
+        error:
+          type: string
+          nullable: true
+          description: Human-readable error message when synced=false due to failure (not present when synced=false because task is not habit-generated)
+
+    CompleteTaskResponse:
+      type: object
+      required: [task, habit_sync]
+      properties:
+        task:
+          $ref: "#/components/schemas/Task"
+        habit_sync:
+          $ref: "#/components/schemas/HabitSyncResult"
+
+    Task:
+      type: object
+      description: Full task object after completion
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [pending, in_progress, completed]
+        completed:
+          type: boolean

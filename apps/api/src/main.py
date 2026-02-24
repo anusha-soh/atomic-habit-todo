@@ -3,19 +3,29 @@ FastAPI Application Entry Point
 Phase 2 Core Infrastructure - Authentication API
 """
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
 import os
+import time
+from sqlalchemy import text
+from sqlmodel import Session
 
 # Load environment variables
 load_dotenv()
 
 # Import configuration and validation
 from src.config import validate_environment
+from src.rate_limiter import limiter
+from slowapi.errors import RateLimitExceeded
+from slowapi import _rate_limit_exceeded_handler
 
 # Validate environment on startup
 validate_environment()
+
+# Module-level variable to track app startup time
+_start_time = time.time()
 
 
 @asynccontextmanager
@@ -89,8 +99,15 @@ app.add_middleware(
     allow_origins=allowed_origins,
     allow_credentials=True,  # Enable cookies for httpOnly JWT tokens
     allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
-    allow_headers=["*"],
+    allow_headers=["Content-Type", "Authorization", "X-Requested-With"],
 )
+
+# Configure rate limiter
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+# Import database session getter
+from src.database import get_session
 
 # Import and register routes
 from src.routes import auth, tasks, habits
@@ -106,10 +123,23 @@ async def root():
 
 
 @app.get("/health")
-async def health():
+async def health(session: Session = Depends(get_session)):
     """Detailed health check with database status"""
-    return {
-        "status": "ok",
-        "database": "connected",  # TODO: Add actual database health check
-        "version": "1.0.0",
-    }
+    db_status = "disconnected"
+    http_status = 503
+    try:
+        session.exec(text("SELECT 1"))
+        db_status = "connected"
+        http_status = 200
+    except Exception:
+        pass
+
+    return JSONResponse(
+        status_code=http_status,
+        content={
+            "status": "healthy" if db_status == "connected" else "unhealthy",
+            "database": db_status,
+            "version": "1.0.0",
+            "uptime_seconds": round(time.time() - _start_time),
+        }
+    )

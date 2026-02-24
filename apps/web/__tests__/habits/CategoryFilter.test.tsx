@@ -9,7 +9,7 @@
  * - Displays currently selected category
  */
 
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { CategoryFilter } from '@/components/habits/CategoryFilter';
@@ -98,14 +98,14 @@ describe('CategoryFilter Component', () => {
       );
 
       const mindfulnessButton = screen.getByRole('button', { name: HabitCategory.MINDFULNESS });
-      expect(mindfulnessButton).toHaveClass('bg-blue-600', 'text-white');
+      expect(mindfulnessButton).toHaveClass('bg-notebook-ink-blue', 'text-notebook-paper-white');
     });
 
     it('highlights "All" when selectedCategory is null', () => {
       render(<CategoryFilter selectedCategory={null} onChange={mockOnChange} />);
 
       const allButton = screen.getByRole('button', { name: 'All' });
-      expect(allButton).toHaveClass('bg-blue-600', 'text-white');
+      expect(allButton).toHaveClass('bg-notebook-ink-blue', 'text-notebook-paper-white');
     });
 
     it('applies default styles to unselected categories', () => {
@@ -117,14 +117,14 @@ describe('CategoryFilter Component', () => {
       );
 
       const healthButton = screen.getByRole('button', { name: HabitCategory.HEALTH_FITNESS });
-      expect(healthButton).toHaveClass('bg-white', 'text-gray-600', 'border');
+      expect(healthButton).toHaveClass('bg-notebook-paper-white', 'text-notebook-ink-medium', 'border');
     });
 
     it('applies hover styles to unselected categories', () => {
       render(<CategoryFilter selectedCategory={null} onChange={mockOnChange} />);
 
       const learningButton = screen.getByRole('button', { name: HabitCategory.LEARNING });
-      expect(learningButton).toHaveClass('hover:border-blue-400');
+      expect(learningButton.className).toContain('hover:border-notebook-ink-blue');
     });
   });
 

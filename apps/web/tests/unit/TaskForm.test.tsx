@@ -27,8 +27,9 @@ vi.mock('@/lib/toast-context', () => ({
 
 // Mock API calls
 vi.mock('@/lib/tasks-api', () => ({
-  createTask: vi.fn(),
-  updateTask: vi.fn(),
+  createTask: vi.fn(() => Promise.resolve({ id: 'task-1', title: 'Test' })),
+  updateTask: vi.fn(() => Promise.resolve({ id: 'task-1', title: 'Test' })),
+  getTags: vi.fn(() => Promise.resolve([])),
 }));
 
 describe('TaskForm Component - T022', () => {

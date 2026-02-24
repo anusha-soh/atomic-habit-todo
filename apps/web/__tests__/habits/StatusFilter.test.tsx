@@ -95,36 +95,36 @@ describe('StatusFilter Component', () => {
       render(<StatusFilter selectedStatus={HabitStatus.ACTIVE} onChange={mockOnChange} />);
 
       const activeButton = screen.getByRole('button', { name: 'Active' });
-      expect(activeButton).toHaveClass('bg-white', 'text-gray-900', 'shadow-sm');
+      expect(activeButton).toHaveClass('bg-notebook-ink-blue', 'text-notebook-paper-white', 'shadow-sm');
     });
 
     it('highlights Archived button when selectedStatus is ARCHIVED', () => {
       render(<StatusFilter selectedStatus={HabitStatus.ARCHIVED} onChange={mockOnChange} />);
 
       const archivedButton = screen.getByRole('button', { name: 'Archived' });
-      expect(archivedButton).toHaveClass('bg-white', 'text-gray-900', 'shadow-sm');
+      expect(archivedButton).toHaveClass('bg-notebook-ink-blue', 'text-notebook-paper-white', 'shadow-sm');
     });
 
     it('highlights All button when selectedStatus is "all"', () => {
       render(<StatusFilter selectedStatus={'all'} onChange={mockOnChange} />);
 
       const allButton = screen.getByRole('button', { name: 'All' });
-      expect(allButton).toHaveClass('bg-white', 'text-gray-900', 'shadow-sm');
+      expect(allButton).toHaveClass('bg-notebook-ink-blue', 'text-notebook-paper-white', 'shadow-sm');
     });
 
     it('applies default styles to unselected buttons', () => {
       render(<StatusFilter selectedStatus={HabitStatus.ACTIVE} onChange={mockOnChange} />);
 
       const archivedButton = screen.getByRole('button', { name: 'Archived' });
-      expect(archivedButton).toHaveClass('text-gray-500');
-      expect(archivedButton).not.toHaveClass('bg-white');
+      expect(archivedButton).toHaveClass('text-notebook-ink-medium');
+      expect(archivedButton).not.toHaveClass('bg-notebook-ink-blue');
     });
 
     it('applies hover styles to unselected buttons', () => {
       render(<StatusFilter selectedStatus={HabitStatus.ACTIVE} onChange={mockOnChange} />);
 
       const archivedButton = screen.getByRole('button', { name: 'Archived' });
-      expect(archivedButton).toHaveClass('hover:text-gray-700');
+      expect(archivedButton).toHaveClass('hover:text-notebook-ink');
     });
   });
 
@@ -144,7 +144,7 @@ describe('StatusFilter Component', () => {
       );
 
       const wrapper = container.firstChild as HTMLElement;
-      expect(wrapper).toHaveClass('bg-gray-100', 'rounded-lg');
+      expect(wrapper).toHaveClass('bg-notebook-paper-alt', 'rounded-lg');
     });
 
     it('has padding', () => {
@@ -231,14 +231,14 @@ describe('StatusFilter Component', () => {
       );
 
       const activeButton = screen.getByRole('button', { name: 'Active' });
-      expect(activeButton).toHaveClass('bg-white');
+      expect(activeButton).toHaveClass('bg-notebook-ink-blue');
 
       // External change to ARCHIVED
       rerender(<StatusFilter selectedStatus={HabitStatus.ARCHIVED} onChange={mockOnChange} />);
 
       const archivedButton = screen.getByRole('button', { name: 'Archived' });
-      expect(archivedButton).toHaveClass('bg-white');
-      expect(activeButton).not.toHaveClass('bg-white');
+      expect(archivedButton).toHaveClass('bg-notebook-ink-blue');
+      expect(activeButton).not.toHaveClass('bg-notebook-ink-blue');
     });
   });
 });

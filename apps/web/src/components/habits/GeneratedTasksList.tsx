@@ -9,7 +9,9 @@ import { useState, useEffect } from 'react';
 import { Task } from '@/types/task';
 import { format } from 'date-fns';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+import { API_BASE } from '@/lib/api';
+
+const API_URL = `${API_BASE}/api`;
 
 interface GeneratedTasksListProps {
   userId: string;

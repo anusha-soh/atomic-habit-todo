@@ -3,10 +3,13 @@ Event Emitter Service
 Phase 2 Core Infrastructure - File-based event logging
 """
 import json
+import logging
 from datetime import datetime, timezone
 from pathlib import Path
 from uuid import UUID
 from typing import Any, Dict
+
+_logger = logging.getLogger(__name__)
 
 
 class EventEmitter:
@@ -31,6 +34,7 @@ class EventEmitter:
         """
         self.log_dir = log_dir
         self.log_dir.mkdir(exist_ok=True)
+        self._failure_count = 0
 
     def emit(
         self,
@@ -73,7 +77,9 @@ class EventEmitter:
                 f.write(json.dumps(event) + "\n")
         except Exception as e:
             # Fire-and-forget: log the error but don't raise
-            print(f"[EventEmitter] Failed to write event: {e}")
+            self._failure_count += 1
+            level = logging.ERROR if self._failure_count >= 3 else logging.WARNING
+            _logger.log(level, f"EventEmitter write failed (count={self._failure_count}): {e}", exc_info=True)
 
 
 # Global event emitter instance

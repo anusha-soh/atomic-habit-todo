@@ -54,6 +54,11 @@
   --notebook-shadow-hover: 0 8px 20px rgba(139, 119, 90, 0.25);
 }
 
+html {
+  /* Offset fixed NotebookNav (64px) on anchor jumps */
+  scroll-padding-top: 4.5rem;
+}
+
 body {
   background-color: #FDF6E3;
   color: #2C2416;
@@ -63,6 +68,15 @@ body {
 .touch-target {
   min-height: 44px;
   min-width: 44px;
+}
+
+/* Mobile-only hamburger — hidden on md+ screens.
+   Explicit CSS because Tailwind v4/Turbopack may not scan
+   md:hidden inside complex className strings. */
+@media (min-width: 768px) {
+  .hamburger-mobile-only {
+    display: none !important;
+  }
 }
 
 /* === Animations === */

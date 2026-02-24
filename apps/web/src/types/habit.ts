@@ -25,16 +25,16 @@ export interface Habit {
   id: string;
   user_id: string;
   identity_statement: string;
-  full_description?: string;
+  full_description?: string | null;      // API may return null
   two_minute_version: string;
-  habit_stacking_cue?: string;
-  anchor_habit_id?: string;
-  motivation?: string;
+  habit_stacking_cue?: string | null;    // API may return null
+  anchor_habit_id?: string | null;       // API may return null
+  motivation?: string | null;            // API may return null
   category: HabitCategory;
   recurring_schedule: RecurringSchedule;
   status: HabitStatus;
   current_streak: number;
-  last_completed_at?: string;
+  last_completed_at?: string | null;     // API may return null
   consecutive_misses: number;
   created_at: string;
   updated_at: string;

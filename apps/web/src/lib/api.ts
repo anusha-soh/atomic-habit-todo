@@ -3,7 +3,11 @@
  * Phase 2 Core Infrastructure
  */
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+export const API_BASE = (
+  process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
+).replace(/\/$/, '')
+
+const API_URL = API_BASE
 
 export class APIError extends Error {
   constructor(

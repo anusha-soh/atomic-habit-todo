@@ -6,9 +6,9 @@
  */
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { createTask, updateTask } from '@/lib/tasks-api';
+import { createTask, updateTask, getTags } from '@/lib/tasks-api';
 import { validateTitle, validateDescription, Task, TaskStatus, TaskPriority } from '@/types/task';
 import { useToast } from '@/lib/toast-context';
 
@@ -39,6 +39,52 @@ export function TaskForm({ userId, taskId, initialData, onSuccess }: TaskFormPro
   const [tags, setTags] = useState<string>(initialData?.tags?.join(', ') || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<{ title?: string; description?: string }>({});
+
+  // Tag autocomplete state
+  const [tagSuggestions, setTagSuggestions] = useState<string[]>([]);
+  const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [tagInput, setTagInput] = useState('');
+
+  useEffect(() => {
+    if (userId) {
+      getTags(userId).then(setTagSuggestions).catch(() => {});
+    }
+  }, [userId]);
+
+  const handleTagInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setTagInput(val);
+    if (val.length > 0) {
+      // Derive the current list of already-added tags to exclude them from suggestions
+      const currentTags = tags
+        .split(',')
+        .map(t => t.trim())
+        .filter(t => t.length > 0);
+      setFilteredSuggestions(
+        tagSuggestions.filter(
+          t => t.toLowerCase().includes(val.toLowerCase()) && !currentTags.includes(t)
+        )
+      );
+      setShowSuggestions(true);
+    } else {
+      setShowSuggestions(false);
+    }
+  };
+
+  const handleSelectSuggestion = (tag: string) => {
+    // Append the selected tag to the comma-separated tags string
+    const currentTags = tags
+      .split(',')
+      .map(t => t.trim())
+      .filter(t => t.length > 0);
+    if (!currentTags.includes(tag)) {
+      currentTags.push(tag);
+    }
+    setTags(currentTags.join(', '));
+    setShowSuggestions(false);
+    setTagInput('');
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -228,6 +274,7 @@ export function TaskForm({ userId, taskId, initialData, onSuccess }: TaskFormPro
         <label htmlFor="tags" className="block text-sm font-medium font-caveat text-notebook-ink mb-1">
           Tags
         </label>
+        {/* Existing tags (comma-separated) — direct edit field */}
         <input
           type="text"
           id="tags"
@@ -239,7 +286,50 @@ export function TaskForm({ userId, taskId, initialData, onSuccess }: TaskFormPro
           placeholder="Enter tags separated by commas (e.g., work, urgent, client)"
           disabled={isSubmitting}
         />
-        <p className="mt-1 text-notebook-ink-light font-inter text-xs">Separate tags with commas</p>
+        {/* Autocomplete input for adding tags from suggestions */}
+        <div className="relative mt-2">
+          <input
+            type="text"
+            value={tagInput}
+            onChange={handleTagInputChange}
+            onBlur={() => {
+              // Delay hide so clicks on suggestions register first
+              setTimeout(() => setShowSuggestions(false), 150);
+            }}
+            onFocus={() => {
+              if (tagInput.length > 0 && filteredSuggestions.length > 0) {
+                setShowSuggestions(true);
+              }
+            }}
+            placeholder="Or type to search existing tags..."
+            className={`w-full px-3 py-2 border-0 border-b border-notebook-line bg-transparent rounded-none font-inter text-notebook-ink-medium text-sm focus:outline-none focus:border-notebook-ink-blue ${
+              isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
+            disabled={isSubmitting}
+            aria-label="Search for tag suggestions"
+            aria-autocomplete="list"
+            aria-expanded={showSuggestions}
+          />
+          {showSuggestions && filteredSuggestions.length > 0 && (
+            <ul
+              className="absolute z-10 w-full bg-notebook-paper-white border border-notebook-line rounded-lg mt-1 shadow-notebook-sm max-h-40 overflow-y-auto"
+              role="listbox"
+            >
+              {filteredSuggestions.map(suggestion => (
+                <li
+                  key={suggestion}
+                  onClick={() => handleSelectSuggestion(suggestion)}
+                  className="px-3 py-2 font-patrick-hand text-notebook-ink hover:bg-notebook-paper-alt cursor-pointer"
+                  role="option"
+                  aria-selected={false}
+                >
+                  {suggestion}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+        <p className="mt-1 text-notebook-ink-light font-inter text-xs">Separate tags with commas, or pick from suggestions above</p>
       </div>
 
       {/* Submit button */}

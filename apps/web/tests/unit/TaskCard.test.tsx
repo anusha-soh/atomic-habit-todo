@@ -34,6 +34,8 @@ describe('TaskCard Component - T021', () => {
     tags: ['work', 'urgent'],
     due_date: '2026-01-10T00:00:00Z',
     completed: false,
+    is_habit_task: false,
+    generated_by_habit_id: null,
     created_at: '2026-01-04T10:00:00Z',
     updated_at: '2026-01-04T10:00:00Z',
   };

@@ -12,7 +12,9 @@ import type {
   TaskListResponse,
 } from '@/types/task';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+import { API_BASE } from './api';
+
+const API_URL = `${API_BASE}/api`;
 
 /**
  * API Error class for structured error handling

@@ -15,6 +15,11 @@ vi.mock('next/navigation', () => ({
   }),
 }));
 
+// Mock user context (RegisterForm calls useUser internally)
+vi.mock('@/contexts/user-context', () => ({
+  useUser: () => ({ refetch: vi.fn(), user: null, isLoading: false, error: null }),
+}));
+
 // Mock auth API
 vi.mock('@/lib/api', () => ({
   authAPI: {
@@ -50,12 +55,13 @@ describe('RegisterForm Component', () => {
   it('should call register API with correct data', async () => {
     const user = userEvent.setup();
     render(<RegisterForm />);
-    
+
     await user.type(screen.getByLabelText(/email/i), 'test@example.com');
     await user.type(screen.getByLabelText(/^password$/i), 'password123');
-    
+    await user.type(screen.getByLabelText(/confirm password/i), 'password123');
+
     await user.click(screen.getByRole('button', { name: /register/i }));
-    
+
     expect(authAPI.register).toHaveBeenCalledWith('test@example.com', 'password123');
   });
 });

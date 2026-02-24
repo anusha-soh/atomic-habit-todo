@@ -6,7 +6,7 @@
  */
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { authAPI, APIError } from '@/lib/api';
@@ -33,6 +33,9 @@ export default function HabitsPage() {
   const [category, setCategory] = useState<string | null>(null);
   const [status, setStatus] = useState<HabitStatus | 'all'>(HabitStatus.ACTIVE);
 
+  // Debounce ref for filter changes
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+
   // Auth check
   useEffect(() => {
     const fetchUser = async () => {
@@ -50,29 +53,33 @@ export default function HabitsPage() {
     fetchUser();
   }, [router]);
 
-  // Fetch habits when filters change
+  // Fetch habits when filters change (debounced 300ms)
   useEffect(() => {
     if (!user) return;
 
-    const fetchHabits = async () => {
-      setFetchingHabits(true);
-      try {
-        const response = await getHabits(user.id, {
-          category: category as HabitCategory || undefined,
-          status: status === 'all' ? undefined : status,
-          include_archived: status === 'all' || status === HabitStatus.ARCHIVED,
-          limit: 100
-        });
-        setHabits(response.habits);
-        setTotal(response.total);
-      } catch (error) {
-        console.error('Failed to fetch habits:', error);
-      } finally {
-        setFetchingHabits(false);
-      }
-    };
+    clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      const fetchHabits = async () => {
+        setFetchingHabits(true);
+        try {
+          const response = await getHabits(user.id, {
+            category: category as HabitCategory || undefined,
+            status: status === 'all' ? undefined : status,
+            include_archived: status === 'all' || status === HabitStatus.ARCHIVED,
+            limit: 100
+          });
+          setHabits(response.habits);
+          setTotal(response.total);
+        } catch (error) {
+          console.error('Failed to fetch habits:', error);
+        } finally {
+          setFetchingHabits(false);
+        }
+      };
+      fetchHabits();
+    }, 300);
 
-    fetchHabits();
+    return () => clearTimeout(debounceRef.current);
   }, [user, category, status]);
 
   if (loading) {

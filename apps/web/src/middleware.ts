@@ -13,7 +13,12 @@ export function middleware(request: NextRequest) {
   const hasAuthToken = request.cookies.has('auth_token')
 
   // Protected Routes: Redirect unauthenticated users to login
-  if (!hasAuthToken && pathname.startsWith('/dashboard')) {
+  if (
+    !hasAuthToken &&
+    (pathname.startsWith('/dashboard') ||
+      pathname.startsWith('/tasks') ||
+      pathname.startsWith('/habits'))
+  ) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
@@ -35,5 +40,7 @@ export const config = {
     '/login',
     '/register',
     '/dashboard/:path*',
+    '/tasks/:path*',
+    '/habits/:path*',
   ],
 }

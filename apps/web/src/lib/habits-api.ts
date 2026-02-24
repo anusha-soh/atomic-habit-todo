@@ -16,7 +16,9 @@ import type {
   UndoCompletionResponse,
 } from '@/types/habit';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+import { API_BASE } from './api';
+
+const API_URL = API_BASE;
 
 /**
  * API Error class for structured error handling

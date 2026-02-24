@@ -12,7 +12,9 @@ import type {
   UserProfileResponse,
 } from '@/types/auth';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+import { API_BASE } from './api';
+
+const API_URL = API_BASE;
 
 export class AuthAPIError extends Error {
   constructor(

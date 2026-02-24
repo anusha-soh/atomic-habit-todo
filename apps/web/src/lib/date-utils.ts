@@ -12,7 +12,7 @@ import { format, isToday, isTomorrow, isPast } from 'date-fns';
  * @param status - Current task status
  * @returns Formatted date string
  */
-export function formatDueDate(dueDate: string | null, status: string): string {
+export function formatDueDate(dueDate: string | null, status: string = 'pending'): string {
   if (!dueDate) return 'No due date';
 
   const date = new Date(dueDate);
@@ -38,7 +38,7 @@ export function formatDueDate(dueDate: string | null, status: string): string {
  * @param status - Current task status
  * @returns True if overdue, false otherwise
  */
-export function isOverdue(dueDate: string | null, status: string): boolean {
+export function isOverdue(dueDate: string | null, status: string = 'pending'): boolean {
   if (!dueDate) return false;
 
   const date = new Date(dueDate);

@@ -11,9 +11,9 @@ import { LogoutButton } from './LogoutButton';
 export function Navbar() {
   const pathname = usePathname();
   
-  // Don't show navbar on login/register pages
-  const isAuthPage = pathname === '/login' || pathname === '/register';
-  if (isAuthPage) return null;
+  // Don't show navbar on marketing or auth pages
+  const isHiddenPage = pathname === '/' || pathname === '/login' || pathname === '/register';
+  if (isHiddenPage) return null;
 
   const navLinks = [
     { name: 'Dashboard', href: '/dashboard' },
@@ -26,8 +26,8 @@ export function Navbar() {
         <div className="flex h-16 justify-between items-center">
           {/* Logo & Desktop Links */}
           <div className="flex items-center gap-8">
-            <Link href="/" className="flex items-center gap-2">
-              <span className="text-2xl">🎯</span>
+            <Link href="/" className="flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-notebook-ink-blue focus-visible:ring-offset-2 rounded" aria-label="Atomic Habits home">
+              <span className="text-2xl" aria-hidden="true">🎯</span>
               <span className="font-caveat text-2xl text-notebook-ink hidden sm:block">Atomic Habits</span>
             </Link>
 
@@ -36,7 +36,7 @@ export function Navbar() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`relative px-3 py-2 font-patrick-hand text-lg transition-colors ${
+                  className={`relative px-3 py-2 font-patrick-hand text-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-notebook-ink-blue focus-visible:ring-offset-2 rounded ${
                     pathname.startsWith(link.href)
                       ? 'text-notebook-ink-blue border-b-[3px] border-notebook-ink-blue pb-1'
                       : 'text-notebook-ink-medium hover:text-notebook-ink-blue'
@@ -61,7 +61,7 @@ export function Navbar() {
           <Link
             key={link.href}
             href={link.href}
-            className={`flex flex-col items-center gap-1 font-patrick-hand text-lg ${
+            className={`flex flex-col items-center gap-1 font-patrick-hand text-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-notebook-ink-blue focus-visible:ring-offset-2 rounded ${
               pathname.startsWith(link.href) ? 'text-notebook-ink-blue font-bold' : 'text-notebook-ink-light'
             }`}
           >

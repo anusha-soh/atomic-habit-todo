@@ -11,6 +11,7 @@ import os
 from src.database import get_session
 from src.services.auth_service import AuthService, AuthenticationError, ValidationError
 from src.middleware.auth import get_current_user_id
+from src.rate_limiter import limiter
 
 router = APIRouter()
 
@@ -66,8 +67,10 @@ class UserProfileResponse(BaseModel):
 
 
 @router.post("/register", response_model=RegisterResponse, status_code=status.HTTP_201_CREATED)
+@limiter.limit("5/5minute")
 async def register(
-    request: RegisterRequest,
+    http_request: Request,
+    register_data: RegisterRequest,
     response: Response,
     db: Session = Depends(get_session)
 ):
@@ -75,7 +78,8 @@ async def register(
     Register a new user.
 
     Args:
-        request: Registration data (email, password)
+        http_request: FastAPI request object (required for rate limiting)
+        register_data: Registration data (email, password)
         response: FastAPI response object (for setting cookie)
         db: Database session
 
@@ -89,7 +93,7 @@ async def register(
     """
     try:
         auth_service = AuthService(db)
-        user, token = auth_service.register(request.email, request.password)
+        user, token = auth_service.register(register_data.email, register_data.password)
 
         # Set httpOnly cookie with JWT token
         response.set_cookie(
@@ -127,8 +131,10 @@ async def register(
 
 
 @router.post("/login", response_model=LoginResponse)
+@limiter.limit("10/minute")
 async def login(
-    request: LoginRequest,
+    http_request: Request,
+    login_data: LoginRequest,
     response: Response,
     db: Session = Depends(get_session)
 ):
@@ -136,7 +142,8 @@ async def login(
     Login with email and password.
 
     Args:
-        request: Login credentials (email, password)
+        http_request: FastAPI request object (required for rate limiting)
+        login_data: Login credentials (email, password)
         response: FastAPI response object (for setting cookie)
         db: Database session
 
@@ -149,7 +156,7 @@ async def login(
     """
     try:
         auth_service = AuthService(db)
-        user, session, token = auth_service.login(request.email, request.password)
+        user, session, token = auth_service.login(login_data.email, login_data.password)
 
         # Set httpOnly cookie with JWT token
         response.set_cookie(

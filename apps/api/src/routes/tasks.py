@@ -2,12 +2,15 @@
 Task Routes
 Phase 2 Chunk 2 - Tasks Full Feature Set
 """
+import logging
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlmodel import Session
 from pydantic import BaseModel, Field
 from uuid import UUID
 from typing import Optional
 from datetime import datetime, timezone
+from enum import Enum
 
 from src.database import get_session
 from src.services.task_service import TaskService, UNSET
@@ -15,7 +18,24 @@ from src.services.event_emitter import EventEmitter
 from src.middleware.auth import get_current_user_id
 from src.schemas.habit_schemas import HabitSyncResponse
 
+logger = logging.getLogger(__name__)
+
 router = APIRouter()
+
+
+# Enums for validation
+class TaskStatus(str, Enum):
+    """Task status enum"""
+    pending = "pending"
+    in_progress = "in_progress"
+    completed = "completed"
+
+
+class TaskPriority(str, Enum):
+    """Task priority enum"""
+    high = "high"
+    medium = "medium"
+    low = "low"
 
 
 # Request/Response Models
@@ -23,8 +43,8 @@ class TaskCreate(BaseModel):
     """Task creation request"""
     title: str = Field(..., min_length=1, max_length=500)
     description: Optional[str] = Field(None, max_length=5000)
-    status: Optional[str] = "pending"
-    priority: Optional[str] = None
+    status: Optional[TaskStatus] = TaskStatus.pending
+    priority: Optional[TaskPriority] = None
     tags: Optional[list[str]] = []
     due_date: Optional[datetime] = None
 
@@ -33,8 +53,8 @@ class TaskUpdate(BaseModel):
     """Task update request (partial)"""
     title: Optional[str] = Field(None, min_length=1, max_length=500)
     description: Optional[str] = Field(None, max_length=5000)
-    status: Optional[str] = None
-    priority: Optional[str] = None
+    status: Optional[TaskStatus] = None
+    priority: Optional[TaskPriority] = None
     tags: Optional[list[str]] = None
     due_date: Optional[datetime] = None
 
@@ -403,9 +423,18 @@ async def complete_task(
                     )
             # else: habit deleted (FK set NULL in DB, but Python still has old value)
             # → habit_sync stays None
-        except Exception:
+        except Exception as e:
             # Graceful degradation: task completes even if habit sync fails
-            pass
+            logger.warning(
+                f"Habit sync failed for task {task_id}: {e}",
+                exc_info=True,
+            )
+            habit_sync = HabitSyncResponse(
+                synced=False,
+                habit_id=str(_generated_by_habit_id) if _generated_by_habit_id else None,
+                message="Habit streak could not be updated. Please check your habit manually.",
+                error=str(e),
+            )
 
     def _get_attr(obj, key):
         return obj[key] if isinstance(obj, dict) else getattr(obj, key)

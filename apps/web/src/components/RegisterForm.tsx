@@ -6,17 +6,21 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { authAPI, APIError } from '@/lib/api'
+import { useUser } from '@/contexts/user-context'
 
 export function RegisterForm() {
   const router = useRouter()
+  const { refetch } = useUser()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
   // Real-time validation states
   const [emailError, setEmailError] = useState('')
   const [passwordError, setPasswordError] = useState('')
+  const [confirmPasswordError, setConfirmPasswordError] = useState('')
 
   // Email validation (real-time)
   const validateEmail = (value: string) => {
@@ -35,6 +39,21 @@ export function RegisterForm() {
     } else {
       setPasswordError('')
     }
+    // Re-validate confirm password whenever password changes
+    if (confirmPassword && value !== confirmPassword) {
+      setConfirmPasswordError('Passwords do not match')
+    } else {
+      setConfirmPasswordError('')
+    }
+  }
+
+  // Confirm password validation (real-time)
+  const validateConfirmPassword = (value: string) => {
+    if (value && value !== password) {
+      setConfirmPasswordError('Passwords do not match')
+    } else {
+      setConfirmPasswordError('')
+    }
   }
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -47,6 +66,12 @@ export function RegisterForm() {
       return
     }
 
+    if (password !== confirmPassword) {
+      setConfirmPasswordError('Passwords do not match')
+      return
+    }
+    setConfirmPasswordError('')
+
     if (emailError || passwordError) {
       setError('Please fix validation errors before submitting')
       return
@@ -58,7 +83,8 @@ export function RegisterForm() {
       // Call register API
       await authAPI.register(email, password)
 
-      // Redirect to dashboard on success
+      // Sync user context then navigate
+      await refetch()
       router.push('/dashboard')
     } catch (err) {
       if (err instanceof APIError) {
@@ -146,11 +172,37 @@ export function RegisterForm() {
         </p>
       </div>
 
+      {/* Confirm Password field */}
+      <div className="space-y-2">
+        <Label htmlFor="confirmPassword">Confirm Password</Label>
+        <Input
+          id="confirmPassword"
+          type="password"
+          autoComplete="new-password"
+          placeholder="Re-enter your password"
+          value={confirmPassword}
+          onChange={(e) => {
+            setConfirmPassword(e.target.value)
+            validateConfirmPassword(e.target.value)
+          }}
+          onBlur={() => validateConfirmPassword(confirmPassword)}
+          disabled={loading}
+          required
+          aria-required="true"
+          aria-invalid={!!confirmPasswordError}
+          aria-describedby={confirmPasswordError ? "confirm-password-error" : undefined}
+          className={confirmPasswordError ? 'border-notebook-ink-red' : ''}
+        />
+        {confirmPasswordError && (
+          <p id="confirm-password-error" className="text-sm text-notebook-ink-red font-patrick-hand" role="alert">{confirmPasswordError}</p>
+        )}
+      </div>
+
       {/* Submit button */}
       <Button
         type="submit"
         className="w-full"
-        disabled={loading || !!emailError || !!passwordError}
+        disabled={loading || !!emailError || !!passwordError || !!confirmPasswordError}
         aria-busy={loading}
       >
         {loading ? 'Creating account...' : 'Register'}

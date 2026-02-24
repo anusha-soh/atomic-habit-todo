@@ -1,0 +1,57 @@
+openapi: "3.1.0"
+info:
+  title: Health API — Production Hardening
+  version: "1.1.0"
+  description: Real database connectivity check replacing hardcoded status
+
+paths:
+  /health:
+    get:
+      summary: Application health check
+      description: |
+        Returns actual database connectivity status. Used by monitoring tools
+        and container orchestrators to determine instance health.
+      operationId: getHealth
+      tags: [Health]
+      responses:
+        "200":
+          description: Application is healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+              example:
+                status: healthy
+                database: connected
+                version: "1.0.0"
+                uptime_seconds: 3600
+        "503":
+          description: Application is unhealthy (database unreachable)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+              example:
+                status: unhealthy
+                database: disconnected
+                version: "1.0.0"
+                uptime_seconds: 3600
+
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      required: [status, database, version, uptime_seconds]
+      properties:
+        status:
+          type: string
+          enum: [healthy, unhealthy]
+        database:
+          type: string
+          enum: [connected, disconnected]
+        version:
+          type: string
+          example: "1.0.0"
+        uptime_seconds:
+          type: number
+          example: 3600

@@ -33,18 +33,22 @@ describe('TaskDetailPage', () => {
   it('should render task details', async () => {
     const mockTask = {
       id: '1',
+      user_id: 'user-1',
       title: 'Task 1',
       description: 'Desc 1',
-      status: 'pending',
-      priority: 'high',
+      status: 'pending' as const,
+      priority: 'high' as const,
       tags: [],
+      due_date: null,
+      completed: false,
+      is_habit_task: false,
+      generated_by_habit_id: null,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
-      completed: false,
     };
     vi.mocked(getTask).mockResolvedValue(mockTask);
 
-    const Page = await TaskDetailPage({ params: Promise.resolve({ id: '1' }) });
+    const Page = await TaskDetailPage({ params: { id: '1' } });
     render(Page);
     
     expect(screen.getByText('Task 1')).toBeInTheDocument();

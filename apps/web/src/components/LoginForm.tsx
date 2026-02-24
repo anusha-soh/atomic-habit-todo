@@ -6,9 +6,11 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { authAPI, APIError } from '@/lib/api'
+import { useUser } from '@/contexts/user-context'
 
 export function LoginForm() {
   const router = useRouter()
+  const { refetch } = useUser()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -30,7 +32,8 @@ export function LoginForm() {
       // Call login API
       await authAPI.login(email, password)
 
-      // Redirect to dashboard on success
+      // Sync user context then navigate
+      await refetch()
       router.push('/dashboard')
     } catch (err) {
       if (err instanceof APIError) {

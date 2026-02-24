@@ -68,6 +68,7 @@ export function CompletionCheckbox({
           'relative flex items-center justify-center',
           // 44×44px minimum tap target (mobile-first)
           'w-11 h-11 rounded-full border-2 transition-all duration-200',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-notebook-ink-green focus-visible:ring-offset-2',
           checked
             ? 'bg-notebook-ink-green border-notebook-ink-green cursor-default'
             : 'bg-notebook-paper-white border-notebook-line hover:border-notebook-ink-green cursor-pointer',

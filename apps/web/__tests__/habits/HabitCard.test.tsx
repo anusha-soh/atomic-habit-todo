@@ -85,7 +85,8 @@ describe('HabitCard Component', () => {
       render(<HabitCard habit={baseMockHabit} userId={mockUserId} />);
 
       const categoryBadge = screen.getByText(HabitCategory.HEALTH_FITNESS);
-      expect(categoryBadge).toHaveClass('bg-green-100', 'text-green-800');
+      expect(categoryBadge.className).toContain('bg-notebook-ink-green');
+      expect(categoryBadge.className).toContain('text-notebook-ink-green');
     });
 
     it('applies correct color for Productivity category', () => {
@@ -93,7 +94,8 @@ describe('HabitCard Component', () => {
       render(<HabitCard habit={habit} userId={mockUserId} />);
 
       const categoryBadge = screen.getByText(HabitCategory.PRODUCTIVITY);
-      expect(categoryBadge).toHaveClass('bg-blue-100', 'text-blue-800');
+      expect(categoryBadge.className).toContain('bg-notebook-ink-blue');
+      expect(categoryBadge.className).toContain('text-notebook-ink-blue');
     });
 
     it('applies correct color for Mindfulness category', () => {
@@ -101,7 +103,7 @@ describe('HabitCard Component', () => {
       render(<HabitCard habit={habit} userId={mockUserId} />);
 
       const categoryBadge = screen.getByText(HabitCategory.MINDFULNESS);
-      expect(categoryBadge).toHaveClass('bg-purple-100', 'text-purple-800');
+      expect(categoryBadge.className).toContain('bg-notebook-highlight-pink');
     });
 
     it('applies correct color for Learning category', () => {
@@ -109,7 +111,7 @@ describe('HabitCard Component', () => {
       render(<HabitCard habit={habit} userId={mockUserId} />);
 
       const categoryBadge = screen.getByText(HabitCategory.LEARNING);
-      expect(categoryBadge).toHaveClass('bg-yellow-100', 'text-yellow-800');
+      expect(categoryBadge.className).toContain('bg-notebook-highlight-yellow');
     });
 
     it('applies correct color for Other category', () => {
@@ -117,7 +119,7 @@ describe('HabitCard Component', () => {
       render(<HabitCard habit={habit} userId={mockUserId} />);
 
       const categoryBadge = screen.getByText(HabitCategory.OTHER);
-      expect(categoryBadge).toHaveClass('bg-gray-100', 'text-gray-800');
+      expect(categoryBadge.className).toContain('bg-notebook-paper-alt');
     });
   });
 
@@ -134,7 +136,7 @@ describe('HabitCard Component', () => {
 
       const archivedBadge = screen.getByText('Archived');
       expect(archivedBadge).toBeInTheDocument();
-      expect(archivedBadge).toHaveClass('bg-gray-100', 'text-gray-500');
+      expect(archivedBadge).toHaveClass('bg-notebook-paper-alt', 'text-notebook-ink-light');
     });
   });
 
@@ -186,14 +188,15 @@ describe('HabitCard Component', () => {
       render(<HabitCard habit={habitWithStreak} userId={mockUserId} />);
 
       expect(screen.getByText('🔥')).toBeInTheDocument();
-      expect(screen.getByText('7 day streak')).toBeInTheDocument();
+      // In compact mode StreakCounter renders the number separately with aria-label for accessibility
+      expect(screen.getByLabelText('7 day streak')).toBeInTheDocument();
     });
 
     it('displays different streak numbers correctly', () => {
       const habitWithStreak = { ...baseMockHabit, current_streak: 42 };
       render(<HabitCard habit={habitWithStreak} userId={mockUserId} />);
 
-      expect(screen.getByText('42 day streak')).toBeInTheDocument();
+      expect(screen.getByLabelText('42 day streak')).toBeInTheDocument();
     });
   });
 
@@ -218,7 +221,7 @@ describe('HabitCard Component', () => {
       const { container } = render(<HabitCard habit={baseMockHabit} userId={mockUserId} />);
 
       const card = container.querySelector('.group');
-      expect(card).toHaveClass('hover:border-blue-300', 'hover:shadow-md');
+      expect(card).toHaveClass('hover:shadow-notebook-hover', 'hover:-translate-y-1');
     });
 
     it('truncates long identity statements with line-clamp', () => {

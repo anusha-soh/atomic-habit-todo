@@ -16,6 +16,11 @@ vi.mock('next/navigation', () => ({
   }),
 }));
 
+// Mock user context (LoginForm calls useUser internally)
+vi.mock('@/contexts/user-context', () => ({
+  useUser: () => ({ refetch: vi.fn(), user: null, isLoading: false, error: null }),
+}));
+
 // Mock auth API
 vi.mock('@/lib/api', () => ({
   authAPI: {

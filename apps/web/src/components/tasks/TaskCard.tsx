@@ -30,6 +30,8 @@ export function TaskCard({ task, userId }: TaskCardProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [showCompletionFlash, setShowCompletionFlash] = useState(false);
+  const [optimisticCompleted, setOptimisticCompleted] = useState(task.completed);
+  const [optimisticDeleted, setOptimisticDeleted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -41,15 +43,17 @@ export function TaskCard({ task, userId }: TaskCardProps) {
 
   const handleMarkComplete = async () => {
     setIsCompleting(true);
+    setOptimisticCompleted(true);
+    setShowCompletionFlash(true);
+    setTimeout(() => setShowCompletionFlash(false), 500);
 
     try {
       await completeTask(userId, task.id);
       showToast('Task marked as completed', 'success');
-      setShowCompletionFlash(true);
-      setTimeout(() => setShowCompletionFlash(false), 500);
       router.refresh(); // Refresh server component data
     } catch (e) {
-      showToast(e instanceof Error ? e.message : 'Failed to complete task', 'error');
+      setOptimisticCompleted(false);
+      showToast(e instanceof Error ? e.message : 'Failed to complete task. Please try again.', 'error');
     } finally {
       setIsCompleting(false);
     }
@@ -61,13 +65,15 @@ export function TaskCard({ task, userId }: TaskCardProps) {
     }
 
     setIsDeleting(true);
+    setOptimisticDeleted(true);
 
     try {
       await deleteTask(userId, task.id);
       showToast('Task deleted successfully', 'success');
       router.refresh(); // Refresh server component data
     } catch (e) {
-      showToast(e instanceof Error ? e.message : 'Failed to delete task', 'error');
+      setOptimisticDeleted(false);
+      showToast(e instanceof Error ? e.message : 'Failed to delete task. Please try again.', 'error');
     } finally {
       setIsDeleting(false);
     }
@@ -79,9 +85,11 @@ export function TaskCard({ task, userId }: TaskCardProps) {
     completed: 'bg-notebook-highlight-mint text-notebook-ink-green',
   };
 
+  if (optimisticDeleted) return null;
+
   return (
     <div className={`rounded-lg p-4 transition-all duration-200 ${
-      task.completed ? 'bg-notebook-paper-alt shadow-notebook-sm opacity-75' : 'bg-notebook-highlight-yellow shadow-notebook-md hover:shadow-notebook-hover hover:-translate-y-1'
+      optimisticCompleted ? 'bg-notebook-paper-alt shadow-notebook-sm opacity-75' : 'bg-notebook-highlight-yellow shadow-notebook-md hover:shadow-notebook-hover hover:-translate-y-1'
     } ${showCompletionFlash ? 'animate-highlight-flash' : ''}`}>
       <div className="flex flex-col space-y-3">
         {/* Header with title and actions */}
@@ -89,7 +97,7 @@ export function TaskCard({ task, userId }: TaskCardProps) {
           <div className="flex-1">
             {/* Title */}
             <h3 className={`font-caveat text-xl ${
-              task.completed ? 'text-notebook-ink-light line-through' : 'text-notebook-ink'
+              optimisticCompleted ? 'text-notebook-ink-light line-through' : 'text-notebook-ink'
             }`}>
               {task.title}
             </h3>
@@ -110,7 +118,7 @@ export function TaskCard({ task, userId }: TaskCardProps) {
             >
               Edit
             </Link>
-            {!task.completed && (
+            {!optimisticCompleted && (
               <button
                 onClick={handleMarkComplete}
                 disabled={isCompleting}
@@ -132,7 +140,7 @@ export function TaskCard({ task, userId }: TaskCardProps) {
         {/* Description */}
         {task.description && (
           <p className={`line-clamp-2 ${
-            task.completed ? 'text-notebook-ink-light font-inter text-sm' : 'text-notebook-ink-medium font-inter text-sm'
+            optimisticCompleted ? 'text-notebook-ink-light font-inter text-sm' : 'text-notebook-ink-medium font-inter text-sm'
           }`}>
             {task.description}
           </p>

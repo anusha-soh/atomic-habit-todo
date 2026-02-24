@@ -35,6 +35,6 @@ describe('Pagination Component', () => {
   it('should highlight current page', () => {
     render(<Pagination total={50} limit={10} currentPage={3} />);
     const activePage = screen.getByText('3');
-    expect(activePage).toHaveClass('bg-blue-50');
+    expect(activePage).toHaveClass('bg-notebook-ink-blue');
   });
 });

@@ -3,6 +3,26 @@ from uuid import UUID
 from datetime import datetime
 from pydantic import BaseModel, Field
 from src.models.habit import RecurringSchedule
+from enum import Enum
+
+
+class HabitCategory(str, Enum):
+    """Habit category enum"""
+    health_fitness = "Health & Fitness"
+    productivity = "Productivity"
+    mindfulness = "Mindfulness"
+    learning = "Learning"
+    social = "Social"
+    finance = "Finance"
+    creative = "Creative"
+    other = "Other"
+
+
+class HabitStatus(str, Enum):
+    """Habit status enum"""
+    active = "active"
+    archived = "archived"
+
 
 class HabitBase(BaseModel):
     identity_statement: str = Field(..., min_length=1, max_length=2000)
@@ -11,7 +31,7 @@ class HabitBase(BaseModel):
     habit_stacking_cue: Optional[str] = Field(None, max_length=500)
     anchor_habit_id: Optional[UUID] = None
     motivation: Optional[str] = Field(None, max_length=2000)
-    category: str
+    category: HabitCategory
     recurring_schedule: RecurringSchedule
 
 class HabitCreate(HabitBase):
@@ -24,9 +44,9 @@ class HabitUpdate(BaseModel):
     habit_stacking_cue: Optional[str] = Field(None, max_length=500)
     anchor_habit_id: Optional[UUID] = None
     motivation: Optional[str] = Field(None, max_length=2000)
-    category: Optional[str] = None
+    category: Optional[HabitCategory] = None
     recurring_schedule: Optional[RecurringSchedule] = None
-    status: Optional[str] = None
+    status: Optional[HabitStatus] = None
 
 class HabitResponse(HabitBase):
     id: UUID
@@ -130,3 +150,4 @@ class HabitSyncResponse(BaseModel):
     new_streak: Optional[int] = None
     completion_type: Optional[str] = None
     message: str
+    error: Optional[str] = None

@@ -305,8 +305,8 @@ Individuals committed to personal growth through incremental behavior change who
 - Kubernetes + Helm for orchestration (Phases IV-V)
 
 **Deployment (Phase II)**:
-- Frontend: Vercel
-- Backend: Render
+- Frontend: Vercel (Next.js)
+- Backend: Hugging Face Spaces (Docker, port 7860)
 - Database: Neon Serverless PostgreSQL
 
 **Cloud Infrastructure (Phase V)**:
@@ -642,7 +642,7 @@ ALTER TABLE habits ADD COLUMN consecutive_misses INT DEFAULT 0;
 **Objectives**:
 - Add database persistence
 - Implement multi-user authentication
-- Deploy to production (Vercel + Render)
+- Deploy to production (Vercel frontend + Hugging Face Spaces backend)
 - Build FULL tasks feature set (Basic + Intermediate + Due dates)
 - Build Habits MVP module
 
@@ -673,7 +673,7 @@ ALTER TABLE habits ADD COLUMN consecutive_misses INT DEFAULT 0;
 **Technology**:
 - Monorepo structure (`apps/web`, `apps/api`)
 - Next.js 16 frontend (Vercel deployment)
-- FastAPI backend (Render deployment)
+- FastAPI backend (Hugging Face Spaces deployment, port 7860)
 - Neon Serverless PostgreSQL
 - Better Auth + JWT
 
@@ -868,7 +868,7 @@ VERIFY (TEST) → Automated tests pass
 ### Phase II Deliverables
 
 - [ ] Deployed web app URL (Vercel frontend)
-- [ ] Deployed API URL (Render backend)
+- [ ] Deployed API URL (Hugging Face Spaces backend)
 - [ ] Database connection working (Neon)
 - [ ] User registration/login functional
 - [ ] Task CRUD with all 9 features working (Basic + Intermediate + Due dates)

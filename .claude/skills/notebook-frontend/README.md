@@ -1,0 +1,45 @@
+# notebook-frontend
+
+Auto-trigger keywords for this skill:
+
+- notebook design system
+- notebook aesthetic
+- notebook theme
+- notebook token
+- notebook-paper
+- notebook-ink
+- font-caveat
+- font-patrick-hand
+- StickyNote
+- RoughBorder
+- rough border
+- sticky note card
+- tilt card
+- feature card
+- NotebookNav
+- notebook nav
+- marketing section
+- landing page section
+- class not generated
+- tailwind not working
+- md:hidden not working
+- tailwind class missing
+- unstyled layout
+- postcss config
+- @tailwindcss/postcss
+- turbopack scanning
+- dynamic class name
+- ClientMain
+- marketing route
+- pb-20 padding
+- scroll-padding-top
+- hamburger mobile
+- mobile menu visibility
+- playwright isVisible
+- visibility hidden overflow hidden
+- animate-fade-in-up
+- wavy underline
+- ruled lines background
+- repeating-linear-gradient notebook
+- seed prop roughjs
+- sketchy border

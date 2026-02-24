@@ -9,13 +9,15 @@ import { EmptyState } from '@/components/tasks/EmptyState';
 describe('EmptyState Component', () => {
   it('should render default empty state', () => {
     render(<EmptyState hasFilters={false} />);
-    expect(screen.getByText(/no tasks yet/i)).toBeInTheDocument();
+    // Component renders "Your task list is a blank page" as heading
+    expect(screen.getByRole('heading')).toBeInTheDocument();
     expect(screen.getByText(/create task/i)).toBeInTheDocument();
   });
 
   it('should render filtered empty state', () => {
     render(<EmptyState hasFilters={true} />);
-    expect(screen.getByText(/no tasks match your filters/i)).toBeInTheDocument();
+    // Both h3 and p contain "No tasks match your filters" — query by heading role
+    expect(screen.getByRole('heading', { name: /no tasks match your filters/i })).toBeInTheDocument();
     expect(screen.getByText(/clear all filters/i)).toBeInTheDocument();
   });
 

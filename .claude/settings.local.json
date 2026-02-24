@@ -7,7 +7,14 @@
       "Bash(alembic upgrade:*)",
       "Bash(psql:*)",
       "Bash(python:*)",
-      "Bash(powershell:*)"
+      "Bash(powershell:*)",
+      "Bash(head:*)",
+      "Bash(grep:*)",
+      "Bash(cd /c/my-drive/spec-kit/hackathon_2_phases/phase-2-webapp/apps/api && .venv/Scripts/python -m pytest tests/unit/ --tb=short -q --no-header 2>&1)",
+      "Bash(tail:*)",
+      "Bash(cd /c/my-drive/spec-kit/hackathon_2_phases/phase-2-webapp/apps/api && timeout 90 .venv/Scripts/python -m pytest tests/unit/test_event_emitter.py tests/unit/test_habit_model.py tests/unit/test_schedule_parser.py --tb=short -q 2>&1)",
+      "Bash(cd /c/my-drive/spec-kit/hackathon_2_phases/phase-2-webapp/apps/api && timeout 90 .venv/Scripts/python -m pytest tests/unit/test_task_service.py tests/unit/test_habit_service.py tests/unit/test_task_model.py --tb=short -q 2>&1)",
+      "Bash(cd:*)"
     ]
   },
   "enabledPlugins": {

@@ -6,8 +6,10 @@
  */
 import Link from 'next/link';
 import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 import { TaskCard } from '@/components/tasks/TaskCard';
 import { TaskFilters } from '@/components/tasks/TaskFilters';
+import { SearchInput } from '@/components/tasks/SearchInput';
 import { EmptyState } from '@/components/tasks/EmptyState';
 import { Pagination } from '@/components/tasks/Pagination';
 import { getTasks } from '@/lib/tasks-api';
@@ -20,13 +22,13 @@ interface TasksPageProps {
 export default async function TasksPage({ searchParams }: TasksPageProps) {
   const params = await searchParams;
 
-  // Get user ID from session cookie (simplified - in production use proper auth)
+  // Get user ID from session cookie; redirect to login if unauthenticated
   const cookieStore = await cookies();
   const sessionCookie = cookieStore.get('session_token');
-
-  // For development, use a test user ID if no session
-  // In production, redirect to login if no session
-  const userId = sessionCookie?.value || 'test-user-id';
+  if (!sessionCookie?.value) {
+    redirect('/login');
+  }
+  const userId = sessionCookie.value;
 
   // Extract filter params
   const filters: TaskFiltersType = {
@@ -69,6 +71,9 @@ export default async function TasksPage({ searchParams }: TasksPageProps) {
         </Link>
       </div>
 
+      {/* Search */}
+      <SearchInput />
+
       {/* Filters */}
       <TaskFilters currentFilters={filters} />
 
@@ -81,7 +86,15 @@ export default async function TasksPage({ searchParams }: TasksPageProps) {
 
       {/* Task list */}
       {tasks.length === 0 && !error ? (
-        <EmptyState hasFilters={hasFilters} />
+        filters.search ? (
+          <div className="bg-notebook-paper-white border-2 border-dashed border-notebook-line rounded-xl p-12 text-center">
+            <p className="font-patrick-hand text-notebook-ink-medium text-lg">
+              No tasks found for &apos;{filters.search}&apos;
+            </p>
+          </div>
+        ) : (
+          <EmptyState hasFilters={hasFilters} />
+        )
       ) : (
         <div className="space-y-4">
           {tasks.map((task, index) => (

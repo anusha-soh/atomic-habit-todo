@@ -6,7 +6,7 @@ Algorithm: O(n log n) sort + linear scan
 - Count consecutive days (day_gap == 1)
 - Break on gaps (day_gap > 1)
 """
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from typing import List, Optional
 from src.models.habit_completion import HabitCompletion
 
@@ -53,7 +53,7 @@ def calculate_streak(
 
     # Use provided today or default to UTC now
     if today is None:
-        today = datetime.now(datetime.now().astimezone().tzinfo).date()
+        today = datetime.now(timezone.utc).date()
 
     # Sort completions by date (descending, most recent first)
     sorted_completions = sorted(
@@ -133,7 +133,7 @@ def is_streak_active(
         return False
 
     if today is None:
-        today = datetime.now(datetime.now().astimezone().tzinfo).date()
+        today = datetime.now(timezone.utc).date()
 
     last_completion = get_last_completion_date(completions)
     if last_completion is None:

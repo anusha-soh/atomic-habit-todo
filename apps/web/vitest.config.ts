@@ -56,6 +56,7 @@ export default defineConfig({
       '**/.next/**',
       '**/out/**',
       '**/coverage/**',
+      '**/e2e/**',
     ],
   },
 

@@ -7,7 +7,7 @@
  */
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { createHabit, updateHabit, getHabits } from '@/lib/habits-api';
 import {
@@ -51,14 +51,20 @@ export function HabitForm({ userId, habitId, initialData, onSuccess }: HabitForm
   const [existingHabits, setExistingHabits] = useState<Habit[]>([]);
   const [isLoadingHabits, setIsLoadingHabits] = useState(false);
 
-  // Fetch habits for stacking options
+  // Cache flag: only fetch anchor habits once per component lifecycle
+  const habitsLoadedRef = useRef(false);
+
+  // Fetch habits for stacking options (cached — runs only once per mount)
   useEffect(() => {
+    if (habitsLoadedRef.current) return;
+
     async function fetchHabits() {
       setIsLoadingHabits(true);
       try {
         const response = await getHabits(userId, { limit: 100 });
         // Filter out current habit to avoid self-anchoring
         setExistingHabits(response.habits.filter(h => h.id !== habitId));
+        habitsLoadedRef.current = true;
       } catch (error) {
         console.error('Failed to fetch habits for stacking:', error);
       } finally {
