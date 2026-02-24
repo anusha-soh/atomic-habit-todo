@@ -6,12 +6,22 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import TasksPage from '@/app/tasks/page';
 import { getTasks } from '@/lib/tasks-api';
 
-// Mock cookies
+// Mock cookies — return auth_token for get('auth_token')
 vi.mock('next/headers', () => ({
   cookies: async () => ({
-    get: vi.fn().mockReturnValue({ value: 'test-session' }),
+    get: vi.fn().mockImplementation((name: string) => {
+      if (name === 'auth_token') return { value: 'test-jwt-token' };
+      return null;
+    }),
   }),
 }));
+
+// Mock fetch for /api/auth/me
+const mockFetch = vi.fn().mockResolvedValue({
+  ok: true,
+  json: async () => ({ user: { id: 'test-user-id' } }),
+});
+vi.stubGlobal('fetch', mockFetch);
 
 // Mock API
 vi.mock('@/lib/tasks-api', () => ({
@@ -35,6 +45,10 @@ vi.mock('@/components/tasks/Pagination', () => ({
 describe('TasksPage (Server Component)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({ user: { id: 'test-user-id' } }),
+    });
   });
 
   it('should fetch tasks and pass them to TaskCard components', async () => {
@@ -46,9 +60,7 @@ describe('TasksPage (Server Component)', () => {
 
     const searchParams = Promise.resolve({});
     const component = await TasksPage({ searchParams });
-    
-    // Check if the component structure exists in the returned JSX
-    // Since it's a server component, it returns React elements
+
     expect(getTasks).toHaveBeenCalled();
   });
 });

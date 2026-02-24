@@ -34,7 +34,7 @@ export default function HabitsPage() {
   const [status, setStatus] = useState<HabitStatus | 'all'>(HabitStatus.ACTIVE);
 
   // Debounce ref for filter changes
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   // Auth check
   useEffect(() => {
