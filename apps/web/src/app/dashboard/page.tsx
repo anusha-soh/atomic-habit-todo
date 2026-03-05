@@ -3,45 +3,25 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { authAPI, APIError } from '@/lib/api'
-import { LogoutButton } from '@/components/LogoutButton'
-
-interface User {
-  id: string
-  email: string
-  created_at: string
-}
+import { useUser } from '@/contexts/user-context'
 
 export default function DashboardPage() {
   const router = useRouter()
-  const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  const { user, isLoading, error } = useUser()
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
     setMounted(true)
-    // Fetch current user on mount
-    const fetchUser = async () => {
-      try {
-        const response = await authAPI.me() as { user: User }
-        setUser(response.user)
-      } catch (err) {
-        if (err instanceof APIError && err.status === 401) {
-          // Not authenticated - redirect to login
-          router.push('/login')
-        } else {
-          setError('Failed to load user data')
-        }
-      } finally {
-        setLoading(false)
-      }
+  }, [])
+
+  useEffect(() => {
+    // Redirect to login if not authenticated (after loading completes)
+    if (!isLoading && !user) {
+      router.push('/login')
     }
+  }, [isLoading, user, router])
 
-    fetchUser()
-  }, [router])
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
@@ -80,7 +60,7 @@ export default function DashboardPage() {
             {mounted ? new Date(user.created_at).toLocaleDateString() : 'Loading...'}
           </p>
           <p className="mt-4 text-sm text-notebook-ink-green font-medium">
-            ✅ You're successfully authenticated.
+            You are successfully authenticated.
           </p>
         </div>
       </div>
