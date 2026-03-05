@@ -15,8 +15,9 @@ from src.rate_limiter import limiter
 
 router = APIRouter()
 
-# Cookie security: Use secure cookies only in production (HTTPS)
-COOKIE_SECURE = os.getenv("ENVIRONMENT", "development") == "production"
+# Cookie security: Secure=True required for SameSite=None (cross-origin auth)
+# Default to True unless explicitly set to development (localhost)
+COOKIE_SECURE = os.getenv("ENVIRONMENT", "production") != "development"
 
 
 # Request/Response Models
@@ -101,7 +102,7 @@ async def register(
             value=token,
             httponly=True,
             secure=COOKIE_SECURE,  # HTTPS only in production
-            samesite="strict",
+            samesite="none",
             max_age=7 * 24 * 60 * 60,  # 7 days
         )
 
@@ -164,7 +165,7 @@ async def login(
             value=token,
             httponly=True,
             secure=COOKIE_SECURE,
-            samesite="strict",
+            samesite="none",
             max_age=7 * 24 * 60 * 60,  # 7 days
         )
 
@@ -225,7 +226,7 @@ async def logout(
             key="auth_token",
             httponly=True,
             secure=COOKIE_SECURE,
-            samesite="strict",
+            samesite="none",
         )
 
         return LogoutResponse(message="Logout successful")
