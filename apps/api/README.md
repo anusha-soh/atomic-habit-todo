@@ -1,3 +1,13 @@
+---
+title: Atomic Habits API
+emoji: 🎯
+colorFrom: blue
+colorTo: green
+sdk: docker
+app_port: 7860
+pinned: false
+---
+
 # Backend API - Phase 2 Core Infrastructure
 
 FastAPI backend for Atomic Habits todo application with authentication, database persistence, and event logging.
