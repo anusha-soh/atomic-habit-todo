@@ -49,12 +49,14 @@ class SessionResponse(BaseModel):
 class RegisterResponse(BaseModel):
     """Registration response"""
     user: UserResponse
+    token: str | None = None
 
 
 class LoginResponse(BaseModel):
     """Login response"""
     user: UserResponse
     session: SessionResponse
+    token: str | None = None
 
 
 class LogoutResponse(BaseModel):
@@ -111,7 +113,8 @@ async def register(
                 id=str(user.id),
                 email=user.email,
                 created_at=user.created_at.isoformat(),
-            )
+            ),
+            token=token,
         )
 
     except ValidationError as e:
@@ -179,6 +182,7 @@ async def login(
                 id=str(session.id),
                 expires_at=session.expires_at.isoformat(),
             ),
+            token=token,
         )
 
     except AuthenticationError as e:

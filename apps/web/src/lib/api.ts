@@ -9,6 +9,25 @@ export const API_BASE = (
 
 const API_URL = API_BASE
 
+/**
+ * Token storage for cross-origin auth (Bearer token fallback).
+ * Cookies are blocked as third-party when frontend and backend
+ * are on different domains (e.g. vercel.app → hf.space).
+ */
+function getStoredToken(): string | null {
+  if (typeof window === 'undefined') return null
+  return localStorage.getItem('auth_token')
+}
+
+function setStoredToken(token: string | null) {
+  if (typeof window === 'undefined') return
+  if (token) {
+    localStorage.setItem('auth_token', token)
+  } else {
+    localStorage.removeItem('auth_token')
+  }
+}
+
 export class APIError extends Error {
   constructor(
     message: string,
@@ -33,13 +52,21 @@ async function apiFetch<T>(
 ): Promise<T> {
   const { data, ...fetchOptions } = options
 
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...(fetchOptions.headers as Record<string, string>),
+  }
+
+  // Add Bearer token if available (cross-origin fallback)
+  const token = getStoredToken()
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`
+  }
+
   const config: RequestInit = {
     ...fetchOptions,
-    headers: {
-      'Content-Type': 'application/json',
-      ...fetchOptions.headers,
-    },
-    credentials: 'include', // Include cookies for httpOnly JWT tokens
+    headers,
+    credentials: 'include', // Also send cookies when same-origin
   }
 
   if (data) {
@@ -114,13 +141,23 @@ export const api = {
  * Authentication API methods
  */
 export const authAPI = {
-  register: (email: string, password: string) =>
-    api.post('/api/auth/register', { email, password }),
+  register: async (email: string, password: string) => {
+    const result = await api.post<{ user: any; token?: string }>('/api/auth/register', { email, password })
+    if (result.token) setStoredToken(result.token)
+    return result
+  },
 
-  login: (email: string, password: string) =>
-    api.post('/api/auth/login', { email, password }),
+  login: async (email: string, password: string) => {
+    const result = await api.post<{ user: any; session: any; token?: string }>('/api/auth/login', { email, password })
+    if (result.token) setStoredToken(result.token)
+    return result
+  },
 
-  logout: () => api.post('/api/auth/logout'),
+  logout: async () => {
+    const result = await api.post('/api/auth/logout')
+    setStoredToken(null)
+    return result
+  },
 
   me: () => api.get('/api/auth/me'),
 }
